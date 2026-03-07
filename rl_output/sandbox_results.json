@@ -1,0 +1,933 @@
+{
+  "training_config": {
+    "episodes": 30,
+    "max_steps": 15,
+    "lr": 0.01,
+    "gamma": 0.99,
+    "curriculum": true
+  },
+  "best_reward": 0.5,
+  "best_actions": [
+    "complete_implementation"
+  ],
+  "final_avg_reward": 0.5,
+  "episode_rewards": [
+    -0.9000000000000001,
+    0.3,
+    -0.10000000000000003,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    -0.10000000000000003,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.3,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+  ],
+  "results": [
+    {
+      "episode": 0,
+      "total_reward": -0.9000000000000001,
+      "final_score": 14.680000000000001,
+      "steps": 8,
+      "actions": [
+        "add_cancellation",
+        "add_booking_creation",
+        "refactor_modularity",
+        "add_slot_interval",
+        "add_availability_override",
+        "optimize_queries",
+        "fix_syntax",
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 14.680000000000001,
+        "weights": {
+          "correctness": 1.0,
+          "quality": 0.3,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 1,
+      "total_reward": 0.3,
+      "final_score": 14.724,
+      "steps": 2,
+      "actions": [
+        "add_buffer_enforcement",
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 14.724,
+        "weights": {
+          "correctness": 0.99,
+          "quality": 0.3233333333333333,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 2,
+      "total_reward": -0.10000000000000003,
+      "final_score": 14.768,
+      "steps": 4,
+      "actions": [
+        "fix_syntax",
+        "add_availability_override",
+        "fix_syntax",
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 14.768,
+        "weights": {
+          "correctness": 0.98,
+          "quality": 0.3466666666666667,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 3,
+      "total_reward": 0.5,
+      "final_score": 14.812000000000001,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 14.812000000000001,
+        "weights": {
+          "correctness": 0.97,
+          "quality": 0.37,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 4,
+      "total_reward": 0.5,
+      "final_score": 14.856000000000002,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 14.856000000000002,
+        "weights": {
+          "correctness": 0.96,
+          "quality": 0.3933333333333333,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 5,
+      "total_reward": 0.5,
+      "final_score": 14.900000000000002,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 14.900000000000002,
+        "weights": {
+          "correctness": 0.95,
+          "quality": 0.41666666666666663,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 6,
+      "total_reward": 0.5,
+      "final_score": 14.944,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 14.944,
+        "weights": {
+          "correctness": 0.94,
+          "quality": 0.43999999999999995,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 7,
+      "total_reward": -0.10000000000000003,
+      "final_score": 14.988000000000001,
+      "steps": 4,
+      "actions": [
+        "refactor_modularity",
+        "fix_syntax",
+        "fix_syntax",
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 14.988000000000001,
+        "weights": {
+          "correctness": 0.93,
+          "quality": 0.4633333333333333,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 8,
+      "total_reward": 0.5,
+      "final_score": 15.032000000000002,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.032000000000002,
+        "weights": {
+          "correctness": 0.92,
+          "quality": 0.48666666666666664,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 9,
+      "total_reward": 0.5,
+      "final_score": 15.076,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.076,
+        "weights": {
+          "correctness": 0.91,
+          "quality": 0.51,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 10,
+      "total_reward": 0.5,
+      "final_score": 15.120000000000001,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.120000000000001,
+        "weights": {
+          "correctness": 0.9,
+          "quality": 0.5333333333333333,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 11,
+      "total_reward": 0.5,
+      "final_score": 15.164000000000001,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.164000000000001,
+        "weights": {
+          "correctness": 0.89,
+          "quality": 0.5566666666666666,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 12,
+      "total_reward": 0.5,
+      "final_score": 15.208000000000002,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.208000000000002,
+        "weights": {
+          "correctness": 0.88,
+          "quality": 0.58,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 13,
+      "total_reward": 0.5,
+      "final_score": 15.252,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.252,
+        "weights": {
+          "correctness": 0.87,
+          "quality": 0.6033333333333333,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 14,
+      "total_reward": 0.5,
+      "final_score": 15.296000000000001,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.296000000000001,
+        "weights": {
+          "correctness": 0.86,
+          "quality": 0.6266666666666667,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 15,
+      "total_reward": 0.5,
+      "final_score": 15.34,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.34,
+        "weights": {
+          "correctness": 0.85,
+          "quality": 0.6499999999999999,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 16,
+      "total_reward": 0.5,
+      "final_score": 15.384,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.384,
+        "weights": {
+          "correctness": 0.84,
+          "quality": 0.6733333333333333,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 17,
+      "total_reward": 0.3,
+      "final_score": 15.428,
+      "steps": 2,
+      "actions": [
+        "fix_syntax",
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.428,
+        "weights": {
+          "correctness": 0.8300000000000001,
+          "quality": 0.6966666666666665,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 18,
+      "total_reward": 0.5,
+      "final_score": 15.472000000000001,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.472000000000001,
+        "weights": {
+          "correctness": 0.8200000000000001,
+          "quality": 0.72,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 19,
+      "total_reward": 0.5,
+      "final_score": 15.516000000000002,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.516000000000002,
+        "weights": {
+          "correctness": 0.81,
+          "quality": 0.7433333333333333,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 20,
+      "total_reward": 0.5,
+      "final_score": 15.56,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.56,
+        "weights": {
+          "correctness": 0.8,
+          "quality": 0.7666666666666666,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 21,
+      "total_reward": 0.5,
+      "final_score": 15.604000000000001,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.604000000000001,
+        "weights": {
+          "correctness": 0.79,
+          "quality": 0.7899999999999999,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 22,
+      "total_reward": 0.5,
+      "final_score": 15.648000000000001,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.648000000000001,
+        "weights": {
+          "correctness": 0.78,
+          "quality": 0.8133333333333332,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 23,
+      "total_reward": 0.5,
+      "final_score": 15.692,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.692,
+        "weights": {
+          "correctness": 0.77,
+          "quality": 0.8366666666666667,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 24,
+      "total_reward": 0.5,
+      "final_score": 15.736,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.736,
+        "weights": {
+          "correctness": 0.76,
+          "quality": 0.8599999999999999,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 25,
+      "total_reward": 0.5,
+      "final_score": 15.780000000000001,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.780000000000001,
+        "weights": {
+          "correctness": 0.75,
+          "quality": 0.8833333333333333,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 26,
+      "total_reward": 0.5,
+      "final_score": 15.824000000000002,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.824000000000002,
+        "weights": {
+          "correctness": 0.74,
+          "quality": 0.9066666666666667,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 27,
+      "total_reward": 0.5,
+      "final_score": 15.868,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.868,
+        "weights": {
+          "correctness": 0.73,
+          "quality": 0.9299999999999999,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 28,
+      "total_reward": 0.5,
+      "final_score": 15.912,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.912,
+        "weights": {
+          "correctness": 0.72,
+          "quality": 0.9533333333333334,
+          "domain": 0.8
+        }
+      }
+    },
+    {
+      "episode": 29,
+      "total_reward": 0.5,
+      "final_score": 15.956,
+      "steps": 1,
+      "actions": [
+        "complete_implementation"
+      ],
+      "breakdown": {
+        "syntax_success": 1.0,
+        "test_pass_rate": 0.0,
+        "zero_conflict": 3.0,
+        "readability": 2.0,
+        "modularity": 3.0,
+        "efficiency_penalty": -1.4000000000000001,
+        "buffer_enforcement": 4.0,
+        "timezone_consistency": 5.0,
+        "availability_masking": 3.0,
+        "correctness_total": 4.0,
+        "quality_total": 3.5999999999999996,
+        "domain_total": 12.0,
+        "total_reward": 15.956,
+        "weights": {
+          "correctness": 0.71,
+          "quality": 0.9766666666666666,
+          "domain": 0.8
+        }
+      }
+    }
+  ]
+}

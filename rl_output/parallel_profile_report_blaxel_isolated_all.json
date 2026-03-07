@@ -1,0 +1,219 @@
+{
+  "timestamp": "2026-03-07T14:12:36.375494",
+  "wall_clock_s": 105.62,
+  "serial_sum_s": 105.62,
+  "speedup": 1.0,
+  "sandbox_count": 3,
+  "providers": [
+    "blaxel"
+  ],
+  "profiles": [
+    {
+      "sandbox_label": "blaxel-1",
+      "provider": "blaxel",
+      "sandbox_id": "rl-test-455193cc",
+      "config": {
+        "episodes": 10,
+        "max_steps": 10
+      },
+      "total_duration_s": 92.55,
+      "tests_passed": 29,
+      "tests_total": 29,
+      "rl_best_reward": 11.100000000000003,
+      "rl_final_avg": 9.390000000000002,
+      "rl_best_actions": [
+        "add_booking_creation",
+        "add_booking_creation",
+        "add_daily_limit",
+        "improve_readability",
+        "add_booking_creation",
+        "add_booking_creation",
+        "noop",
+        "noop",
+        "add_buffer_enforcement",
+        "add_cancellation"
+      ],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.38,
+          "success": true,
+          "detail": "rl-test-455193cc"
+        },
+        {
+          "name": "upload_project",
+          "duration_s": 0.5,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "install_deps",
+          "duration_s": 6.73,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "run_tests",
+          "duration_s": 6.69,
+          "success": true,
+          "detail": "k\n\n----------------------------------------------------------------------\nRan 29 tests in 6.065s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n"
+        },
+        {
+          "name": "rl_training",
+          "duration_s": 77.36,
+          "success": true,
+          "detail": "s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 6.274s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 6.224s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 6.207s\n\nOK\n"
+        },
+        {
+          "name": "retrieve_results",
+          "duration_s": 0.08,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.15,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "blaxel-fs-1",
+      "provider": "blaxel",
+      "sandbox_id": "rl-test-eae2ccda",
+      "config": {
+        "benchmark": "filesystem"
+      },
+      "total_duration_s": 8.48,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.38,
+          "success": true,
+          "detail": "rl-test-eae2ccda"
+        },
+        {
+          "name": "fs_code_generation",
+          "duration_s": 1.26,
+          "success": true,
+          "detail": "10 files, 78KB total"
+        },
+        {
+          "name": "fs_build_compile",
+          "duration_s": 0.3,
+          "success": true,
+          "detail": "10 .pyc files generated"
+        },
+        {
+          "name": "fs_upload_files",
+          "duration_s": 0.58,
+          "success": true,
+          "detail": "5/5 files, 32KB"
+        },
+        {
+          "name": "fs_download_files",
+          "duration_s": 0.88,
+          "success": true,
+          "detail": "9 files, 156KB"
+        },
+        {
+          "name": "fs_pip_package_io",
+          "duration_s": 4.57,
+          "success": false,
+          "detail": "3 wheels: down 1189KB, up 1189KB, integrity=FAIL"
+        },
+        {
+          "name": "fs_list_verify",
+          "duration_s": 0.15,
+          "success": true,
+          "detail": "31 files total, native list N/A"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.2,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "blaxel-pause-1",
+      "provider": "blaxel",
+      "sandbox_id": "rl-test-8191eae1",
+      "config": {
+        "benchmark": "pause_resume"
+      },
+      "total_duration_s": 4.6,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.3,
+          "success": true,
+          "detail": "rl-test-8191eae1"
+        },
+        {
+          "name": "async_start_task",
+          "duration_s": 2.39,
+          "success": true,
+          "detail": "bg task started, progress: {\"step\": 5, \"total\": 20, \"pct\": 25.0, \"ts\": 1772921554.6093056}"
+        },
+        {
+          "name": "async_write_state",
+          "duration_s": 0.21,
+          "success": true,
+          "detail": "3/3 files, 10KB"
+        },
+        {
+          "name": "async_pause",
+          "duration_s": 0.0,
+          "success": false,
+          "detail": "pause unsupported: Blaxel SDK does not expose pause()"
+        },
+        {
+          "name": "async_resume",
+          "duration_s": 0.0,
+          "success": false,
+          "detail": "resume unsupported: Blaxel SDK does not expose resume()"
+        },
+        {
+          "name": "async_verify_state",
+          "duration_s": 0.59,
+          "success": true,
+          "detail": "5/5 files, json=OK, bin=FAIL"
+        },
+        {
+          "name": "async_restart_task",
+          "duration_s": 0.24,
+          "success": true,
+          "detail": "compute OK, fib50 in 0.008s"
+        },
+        {
+          "name": "async_download_verify",
+          "duration_s": 0.46,
+          "success": true,
+          "detail": "6/6 files, 20KB total"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.13,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    }
+  ]
+}

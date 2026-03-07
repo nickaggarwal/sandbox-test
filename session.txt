@@ -1,0 +1,76 @@
+Session Context: Sandbox Platform Benchmark Project
+====================================================
+
+Project Overview:
+- Django Calendly-like scheduling app with 29 unit tests
+- RL agent training using REINFORCE policy gradient with OpenAI Gymnasium
+- Benchmarking across 3 sandbox providers: Daytona, E2B, Blaxel
+
+Providers & SDKs:
+- Daytona SDK v0.149 (4 CPU, 8GB RAM, 10GB disk)
+- E2B Code Interpreter v2.4.1 (default instance)
+- Blaxel SDK v0.2.44 (4 vCPU, 8GB RAM)
+- Python 3.12 (host and sandbox images)
+
+Benchmarks Implemented:
+1. RL Compute Benchmark (--benchmark rl)
+   - 50 episodes, 25 max steps
+   - Measures: sandbox creation, project upload, pip install, Django tests, RL training
+
+2. Filesystem I/O Benchmark (--benchmark fs)
+   - 6 steps: code generation (10 files), build/compile (.pyc), native file upload (5 files),
+     native file download (9 files), pip package store & retrieve (3 wheels), list & verify
+   - Tests native FS APIs: upload_file_native, download_file_native, list_files_native
+
+3. Async Task + Pause/Resume Benchmark (--benchmark pause)
+   - 7 steps: start background task, write state files, pause sandbox, resume sandbox,
+     verify state after resume, restart compute, download & verify
+   - Tests state preservation across pause/resume cycles
+
+Key Files:
+- daytona_sandbox.py    - Daytona SDK wrapper with native FS + pause/resume
+- e2b_sandbox.py        - E2B SDK wrapper with native FS + pause/resume
+- blaxel_sandbox.py     - Blaxel SDK wrapper with native FS (no pause/resume API)
+- filesystem_benchmark.py - 6-step FS benchmark module
+- async_task_benchmark.py  - 7-step pause/resume benchmark module
+- run_parallel_profiled.py - Parallel profiler with --benchmark and --provider flags
+- SANDBOX_BENCHMARK_REPORT.md - Full comparison report
+
+Latest Benchmark Results:
+  Daytona RL:    389.1s total (368.3s training, 29/29 tests passed)
+  E2B RL:        301.1s total (287s training, connection timeout on some runs)
+  Blaxel RL:     135.2s total (120s training, intermittent errors)
+
+  Daytona FS:    15.7s total
+  E2B FS:         2.8s total (E2B wins FS by 5.6x)
+  Blaxel FS:      3.7s total
+
+  Daytona Pause: 23.3s (11.5s pause via stop(), 0.7s resume via start())
+  E2B Pause:     15.4s (0.9s native pause, 0.2s resume via connect())
+  Blaxel Pause:   4.4s (no pause API, skipped pause/resume steps)
+
+Known Issues & Workarounds:
+- Daytona: 60s exec timeout → use nohup + polling via exec_long()
+- Daytona: Home dir is /root not /home/daytona
+- Daytona: SSL cert errors on macOS → import certifi
+- Daytona: Pause is actually stop/start (11-14s latency)
+- E2B: Sandbox() constructor deprecated → use Sandbox.create(api_key=...)
+- E2B: Connection drops on long runs (>5min)
+- E2B: Binary file read returns different bytes after resume
+- Blaxel: No pause/resume in SDK
+- Blaxel: Event loop shared across threads → create new asyncio.new_event_loop() per instance
+
+CLI Usage:
+  python run_parallel_profiled.py --benchmark fs --provider both --sandboxes 2
+  python run_parallel_profiled.py --benchmark pause --provider all --sandboxes 1
+  python run_parallel_profiled.py --benchmark all --provider both --sandboxes 4
+  python run_parallel_profiled.py --provider both --sandboxes 4 --vary-config
+
+Rankings by Use Case:
+  Long RL Training       → Daytona (most reliable for 5+ min compute)
+  Filesystem-Heavy Agents → E2B (8x faster native file I/O)
+  Pause/Resume Workflows → E2B (sub-second native pause)
+  Rapid Prototyping      → E2B (0.1s sandbox creation)
+  Short Compute Tasks    → Blaxel (fastest test execution)
+  Large File Processing  → Blaxel (0.2s for 1MB round-trip)
+  Custom Environments    → Daytona (full Docker image control)

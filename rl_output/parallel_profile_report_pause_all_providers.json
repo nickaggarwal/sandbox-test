@@ -1,0 +1,299 @@
+{
+  "timestamp": "2026-03-07T14:00:59.838723",
+  "wall_clock_s": 31.95,
+  "serial_sum_s": 74.39,
+  "speedup": 2.33,
+  "sandbox_count": 4,
+  "providers": [
+    "daytona",
+    "modal",
+    "e2b",
+    "blaxel"
+  ],
+  "profiles": [
+    {
+      "sandbox_label": "blaxel-pause",
+      "provider": "blaxel",
+      "sandbox_id": "rl-test-83f9f335",
+      "config": {
+        "benchmark": "pause_resume"
+      },
+      "total_duration_s": 5.9,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.39,
+          "success": true,
+          "detail": "rl-test-83f9f335"
+        },
+        {
+          "name": "async_start_task",
+          "duration_s": 2.3,
+          "success": true,
+          "detail": "bg task started, progress: {\"step\": 5, \"total\": 20, \"pct\": 25.0, \"ts\": 1772920833.0452678}"
+        },
+        {
+          "name": "async_write_state",
+          "duration_s": 0.13,
+          "success": true,
+          "detail": "3/3 files, 10KB"
+        },
+        {
+          "name": "async_pause",
+          "duration_s": 0.0,
+          "success": false,
+          "detail": "pause failed: 'SandboxInstance' object has no attribute 'pause'"
+        },
+        {
+          "name": "async_resume",
+          "duration_s": 0.0,
+          "success": false,
+          "detail": "resume failed: 'SandboxInstance' object has no attribute 'resume'"
+        },
+        {
+          "name": "async_verify_state",
+          "duration_s": 0.47,
+          "success": true,
+          "detail": "5/5 files, json=OK, bin=FAIL"
+        },
+        {
+          "name": "async_restart_task",
+          "duration_s": 0.22,
+          "success": true,
+          "detail": "compute OK, fib50 in 0.008s"
+        },
+        {
+          "name": "async_download_verify",
+          "duration_s": 0.29,
+          "success": true,
+          "detail": "6/6 files, 20KB total"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.12,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "daytona-pause",
+      "provider": "daytona",
+      "sandbox_id": "775f08c6-4917-4106-8a1b-79c77083ccfa",
+      "config": {
+        "benchmark": "pause_resume"
+      },
+      "total_duration_s": 31.94,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 1.43,
+          "success": true,
+          "detail": "775f08c6-4917-4106-8a1b-79c77083ccfa"
+        },
+        {
+          "name": "async_start_task",
+          "duration_s": 3.07,
+          "success": true,
+          "detail": "bg task started, progress: {\"step\": 5, \"total\": 20, \"pct\": 25.0, \"ts\": 1772920834.6021001}"
+        },
+        {
+          "name": "async_write_state",
+          "duration_s": 1.35,
+          "success": true,
+          "detail": "3/3 files, 10KB"
+        },
+        {
+          "name": "async_pause",
+          "duration_s": 14.7,
+          "success": true,
+          "detail": "paused in 14.699s"
+        },
+        {
+          "name": "async_resume",
+          "duration_s": 1.08,
+          "success": true,
+          "detail": "resumed in 1.075s"
+        },
+        {
+          "name": "async_verify_state",
+          "duration_s": 3.31,
+          "success": true,
+          "detail": "5/5 files, json=OK, bin=OK"
+        },
+        {
+          "name": "async_restart_task",
+          "duration_s": 1.3,
+          "success": true,
+          "detail": "compute OK, fib50 in 0.007s"
+        },
+        {
+          "name": "async_download_verify",
+          "duration_s": 2.68,
+          "success": true,
+          "detail": "6/6 files, 10KB total"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.3,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "e2b-pause",
+      "provider": "e2b",
+      "sandbox_id": "iawofxutmmoe5tzb00elb",
+      "config": {
+        "benchmark": "pause_resume"
+      },
+      "total_duration_s": 17.55,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.28,
+          "success": true,
+          "detail": "iawofxutmmoe5tzb00elb"
+        },
+        {
+          "name": "async_start_task",
+          "duration_s": 12.22,
+          "success": true,
+          "detail": "bg task started, progress: {\"step\": 20, \"total\": 20, \"pct\": 100.0, \"ts\": 1772920839.609847}"
+        },
+        {
+          "name": "async_write_state",
+          "duration_s": 0.16,
+          "success": true,
+          "detail": "3/3 files, 10KB"
+        },
+        {
+          "name": "async_pause",
+          "duration_s": 2.06,
+          "success": true,
+          "detail": "paused in 2.063s"
+        },
+        {
+          "name": "async_resume",
+          "duration_s": 0.19,
+          "success": true,
+          "detail": "resumed in 0.188s"
+        },
+        {
+          "name": "async_verify_state",
+          "duration_s": 0.38,
+          "success": true,
+          "detail": "5/5 files, json=OK, bin=OK"
+        },
+        {
+          "name": "async_restart_task",
+          "duration_s": 0.23,
+          "success": true,
+          "detail": "compute OK, fib50 in 0.021s"
+        },
+        {
+          "name": "async_download_verify",
+          "duration_s": 0.31,
+          "success": true,
+          "detail": "6/6 files, 10KB total"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.19,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "modal-pause",
+      "provider": "modal",
+      "sandbox_id": "sb-0Os8JVPHO8tllOBahrHBre",
+      "config": {
+        "benchmark": "pause_resume"
+      },
+      "total_duration_s": 19.0,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.6,
+          "success": true,
+          "detail": "sb-0Os8JVPHO8tllOBahrHBre"
+        },
+        {
+          "name": "async_start_task",
+          "duration_s": 3.09,
+          "success": true,
+          "detail": "bg task started, progress: {\"step\": 5, \"total\": 20, \"pct\": 25.0, \"ts\": 1772920835.043796}"
+        },
+        {
+          "name": "async_write_state",
+          "duration_s": 1.77,
+          "success": true,
+          "detail": "3/3 files, 10KB"
+        },
+        {
+          "name": "async_pause",
+          "duration_s": 0.0,
+          "success": false,
+          "detail": "pause failed: 'Sandbox' object has no attribute 'snapshot'"
+        },
+        {
+          "name": "async_resume",
+          "duration_s": 0.1,
+          "success": true,
+          "detail": "resumed in 0.099s"
+        },
+        {
+          "name": "async_verify_state",
+          "duration_s": 4.86,
+          "success": true,
+          "detail": "5/5 files, json=OK, bin=OK"
+        },
+        {
+          "name": "async_restart_task",
+          "duration_s": 1.8,
+          "success": true,
+          "detail": "compute OK, fib50 in 0.014s"
+        },
+        {
+          "name": "async_download_verify",
+          "duration_s": 3.9,
+          "success": true,
+          "detail": "6/6 files, 10KB total"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.12,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    }
+  ]
+}

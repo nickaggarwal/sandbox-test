@@ -1,0 +1,367 @@
+{
+  "timestamp": "2026-03-07T13:59:43.636681",
+  "wall_clock_s": 16.79,
+  "serial_sum_s": 74.6,
+  "speedup": 4.44,
+  "sandbox_count": 5,
+  "providers": [
+    "e2b"
+  ],
+  "profiles": [
+    {
+      "sandbox_label": "e2b-pause-1",
+      "provider": "e2b",
+      "sandbox_id": "itsuza4a94ihbwss1bx0q",
+      "config": {
+        "benchmark": "pause_resume"
+      },
+      "total_duration_s": 15.06,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.21,
+          "success": true,
+          "detail": "itsuza4a94ihbwss1bx0q"
+        },
+        {
+          "name": "async_start_task",
+          "duration_s": 12.29,
+          "success": true,
+          "detail": "bg task started, progress: {\"step\": 20, \"total\": 20, \"pct\": 100.0, \"ts\": 1772920776.9806297}"
+        },
+        {
+          "name": "async_write_state",
+          "duration_s": 0.14,
+          "success": true,
+          "detail": "3/3 files, 10KB"
+        },
+        {
+          "name": "async_pause",
+          "duration_s": 0.83,
+          "success": true,
+          "detail": "paused in 0.830s"
+        },
+        {
+          "name": "async_resume",
+          "duration_s": 0.18,
+          "success": true,
+          "detail": "resumed in 0.184s"
+        },
+        {
+          "name": "async_verify_state",
+          "duration_s": 0.33,
+          "success": true,
+          "detail": "5/5 files, json=OK, bin=OK"
+        },
+        {
+          "name": "async_restart_task",
+          "duration_s": 0.2,
+          "success": true,
+          "detail": "compute OK, fib50 in 0.009s"
+        },
+        {
+          "name": "async_download_verify",
+          "duration_s": 0.28,
+          "success": true,
+          "detail": "6/6 files, 10KB total"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.28,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "e2b-pause-2",
+      "provider": "e2b",
+      "sandbox_id": "i5sxxtej2z3zbcdoqpne9",
+      "config": {
+        "benchmark": "pause_resume"
+      },
+      "total_duration_s": 14.44,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.12,
+          "success": true,
+          "detail": "i5sxxtej2z3zbcdoqpne9"
+        },
+        {
+          "name": "async_start_task",
+          "duration_s": 12.19,
+          "success": true,
+          "detail": "bg task started, progress: {\"step\": 20, \"total\": 20, \"pct\": 100.0, \"ts\": 1772920777.1681356}"
+        },
+        {
+          "name": "async_write_state",
+          "duration_s": 0.13,
+          "success": true,
+          "detail": "3/3 files, 10KB"
+        },
+        {
+          "name": "async_pause",
+          "duration_s": 0.7,
+          "success": true,
+          "detail": "paused in 0.704s"
+        },
+        {
+          "name": "async_resume",
+          "duration_s": 0.18,
+          "success": true,
+          "detail": "resumed in 0.177s"
+        },
+        {
+          "name": "async_verify_state",
+          "duration_s": 0.34,
+          "success": true,
+          "detail": "5/5 files, json=OK, bin=OK"
+        },
+        {
+          "name": "async_restart_task",
+          "duration_s": 0.18,
+          "success": true,
+          "detail": "compute OK, fib50 in 0.010s"
+        },
+        {
+          "name": "async_download_verify",
+          "duration_s": 0.27,
+          "success": true,
+          "detail": "6/6 files, 10KB total"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.22,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "e2b-pause-3",
+      "provider": "e2b",
+      "sandbox_id": "iz68wujbk7uq5c062yx29",
+      "config": {
+        "benchmark": "pause_resume"
+      },
+      "total_duration_s": 15.78,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.15,
+          "success": true,
+          "detail": "iz68wujbk7uq5c062yx29"
+        },
+        {
+          "name": "async_start_task",
+          "duration_s": 12.29,
+          "success": true,
+          "detail": "bg task started, progress: {\"step\": 20, \"total\": 20, \"pct\": 100.0, \"ts\": 1772920777.7150168}"
+        },
+        {
+          "name": "async_write_state",
+          "duration_s": 0.14,
+          "success": true,
+          "detail": "3/3 files, 10KB"
+        },
+        {
+          "name": "async_pause",
+          "duration_s": 1.81,
+          "success": true,
+          "detail": "paused in 1.813s"
+        },
+        {
+          "name": "async_resume",
+          "duration_s": 0.23,
+          "success": true,
+          "detail": "resumed in 0.227s"
+        },
+        {
+          "name": "async_verify_state",
+          "duration_s": 0.37,
+          "success": true,
+          "detail": "5/5 files, json=OK, bin=OK"
+        },
+        {
+          "name": "async_restart_task",
+          "duration_s": 0.2,
+          "success": true,
+          "detail": "compute OK, fib50 in 0.015s"
+        },
+        {
+          "name": "async_download_verify",
+          "duration_s": 0.29,
+          "success": true,
+          "detail": "6/6 files, 10KB total"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.19,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "e2b-pause-4",
+      "provider": "e2b",
+      "sandbox_id": "izv45q9s2b7gw5wc7p9iy",
+      "config": {
+        "benchmark": "pause_resume"
+      },
+      "total_duration_s": 14.6,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.17,
+          "success": true,
+          "detail": "izv45q9s2b7gw5wc7p9iy"
+        },
+        {
+          "name": "async_start_task",
+          "duration_s": 12.23,
+          "success": true,
+          "detail": "bg task started, progress: {\"step\": 20, \"total\": 20, \"pct\": 100.0, \"ts\": 1772920778.2216814}"
+        },
+        {
+          "name": "async_write_state",
+          "duration_s": 0.13,
+          "success": true,
+          "detail": "3/3 files, 10KB"
+        },
+        {
+          "name": "async_pause",
+          "duration_s": 0.71,
+          "success": true,
+          "detail": "paused in 0.713s"
+        },
+        {
+          "name": "async_resume",
+          "duration_s": 0.18,
+          "success": true,
+          "detail": "resumed in 0.177s"
+        },
+        {
+          "name": "async_verify_state",
+          "duration_s": 0.34,
+          "success": true,
+          "detail": "5/5 files, json=OK, bin=OK"
+        },
+        {
+          "name": "async_restart_task",
+          "duration_s": 0.19,
+          "success": true,
+          "detail": "compute OK, fib50 in 0.011s"
+        },
+        {
+          "name": "async_download_verify",
+          "duration_s": 0.3,
+          "success": true,
+          "detail": "6/6 files, 10KB total"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.24,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "e2b-pause-5",
+      "provider": "e2b",
+      "sandbox_id": "iygnj4xc4ysiekcrnnhqv",
+      "config": {
+        "benchmark": "pause_resume"
+      },
+      "total_duration_s": 14.72,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.16,
+          "success": true,
+          "detail": "iygnj4xc4ysiekcrnnhqv"
+        },
+        {
+          "name": "async_start_task",
+          "duration_s": 12.2,
+          "success": true,
+          "detail": "bg task started, progress: {\"step\": 20, \"total\": 20, \"pct\": 100.0, \"ts\": 1772920778.7145}"
+        },
+        {
+          "name": "async_write_state",
+          "duration_s": 0.14,
+          "success": true,
+          "detail": "3/3 files, 10KB"
+        },
+        {
+          "name": "async_pause",
+          "duration_s": 0.91,
+          "success": true,
+          "detail": "paused in 0.907s"
+        },
+        {
+          "name": "async_resume",
+          "duration_s": 0.18,
+          "success": true,
+          "detail": "resumed in 0.184s"
+        },
+        {
+          "name": "async_verify_state",
+          "duration_s": 0.35,
+          "success": true,
+          "detail": "5/5 files, json=OK, bin=OK"
+        },
+        {
+          "name": "async_restart_task",
+          "duration_s": 0.19,
+          "success": true,
+          "detail": "compute OK, fib50 in 0.009s"
+        },
+        {
+          "name": "async_download_verify",
+          "duration_s": 0.3,
+          "success": true,
+          "detail": "6/6 files, 10KB total"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.18,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    }
+  ]
+}

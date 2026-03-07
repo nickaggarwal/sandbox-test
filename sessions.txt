@@ -1,0 +1,104 @@
+Session Context Dump
+====================
+Date: 2026-03-07
+Workspace: /Users/nilesh/sandbox-test
+
+Project Goal
+------------
+Benchmark sandbox providers (Daytona, E2B, Blaxel, Modal) for:
+- Bootup / sandbox creation
+- Compute pipeline (deps install, tests, RL training)
+- Filesystem IO (native upload/download + package roundtrip)
+- Pause/resume state persistence and restart behavior
+- Parallel scale behavior
+
+Recent Code Changes Applied
+---------------------------
+1) E2B pause/resume compatibility fix
+- File: e2b_sandbox.py
+- Change: use `beta_pause()` (or class fallback) instead of nonexistent `pause()`.
+- Result: E2B pause benchmark now passes.
+
+2) Modal pause/resume + resource config
+- File: modal_sandbox.py
+- Changes:
+  - set sandbox resources to cpu=4.0, memory=8192 MB
+  - implement pause via `snapshot_filesystem()` + terminate
+  - implement resume via `Sandbox.create(image=snapshot_image, cpu=4, memory=8192)`
+- Result: Modal pause step now works in benchmark flow.
+
+3) Blaxel stability + unsupported pause semantics
+- File: blaxel_sandbox.py
+- Changes:
+  - shared global event loop with lock to reduce cross-loop/thread issues
+  - pause/resume explicitly raise NotImplementedError if SDK methods absent
+- Result: clearer behavior for pause/resume unsupported path; improved runner stability.
+
+4) Async benchmark clarity for unsupported pause/resume
+- File: async_task_benchmark.py
+- Change: explicit NotImplementedError handling in pause/resume steps.
+- Result: benchmark output marks unsupported vs generic failure.
+
+5) Correct provider attribution on crashed jobs
+- File: run_parallel_profiled.py
+- Change: preserve provider metadata in exception path.
+
+6) LLM coding bootstrap mode (previous request)
+- File: coding_agent.py
+- Changes:
+  - `--bootstrap-app` added
+  - supports generating app from scratch in sandbox without uploading core app
+  - enforces filename markers and creates parent dirs for nested files
+
+Generated Reports
+-----------------
+Main consolidated markdown report:
+- ALL_PROVIDER_PERFORMANCE_REPORT.md
+
+Key raw JSON reports:
+- rl_output/parallel_profile_report_all_providers_all_benchmarks.json
+- rl_output/parallel_profile_report_blaxel_isolated_all.json
+- rl_output/parallel_profile_report_e2b_pause_5x.json
+
+Resource Normalization Status
+----------------------------
+Configured equal where supported:
+- Daytona: 4 CPU / 8 GB RAM / 10 GB disk
+- Blaxel: 4 vCPU / 8 GB RAM
+- Modal: 4 CPU / 8 GB RAM
+Not fully controllable in this code path:
+- E2B: default provider instance shape (SDK path used here does not expose direct CPU/RAM sizing)
+
+Most Recent Benchmark Highlights
+--------------------------------
+From the consolidated report:
+- Bootup fastest: E2B (~0.2s)
+- RL training fastest: Daytona in latest all-provider run (~72s for 10 episodes) with Blaxel close in isolated run (~77s)
+- Filesystem fastest: E2B (~5.3s total); Daytona ~13.3s; Blaxel isolated ~8.5s; Modal ~38s
+- Pause/resume latency:
+  - E2B pause/resume: ~0.8s / ~0.2s
+  - Daytona pause/resume: ~21.5s / ~1.4s
+  - Modal pause/resume (snapshot-based): ~1.7s / ~0.1s (with heavier post-resume verify cost)
+  - Blaxel: pause/resume unsupported in current SDK
+
+Scale test (explicit):
+- E2B 5 parallel pause/resume containers
+- Wall clock ~16.8s, speedup ~4.44x
+- State verify success: 5/5
+
+Known Caveats / Open Issues
+---------------------------
+1) Blaxel pause/resume API is not available in installed SDK.
+2) Blaxel FS `fs_pip_package_io` integrity check is failing in current benchmark path (other FS operations succeed).
+3) E2B resource parity (CPU/RAM exact match) cannot be guaranteed with current SDK controls.
+
+Useful Commands
+---------------
+Run all benchmark types across all providers:
+- venv/bin/python -u run_parallel_profiled.py --benchmark all --provider all --sandboxes 4 --episodes 10 --max-steps 10 --max-workers 6 --stagger 0.5
+
+Run E2B 5-container pause scale:
+- venv/bin/python -u run_parallel_profiled.py --benchmark pause --provider e2b --sandboxes 5 --max-workers 5 --stagger 0.5
+
+Open consolidated report:
+- cat ALL_PROVIDER_PERFORMANCE_REPORT.md

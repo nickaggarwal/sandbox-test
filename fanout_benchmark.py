@@ -1,0 +1,387 @@
+"""
+Multi-Sandbox Fan-Out Benchmark for Sandbox Profiling.
+
+Tests how fast a single agent process can spin up N sandboxes,
+distribute different tasks across them, and collect results.
+This simulates an agent parallelizing work (e.g., testing on
+different configs, or splitting work across workers).
+
+Steps:
+1. Create N sandboxes concurrently
+2. Upload code to all sandboxes concurrently
+3. Run different compute tasks on each sandbox concurrently
+4. Collect results from all sandboxes concurrently
+5. Destroy all sandboxes concurrently
+
+NOTE: Unlike other benchmarks, this one manages its own sandbox
+lifecycle internally (creates and destroys its own runners).
+"""
+import json
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from run_parallel_profiled import StepProfile
+
+
+# ── Compute Task Content ──────────────────────────────────────────
+
+COMPUTE_SCRIPT = b'''"""Compute tasks for fan-out benchmark."""
+import json
+import sys
+import time
+
+
+def factorial(n):
+    result = 1
+    for i in range(2, n + 1):
+        result *= i
+    return result
+
+
+def fibonacci(n):
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a + b
+    return a
+
+
+def primes(limit):
+    sieve = [True] * (limit + 1)
+    sieve[0] = sieve[1] = False
+    for i in range(2, int(limit**0.5) + 1):
+        if sieve[i]:
+            for j in range(i * i, limit + 1, i):
+                sieve[j] = False
+    return [i for i in range(limit + 1) if sieve[i]]
+
+
+def sort_random(n):
+    import random
+    random.seed(42)
+    data = [random.randint(0, 1000000) for _ in range(n)]
+    return sorted(data)
+
+
+if __name__ == "__main__":
+    task = sys.argv[1]
+    arg = int(sys.argv[2])
+    start = time.time()
+
+    if task == "factorial":
+        result = str(factorial(arg))[-20:]
+    elif task == "fibonacci":
+        result = str(fibonacci(arg))[-20:]
+    elif task == "primes":
+        p = primes(arg)
+        result = str(len(p))
+    elif task == "sort":
+        s = sort_random(arg)
+        result = str(len(s))
+    else:
+        result = "unknown task"
+
+    elapsed = time.time() - start
+    output = {"task": task, "arg": arg, "result": result, "elapsed": round(elapsed, 4)}
+    json.dump(output, open("task_result.json", "w"))
+    print(json.dumps(output))
+'''
+
+# Tasks to distribute across sandboxes
+TASKS = [
+    ('factorial', 500),
+    ('fibonacci', 1000),
+    ('primes', 10000),
+    ('sort', 50000),
+]
+
+
+# ── Helper ─────────────────────────────────────────────────────────
+
+def _create_runner_with_key(provider, api_key):
+    """Create a sandbox runner with explicit API key."""
+    if provider == 'daytona':
+        from daytona_sandbox import DaytonaSandboxRunner
+        return DaytonaSandboxRunner(api_key=api_key)
+    elif provider == 'e2b':
+        from e2b_sandbox import E2BSandboxRunner
+        return E2BSandboxRunner(api_key=api_key)
+    elif provider == 'blaxel':
+        from blaxel_sandbox import BlaxelSandboxRunner
+        return BlaxelSandboxRunner(api_key=api_key)
+    elif provider == 'modal':
+        from modal_sandbox import ModalSandboxRunner
+        return ModalSandboxRunner()
+    else:
+        raise ValueError('Unknown provider: {}'.format(provider))
+
+
+def _get_base_dir(provider):
+    """Get the base directory for this benchmark in a given provider."""
+    if provider == 'daytona':
+        return '/root/fanout_bench'
+    elif provider == 'blaxel':
+        return '/blaxel/fanout_bench'
+    elif provider == 'modal':
+        return '/root/fanout_bench'
+    else:
+        return '/home/user/fanout_bench'
+
+
+# ── Benchmark Steps ────────────────────────────────────────────────
+
+def _step_create_sandboxes(provider, api_key, num_sandboxes):
+    """Create N sandboxes concurrently."""
+    step = StepProfile(name='fo_create_sandboxes', started_at=time.time())
+
+    runners = []
+    errors = []
+
+    def _create_one(idx):
+        runner = _create_runner_with_key(provider, api_key)
+        runner.create_sandbox()
+        return runner
+
+    with ThreadPoolExecutor(max_workers=num_sandboxes) as pool:
+        futures = {
+            pool.submit(_create_one, i): i
+            for i in range(num_sandboxes)
+        }
+        for future in as_completed(futures):
+            idx = futures[future]
+            try:
+                runner = future.result()
+                runners.append((idx, runner))
+            except Exception as e:
+                errors.append('sandbox-{}: {}'.format(idx, str(e)[:80]))
+
+    # Sort by index to maintain order
+    runners.sort(key=lambda x: x[0])
+    runner_list = [r for _, r in runners]
+
+    step.ended_at = time.time()
+    step.duration_s = step.ended_at - step.started_at
+    step.success = len(runner_list) == num_sandboxes
+    avg = step.duration_s / max(len(runner_list), 1)
+    step.detail = '{} sandboxes in {:.2f}s (avg {:.2f}s each)'.format(
+        len(runner_list), step.duration_s, avg)
+    if errors:
+        step.detail += ', errors: ' + '; '.join(errors[:2])
+
+    return step, runner_list
+
+
+def _step_upload_code(runners, provider):
+    """Upload compute script to all sandboxes concurrently."""
+    step = StepProfile(name='fo_upload_code', started_at=time.time())
+    base_dir = _get_base_dir(provider)
+
+    uploaded = 0
+    errors = []
+
+    def _upload_one(runner):
+        runner.exec('mkdir -p {}'.format(base_dir), cwd='/tmp')
+        runner.upload_file_native(
+            COMPUTE_SCRIPT,
+            '{}/compute.py'.format(base_dir),
+        )
+        return True
+
+    with ThreadPoolExecutor(max_workers=len(runners)) as pool:
+        futures = {
+            pool.submit(_upload_one, r): i
+            for i, r in enumerate(runners)
+        }
+        for future in as_completed(futures):
+            idx = futures[future]
+            try:
+                future.result()
+                uploaded += 1
+            except Exception as e:
+                errors.append('sandbox-{}: {}'.format(idx, str(e)[:80]))
+
+    step.ended_at = time.time()
+    step.duration_s = step.ended_at - step.started_at
+    step.success = uploaded == len(runners)
+    step.detail = '{} sandboxes loaded, {}B each, wall={:.2f}s'.format(
+        uploaded, len(COMPUTE_SCRIPT), step.duration_s)
+    return step
+
+
+def _step_run_different_tasks(runners, provider):
+    """Run a different compute task on each sandbox concurrently."""
+    step = StepProfile(name='fo_run_tasks', started_at=time.time())
+    base_dir = _get_base_dir(provider)
+
+    task_timings = []
+    completed = 0
+    errors = []
+
+    def _run_one(runner, task_name, task_arg):
+        t0 = time.time()
+        result = runner.exec(
+            'python3 compute.py {} {}'.format(task_name, task_arg),
+            cwd=base_dir,
+            timeout=120,
+        )
+        dur = time.time() - t0
+        return result, dur
+
+    with ThreadPoolExecutor(max_workers=len(runners)) as pool:
+        futures = {}
+        for i, runner in enumerate(runners):
+            task_name, task_arg = TASKS[i % len(TASKS)]
+            future = pool.submit(_run_one, runner, task_name, task_arg)
+            futures[future] = (i, task_name)
+
+        for future in as_completed(futures):
+            idx, task_name = futures[future]
+            try:
+                result, dur = future.result()
+                task_timings.append(dur)
+                if result['exit_code'] == 0:
+                    completed += 1
+                else:
+                    errors.append('{}: exit={}'.format(
+                        task_name, result['exit_code']))
+            except Exception as e:
+                errors.append('{}: {}'.format(task_name, str(e)[:60]))
+
+    step.ended_at = time.time()
+    step.duration_s = step.ended_at - step.started_at
+    step.success = completed == len(runners)
+    times_str = ', '.join('{:.2f}s'.format(t) for t in task_timings)
+    step.detail = '{} tasks done, wall={:.2f}s, times=[{}]'.format(
+        completed, step.duration_s, times_str)
+    return step
+
+
+def _step_collect_results(runners, provider):
+    """Download result JSON from each sandbox concurrently."""
+    step = StepProfile(name='fo_collect_results', started_at=time.time())
+    base_dir = _get_base_dir(provider)
+
+    collected = 0
+    all_valid = True
+    results = []
+
+    def _collect_one(runner):
+        content = runner.download_file_native(
+            '{}/task_result.json'.format(base_dir))
+        data = json.loads(content)
+        return data
+
+    with ThreadPoolExecutor(max_workers=len(runners)) as pool:
+        futures = {
+            pool.submit(_collect_one, r): i
+            for i, r in enumerate(runners)
+        }
+        for future in as_completed(futures):
+            idx = futures[future]
+            try:
+                data = future.result()
+                results.append(data)
+                if 'task' in data and 'result' in data:
+                    collected += 1
+                else:
+                    all_valid = False
+            except Exception as e:
+                all_valid = False
+
+    step.ended_at = time.time()
+    step.duration_s = step.ended_at - step.started_at
+    step.success = collected == len(runners) and all_valid
+    step.detail = '{} results collected, wall={:.2f}s, valid={}'.format(
+        collected, step.duration_s, all_valid)
+    return step
+
+
+def _step_destroy_sandboxes(runners):
+    """Destroy all sandboxes concurrently."""
+    step = StepProfile(name='fo_destroy_sandboxes', started_at=time.time())
+
+    destroyed = 0
+
+    def _destroy_one(runner):
+        runner.destroy()
+        return True
+
+    with ThreadPoolExecutor(max_workers=len(runners)) as pool:
+        futures = {
+            pool.submit(_destroy_one, r): i
+            for i, r in enumerate(runners)
+        }
+        for future in as_completed(futures):
+            try:
+                future.result()
+                destroyed += 1
+            except Exception:
+                pass
+
+    step.ended_at = time.time()
+    step.duration_s = step.ended_at - step.started_at
+    step.success = destroyed == len(runners)
+    step.detail = '{} sandboxes destroyed in {:.2f}s'.format(
+        destroyed, step.duration_s)
+    return step
+
+
+# ── Main Benchmark Function ───────────────────────────────────────
+
+def run_fanout_benchmark(runner, provider, api_key=None, num_sandboxes=3):
+    """Execute the multi-sandbox fan-out benchmark.
+
+    NOTE: The `runner` parameter is not used for execution (this benchmark
+    creates its own sandboxes). It is accepted for interface consistency.
+
+    Args:
+        runner: Unused (for interface consistency). Pass None.
+        provider: 'daytona', 'e2b', 'blaxel', or 'modal'.
+        api_key: API key for the provider (not needed for Modal).
+        num_sandboxes: Number of sandboxes to fan out (default 3).
+
+    Returns:
+        list[StepProfile]: Profiling data for each benchmark step.
+    """
+    steps = []
+    runners = []
+
+    print('    [FO] Step 1/5: Create {} sandboxes...'.format(num_sandboxes))
+    create_step, runners = _step_create_sandboxes(
+        provider, api_key, num_sandboxes)
+    steps.append(create_step)
+    print('    [FO]   {:.1f}s - {}'.format(create_step.duration_s, create_step.detail))
+
+    if not runners:
+        print('    [FO] No sandboxes created, aborting fan-out benchmark')
+        return steps
+
+    try:
+        print('    [FO] Step 2/5: Upload code to {} sandboxes...'.format(
+            len(runners)))
+        upload_step = _step_upload_code(runners, provider)
+        steps.append(upload_step)
+        print('    [FO]   {:.1f}s - {}'.format(
+            upload_step.duration_s, upload_step.detail))
+
+        print('    [FO] Step 3/5: Run tasks on {} sandboxes...'.format(
+            len(runners)))
+        tasks_step = _step_run_different_tasks(runners, provider)
+        steps.append(tasks_step)
+        print('    [FO]   {:.1f}s - {}'.format(
+            tasks_step.duration_s, tasks_step.detail))
+
+        print('    [FO] Step 4/5: Collect results...')
+        collect_step = _step_collect_results(runners, provider)
+        steps.append(collect_step)
+        print('    [FO]   {:.1f}s - {}'.format(
+            collect_step.duration_s, collect_step.detail))
+
+    finally:
+        print('    [FO] Step 5/5: Destroy {} sandboxes...'.format(
+            len(runners)))
+        destroy_step = _step_destroy_sandboxes(runners)
+        steps.append(destroy_step)
+        print('    [FO]   {:.1f}s - {}'.format(
+            destroy_step.duration_s, destroy_step.detail))
+
+    return steps

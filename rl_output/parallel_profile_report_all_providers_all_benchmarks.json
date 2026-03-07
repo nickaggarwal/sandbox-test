@@ -1,0 +1,843 @@
+{
+  "timestamp": "2026-03-07T14:10:26.356797",
+  "wall_clock_s": 133.15,
+  "serial_sum_s": 647.26,
+  "speedup": 4.86,
+  "sandbox_count": 12,
+  "providers": [
+    "modal",
+    "e2b",
+    "blaxel",
+    "daytona"
+  ],
+  "profiles": [
+    {
+      "sandbox_label": "blaxel-1",
+      "provider": "blaxel",
+      "sandbox_id": "rl-test-1d14b310",
+      "config": {
+        "episodes": 10,
+        "max_steps": 10
+      },
+      "total_duration_s": 92.21,
+      "tests_passed": 29,
+      "tests_total": 29,
+      "rl_best_reward": 11.100000000000003,
+      "rl_final_avg": 9.390000000000002,
+      "rl_best_actions": [
+        "add_booking_creation",
+        "add_booking_creation",
+        "add_daily_limit",
+        "improve_readability",
+        "add_booking_creation",
+        "add_booking_creation",
+        "noop",
+        "noop",
+        "add_buffer_enforcement",
+        "add_cancellation"
+      ],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.33,
+          "success": true,
+          "detail": "rl-test-1d14b310"
+        },
+        {
+          "name": "upload_project",
+          "duration_s": 0.49,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "install_deps",
+          "duration_s": 6.76,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "run_tests",
+          "duration_s": 6.67,
+          "success": true,
+          "detail": "k\n\n----------------------------------------------------------------------\nRan 29 tests in 5.998s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n"
+        },
+        {
+          "name": "rl_training",
+          "duration_s": 75.66,
+          "success": true,
+          "detail": "s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 5.950s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 5.971s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 5.959s\n\nOK\n"
+        },
+        {
+          "name": "retrieve_results",
+          "duration_s": 0.35,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.32,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "blaxel-fs",
+      "provider": "blaxel",
+      "sandbox_id": "rl-test-a7be8b59",
+      "config": {
+        "benchmark": "filesystem"
+      },
+      "total_duration_s": 90.28,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 6.4,
+          "success": true,
+          "detail": "rl-test-a7be8b59"
+        },
+        {
+          "name": "fs_code_generation",
+          "duration_s": 76.73,
+          "success": true,
+          "detail": "10 files, 78KB total"
+        },
+        {
+          "name": "fs_build_compile",
+          "duration_s": 0.32,
+          "success": true,
+          "detail": "10 .pyc files generated"
+        },
+        {
+          "name": "fs_upload_files",
+          "duration_s": 0.37,
+          "success": true,
+          "detail": "5/5 files, 32KB"
+        },
+        {
+          "name": "fs_download_files",
+          "duration_s": 1.06,
+          "success": true,
+          "detail": "9 files, 156KB"
+        },
+        {
+          "name": "fs_pip_package_io",
+          "duration_s": 4.9,
+          "success": false,
+          "detail": "3 wheels: down 1189KB, up 1189KB, integrity=FAIL"
+        },
+        {
+          "name": "fs_list_verify",
+          "duration_s": 0.14,
+          "success": true,
+          "detail": "31 files total, native list N/A"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.15,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "blaxel-pause",
+      "provider": "blaxel",
+      "sandbox_id": "rl-test-2eddbff3",
+      "config": {
+        "benchmark": "pause_resume"
+      },
+      "total_duration_s": 4.92,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.57,
+          "success": true,
+          "detail": "rl-test-2eddbff3"
+        },
+        {
+          "name": "async_start_task",
+          "duration_s": 2.58,
+          "success": true,
+          "detail": "bg task started, progress: {\"step\": 5, \"total\": 20, \"pct\": 25.0, \"ts\": 1772921395.1969407}"
+        },
+        {
+          "name": "async_write_state",
+          "duration_s": 0.12,
+          "success": true,
+          "detail": "3/3 files, 10KB"
+        },
+        {
+          "name": "async_pause",
+          "duration_s": 0.0,
+          "success": false,
+          "detail": "pause unsupported: Blaxel SDK does not expose pause()"
+        },
+        {
+          "name": "async_resume",
+          "duration_s": 0.0,
+          "success": false,
+          "detail": "resume unsupported: Blaxel SDK does not expose resume()"
+        },
+        {
+          "name": "async_verify_state",
+          "duration_s": 0.35,
+          "success": true,
+          "detail": "5/5 files, json=OK, bin=FAIL"
+        },
+        {
+          "name": "async_restart_task",
+          "duration_s": 0.17,
+          "success": true,
+          "detail": "compute OK, fib50 in 0.016s"
+        },
+        {
+          "name": "async_download_verify",
+          "duration_s": 0.28,
+          "success": true,
+          "detail": "6/6 files, 20KB total"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.12,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "daytona-1",
+      "provider": "daytona",
+      "sandbox_id": "f0b86def-7ba0-4442-8be9-30d0b34e7a14",
+      "config": {
+        "episodes": 10,
+        "max_steps": 10
+      },
+      "total_duration_s": 92.99,
+      "tests_passed": 29,
+      "tests_total": 29,
+      "rl_best_reward": 11.100000000000003,
+      "rl_final_avg": 9.390000000000002,
+      "rl_best_actions": [
+        "add_booking_creation",
+        "add_booking_creation",
+        "add_daily_limit",
+        "improve_readability",
+        "add_booking_creation",
+        "add_booking_creation",
+        "noop",
+        "noop",
+        "add_buffer_enforcement",
+        "add_cancellation"
+      ],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.79,
+          "success": true,
+          "detail": "f0b86def-7ba0-4442-8be9-30d0b34e7a14"
+        },
+        {
+          "name": "upload_project",
+          "duration_s": 0.96,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "install_deps",
+          "duration_s": 5.27,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "run_tests",
+          "duration_s": 10.55,
+          "success": true,
+          "detail": "----------------------\nRan 29 tests in 5.702s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n OK\nSystem check identified no issues (0 silenced)."
+        },
+        {
+          "name": "rl_training",
+          "duration_s": 72.07,
+          "success": true,
+          "detail": "            3\n  refactor_modularity               2\n  add_dst_handling                  2\n  add_conflict_detection            1\n  improve_readability               1\n  add_cancellation                  1\n\nResults saved to: rl_output/training_results.json\nWeights saved to: rl_output/agent_weights.npz"
+        },
+        {
+          "name": "retrieve_results",
+          "duration_s": 0.38,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.48,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "daytona-fs",
+      "provider": "daytona",
+      "sandbox_id": "d39397f4-9d81-4cd8-8500-a9dfa9c9a01e",
+      "config": {
+        "benchmark": "filesystem"
+      },
+      "total_duration_s": 13.27,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.67,
+          "success": true,
+          "detail": "d39397f4-9d81-4cd8-8500-a9dfa9c9a01e"
+        },
+        {
+          "name": "fs_code_generation",
+          "duration_s": 1.36,
+          "success": true,
+          "detail": "10 files, 78KB total"
+        },
+        {
+          "name": "fs_build_compile",
+          "duration_s": 0.24,
+          "success": true,
+          "detail": "10 .pyc files generated"
+        },
+        {
+          "name": "fs_upload_files",
+          "duration_s": 1.57,
+          "success": true,
+          "detail": "5/5 files, 32KB"
+        },
+        {
+          "name": "fs_download_files",
+          "duration_s": 2.66,
+          "success": true,
+          "detail": "9 files, 44KB"
+        },
+        {
+          "name": "fs_pip_package_io",
+          "duration_s": 5.5,
+          "success": true,
+          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
+        },
+        {
+          "name": "fs_list_verify",
+          "duration_s": 0.28,
+          "success": true,
+          "detail": "31 files total, native: 20 entries"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.18,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "daytona-pause",
+      "provider": "daytona",
+      "sandbox_id": "db5db811-5aa9-4462-96fa-e2e3e026361a",
+      "config": {
+        "benchmark": "pause_resume"
+      },
+      "total_duration_s": 37.39,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 1.56,
+          "success": true,
+          "detail": "db5db811-5aa9-4462-96fa-e2e3e026361a"
+        },
+        {
+          "name": "async_start_task",
+          "duration_s": 3.12,
+          "success": true,
+          "detail": "bg task started, progress: {\"step\": 5, \"total\": 20, \"pct\": 25.0, \"ts\": 1772921358.6709907}"
+        },
+        {
+          "name": "async_write_state",
+          "duration_s": 1.67,
+          "success": true,
+          "detail": "3/3 files, 10KB"
+        },
+        {
+          "name": "async_pause",
+          "duration_s": 21.5,
+          "success": true,
+          "detail": "paused in 21.504s"
+        },
+        {
+          "name": "async_resume",
+          "duration_s": 1.41,
+          "success": true,
+          "detail": "resumed in 1.414s"
+        },
+        {
+          "name": "async_verify_state",
+          "duration_s": 3.48,
+          "success": true,
+          "detail": "5/5 files, json=OK, bin=OK"
+        },
+        {
+          "name": "async_restart_task",
+          "duration_s": 0.91,
+          "success": true,
+          "detail": "compute OK, fib50 in 0.007s"
+        },
+        {
+          "name": "async_download_verify",
+          "duration_s": 3.05,
+          "success": true,
+          "detail": "6/6 files, 10KB total"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.17,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "e2b-1",
+      "provider": "e2b",
+      "sandbox_id": "iigmlllef9123s8y2hob2",
+      "config": {
+        "episodes": 10,
+        "max_steps": 10
+      },
+      "total_duration_s": 95.24,
+      "tests_passed": 29,
+      "tests_total": 29,
+      "rl_best_reward": 11.100000000000003,
+      "rl_final_avg": 9.390000000000002,
+      "rl_best_actions": [
+        "add_booking_creation",
+        "add_booking_creation",
+        "add_daily_limit",
+        "improve_readability",
+        "add_booking_creation",
+        "add_booking_creation",
+        "noop",
+        "noop",
+        "add_buffer_enforcement",
+        "add_cancellation"
+      ],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.21,
+          "success": true,
+          "detail": "iigmlllef9123s8y2hob2"
+        },
+        {
+          "name": "upload_project",
+          "duration_s": 0.93,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "install_deps",
+          "duration_s": 4.65,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "run_tests",
+          "duration_s": 7.17,
+          "success": true,
+          "detail": "k\n\n----------------------------------------------------------------------\nRan 29 tests in 6.419s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n"
+        },
+        {
+          "name": "rl_training",
+          "duration_s": 81.05,
+          "success": true,
+          "detail": "s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 6.386s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 6.334s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 6.339s\n\nOK\n"
+        },
+        {
+          "name": "retrieve_results",
+          "duration_s": 0.09,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.11,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "e2b-fs",
+      "provider": "e2b",
+      "sandbox_id": "ihxl2j72njkmlu2bu3j61",
+      "config": {
+        "benchmark": "filesystem"
+      },
+      "total_duration_s": 5.31,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.15,
+          "success": true,
+          "detail": "ihxl2j72njkmlu2bu3j61"
+        },
+        {
+          "name": "fs_code_generation",
+          "duration_s": 0.86,
+          "success": true,
+          "detail": "10 files, 78KB total"
+        },
+        {
+          "name": "fs_build_compile",
+          "duration_s": 0.17,
+          "success": true,
+          "detail": "10 .pyc files generated"
+        },
+        {
+          "name": "fs_upload_files",
+          "duration_s": 0.28,
+          "success": true,
+          "detail": "5/5 files, 32KB"
+        },
+        {
+          "name": "fs_download_files",
+          "duration_s": 0.48,
+          "success": true,
+          "detail": "9 files, 44KB"
+        },
+        {
+          "name": "fs_pip_package_io",
+          "duration_s": 3.0,
+          "success": true,
+          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
+        },
+        {
+          "name": "fs_list_verify",
+          "duration_s": 0.11,
+          "success": true,
+          "detail": "31 files total, native: 20 entries"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.11,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "e2b-pause",
+      "provider": "e2b",
+      "sandbox_id": "ierfu95y9yrw49xlkyf2d",
+      "config": {
+        "benchmark": "pause_resume"
+      },
+      "total_duration_s": 14.97,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.35,
+          "success": true,
+          "detail": "ierfu95y9yrw49xlkyf2d"
+        },
+        {
+          "name": "async_start_task",
+          "duration_s": 12.23,
+          "success": true,
+          "detail": "bg task started, progress: {\"step\": 20, \"total\": 20, \"pct\": 100.0, \"ts\": 1772921400.7957273}"
+        },
+        {
+          "name": "async_write_state",
+          "duration_s": 0.14,
+          "success": true,
+          "detail": "3/3 files, 10KB"
+        },
+        {
+          "name": "async_pause",
+          "duration_s": 0.85,
+          "success": true,
+          "detail": "paused in 0.849s"
+        },
+        {
+          "name": "async_resume",
+          "duration_s": 0.2,
+          "success": true,
+          "detail": "resumed in 0.204s"
+        },
+        {
+          "name": "async_verify_state",
+          "duration_s": 0.39,
+          "success": true,
+          "detail": "5/5 files, json=OK, bin=OK"
+        },
+        {
+          "name": "async_restart_task",
+          "duration_s": 0.22,
+          "success": true,
+          "detail": "compute OK, fib50 in 0.009s"
+        },
+        {
+          "name": "async_download_verify",
+          "duration_s": 0.3,
+          "success": true,
+          "detail": "6/6 files, 10KB total"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.18,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "modal-1",
+      "provider": "modal",
+      "sandbox_id": "sb-UYU284J72z3wErQQa4cXT0",
+      "config": {
+        "episodes": 10,
+        "max_steps": 10
+      },
+      "total_duration_s": 130.82,
+      "tests_passed": 29,
+      "tests_total": 29,
+      "rl_best_reward": 11.100000000000003,
+      "rl_final_avg": 9.390000000000002,
+      "rl_best_actions": [
+        "add_booking_creation",
+        "add_booking_creation",
+        "add_daily_limit",
+        "improve_readability",
+        "add_booking_creation",
+        "add_booking_creation",
+        "noop",
+        "noop",
+        "add_buffer_enforcement",
+        "add_cancellation"
+      ],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.4,
+          "success": true,
+          "detail": "sb-UYU284J72z3wErQQa4cXT0"
+        },
+        {
+          "name": "upload_project",
+          "duration_s": 4.37,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "install_deps",
+          "duration_s": 7.26,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "run_tests",
+          "duration_s": 9.85,
+          "success": true,
+          "detail": "k\n\n----------------------------------------------------------------------\nRan 29 tests in 8.526s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n"
+        },
+        {
+          "name": "rl_training",
+          "duration_s": 107.0,
+          "success": true,
+          "detail": "s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.481s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.462s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.493s\n\nOK\n"
+        },
+        {
+          "name": "retrieve_results",
+          "duration_s": 0.7,
+          "success": true,
+          "detail": ""
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.11,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "modal-fs",
+      "provider": "modal",
+      "sandbox_id": "sb-SNoypcqOEQyhCubYKBsGOC",
+      "config": {
+        "benchmark": "filesystem"
+      },
+      "total_duration_s": 37.95,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.22,
+          "success": true,
+          "detail": "sb-SNoypcqOEQyhCubYKBsGOC"
+        },
+        {
+          "name": "fs_code_generation",
+          "duration_s": 7.79,
+          "success": true,
+          "detail": "10 files, 78KB total"
+        },
+        {
+          "name": "fs_build_compile",
+          "duration_s": 1.38,
+          "success": true,
+          "detail": "10 .pyc files generated"
+        },
+        {
+          "name": "fs_upload_files",
+          "duration_s": 4.0,
+          "success": true,
+          "detail": "5/5 files, 32KB"
+        },
+        {
+          "name": "fs_download_files",
+          "duration_s": 7.41,
+          "success": true,
+          "detail": "9 files, 44KB"
+        },
+        {
+          "name": "fs_pip_package_io",
+          "duration_s": 13.04,
+          "success": true,
+          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
+        },
+        {
+          "name": "fs_list_verify",
+          "duration_s": 1.03,
+          "success": true,
+          "detail": "31 files total, native: 20 entries"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.11,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "modal-pause",
+      "provider": "modal",
+      "sandbox_id": "sb-gFKl4QSBZBkAwa3QFsvgrx",
+      "config": {
+        "benchmark": "pause_resume"
+      },
+      "total_duration_s": 31.89,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.22,
+          "success": true,
+          "detail": "sb-gFKl4QSBZBkAwa3QFsvgrx"
+        },
+        {
+          "name": "async_start_task",
+          "duration_s": 3.96,
+          "success": true,
+          "detail": "bg task started, progress: {\"step\": 6, \"total\": 20, \"pct\": 30.0, \"ts\": 1772921400.690653}"
+        },
+        {
+          "name": "async_write_state",
+          "duration_s": 1.84,
+          "success": true,
+          "detail": "3/3 files, 10KB"
+        },
+        {
+          "name": "async_pause",
+          "duration_s": 1.69,
+          "success": true,
+          "detail": "paused in 1.686s"
+        },
+        {
+          "name": "async_resume",
+          "duration_s": 0.11,
+          "success": true,
+          "detail": "resumed in 0.114s"
+        },
+        {
+          "name": "async_verify_state",
+          "duration_s": 13.09,
+          "success": true,
+          "detail": "5/5 files, json=OK, bin=OK"
+        },
+        {
+          "name": "async_restart_task",
+          "duration_s": 2.05,
+          "success": true,
+          "detail": "compute OK, fib50 in 0.012s"
+        },
+        {
+          "name": "async_download_verify",
+          "duration_s": 6.18,
+          "success": true,
+          "detail": "6/6 files, 10KB total"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.11,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    }
+  ]
+}
