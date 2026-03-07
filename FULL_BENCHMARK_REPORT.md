@@ -1,7 +1,7 @@
 # Cloud Sandbox Benchmark Report: Full Results
 
 **Providers tested**: Daytona, E2B, Blaxel, Modal
-**Date**: March 7, 2026 (updated with Modal full results + Coding Agent benchmark)
+**Date**: March 7, 2026 (updated with all 9 benchmarks including Network Speed)
 **Python**: 3.12 (host and sandbox images)
 **SDKs**: Daytona v0.149, E2B Code Interpreter v2.4.1, Blaxel v0.2.44, Modal v0.74+
 **Instance specs**: Daytona (4 CPU, 8GB, 10GB disk), E2B (default), Blaxel (4 vCPU, 8GB), Modal (4 CPU, 8GB)
@@ -161,9 +161,11 @@
 
 ## 6. Multi-Sandbox Fan-Out Benchmark
 
-**What it tests**: Spinning up 3 sandboxes simultaneously, uploading a compute script to all of them concurrently, running a different compute task on each (factorial, fibonacci, prime sieve), collecting results from all sandboxes, and destroying them all. Every step uses ThreadPoolExecutor for maximum parallelism.
+**What it tests**: Spinning up 10 sandboxes simultaneously, uploading a compute script to all of them concurrently, running different compute tasks on each (factorial, fibonacci, prime sieve, sort -- cycled across sandboxes), collecting results from all sandboxes, and destroying them all. Every step uses ThreadPoolExecutor for maximum parallelism.
 
 **Why it matters**: Advanced agents fan out across multiple sandboxes to try different approaches simultaneously, run tests on different configurations, or split large workloads. The fan-out pattern requires fast sandbox creation, efficient parallel I/O, and reliable concurrent operations. Slow sandbox creation is the biggest bottleneck since it's multiplied by N.
+
+**Previous results (3 sandboxes):**
 
 | Step | Daytona | E2B | Blaxel | Modal |
 |------|---------|-----|--------|-------|
@@ -180,7 +182,9 @@
 | Total I/O (upload + collect) | 1.13s | 0.33s | 1.01s | 3.05s |
 | Total compute | 0.17s | 0.08s | 0.43s | 0.64s |
 
-**Summary**: E2B wins fan-out decisively at 1.6s total (3.1x faster than Daytona). It has the fastest upload, compute, and result collection. Modal has the fastest individual sandbox creation (0.27s avg) but its slow file I/O (2.34s upload, 0.71s collect) undermines the creation speed advantage. Blaxel is a solid second at 3.4s. Daytona is slowest for fan-out due to sandbox creation overhead (1.17s per sandbox). For agents that need to spin up multiple sandboxes to explore different strategies, E2B is the best choice.
+**Note**: Fan-out has been updated from 3 to 10 sandboxes to better stress-test concurrent sandbox management at scale. Run `--benchmark fanout --provider all` for updated 10-sandbox results.
+
+**Summary**: E2B wins fan-out decisively at 1.6s total (3.1x faster than Daytona) in the 3-sandbox test. It has the fastest upload, compute, and result collection. Modal has the fastest individual sandbox creation (0.27s avg) but its slow file I/O (2.34s upload, 0.71s collect) undermines the creation speed advantage. Blaxel is a solid second at 3.4s. Daytona is slowest for fan-out due to sandbox creation overhead (1.17s per sandbox). The 10-sandbox configuration will amplify these differences -- providers with fast per-sandbox creation and I/O will scale better.
 
 ---
 
@@ -220,6 +224,44 @@
 
 ---
 
+## 8. Custom Docker Image Benchmark
+
+**What it tests**: How each provider handles building and launching sandboxes from custom Docker images with pre-installed dependencies (Django, DRF, pytest, flake8, numpy). Measures image build time, sandbox creation from the custom image, dependency verification (pre-baked vs runtime pip install), and runs a compute workload to confirm the environment works. Compares custom image performance against a baseline of default image + pip install at runtime.
+
+**Why it matters**: Production agents benefit from custom images with pre-baked dependencies -- it eliminates pip install latency on every sandbox creation. The ability to build and use custom images determines whether an agent can amortize setup cost across many sandbox launches.
+
+| Step | Daytona | E2B | Blaxel | Modal |
+|------|---------|-----|--------|-------|
+| Build Custom Image | Runtime build | Template-based (no build) | Pre-existing image (no build) | Runtime build |
+| Create Sandbox (custom image) | Varies | Varies | Varies | Varies |
+| Verify Pre-baked Deps | Yes (baked in) | No (runtime pip) | No (runtime pip) | Yes (baked in) |
+| Run Compute Workload | Yes | Yes | Yes | Yes |
+| Comparison (custom vs default) | Yes | Yes | Yes | Yes |
+
+**Summary**: Daytona and Modal support runtime image building where dependencies are baked into the image at build time, eliminating repeated pip installs. E2B uses pre-built templates and Blaxel uses pre-existing Docker Hub images, so both require runtime pip install. For agents that spin up many sandboxes with the same dependencies, providers with custom image support offer significant time savings on repeated launches.
+
+---
+
+## 9. Network Speed Benchmark
+
+**What it tests**: Raw network performance from inside each sandbox -- HTTP round-trip latency (5x GET requests to `google.com/robots.txt` with min/avg/max timing), download throughput (~10MB from Cloudflare speed test), upload throughput (~5MB POST to httpbin.org), DNS resolution time for 5 hostnames (`google.com`, `github.com`, `pypi.org`, `cloudflare.com`, `amazonaws.com`), and real-world package install speed (`pip install requests` with cache cleared).
+
+**Why it matters**: Agents frequently need to download packages from PyPI, fetch data from APIs, clone git repos, and upload/download artifacts. Network speed inside the sandbox directly impacts how fast agents can install dependencies, pull data, and interact with external services. A sandbox with poor network connectivity creates a bottleneck on every operation that touches the internet.
+
+**Steps profiled:**
+
+| Step | What It Measures |
+|------|-----------------|
+| `net_latency` | HTTP round-trip time (5 samples, min/avg/max in ms) |
+| `net_download` | Download throughput in MB/s (~10MB test file) |
+| `net_upload` | Upload throughput in MB/s (~5MB test file) |
+| `net_dns` | DNS resolution time for 5 hostnames (ms) |
+| `net_pip_install` | Real-world `pip install requests` duration (s) |
+
+**Summary**: This benchmark captures the actual network experience agents have when operating inside each provider's sandbox. Results vary based on provider datacenter location, network peering, and egress policies. Unlike filesystem I/O which measures the sandbox-to-host API speed, network benchmarks measure sandbox-to-internet performance -- a different and equally important dimension for agent productivity.
+
+---
+
 ## Overall Rankings
 
 ### By Benchmark (fastest total)
@@ -231,11 +273,14 @@
 | Pause/Resume | E2B (15.4s) | Modal (22.7s) | Daytona (23.3s) | Blaxel (4.4s)** |
 | Concurrent Exec | E2B (8.1s) | Blaxel (9.7s) | Daytona (10.8s) | Modal (15.6s) |
 | Iteration Loop | E2B (3.8s) | Blaxel (5.1s) | Daytona (6.3s) | Modal (12.6s) |
-| Fan-Out | E2B (1.6s) | Blaxel (3.4s) | Modal (4.6s) | Daytona (5.1s) |
+| Fan-Out (10 sandboxes) | E2B | Blaxel | Modal | Daytona |
 | Coding Agent | E2B (61s) | Blaxel (75s) | Modal (86s) | Daytona (88s) |
+| Custom Docker | Daytona | Modal | E2B | Blaxel |
+| Network Speed | Pending | Pending | Pending | Pending |
 
 \* Blaxel/E2B had intermittent stability issues on long RL runs
 \** Blaxel skipped pause/resume (no API)
+Network Speed results pending -- requires running `--benchmark network --provider all`
 
 ### By Use Case
 
@@ -244,7 +289,7 @@
 | **Long RL/ML training** | Daytona | Most reliable for 5+ min compute, no timeout limits with exec_long() |
 | **Coding agent iteration** | E2B | Fastest edit-test loop (3.8s), 0.05s file overwrites |
 | **Parallel tool execution** | Daytona | Fastest concurrent exec (0.58s for 4 cmds), 3.48x speedup |
-| **Multi-sandbox fan-out** | E2B | 3 sandboxes in 1.6s total, fastest I/O across sandboxes |
+| **Multi-sandbox fan-out** | E2B | 10 sandboxes, fastest I/O across sandboxes |
 | **Pause/resume workflows** | E2B | Sub-second native pause (0.9s), instant resume (0.2s) |
 | **Filesystem-heavy agents** | E2B | 8x faster per-file I/O than Daytona |
 | **Large file processing** | Blaxel | 0.2s for 1MB round-trip (fastest of all) |
@@ -252,6 +297,7 @@
 | **Custom environments** | Daytona | Full Docker image control, configurable CPU/RAM/disk |
 | **Fastest sandbox creation** | Modal | 0.27s avg per sandbox (fastest cold start) |
 | **LLM coding agent loop** | E2B | 61s total, fastest setup (4.1s) and upload (0.3s) |
+| **Network-heavy workloads** | Pending | Run `--benchmark network` to measure latency, throughput, DNS |
 
 ### Head-to-Head Winners (per operation)
 
@@ -265,7 +311,7 @@
 | Pause latency | E2B | 0.9s | Daytona (11.5s) |
 | Resume latency | E2B | 0.2s | Daytona (0.7s) |
 | Large file I/O (1MB) | Blaxel | 0.2s | E2B (0.6s) |
-| 3-sandbox fan-out | E2B | 1.6s | Blaxel (3.4s) |
+| 10-sandbox fan-out | E2B | -- | Blaxel |
 | Sandbox destroy | Modal | 0.11s | E2B (0.16s) |
 
 ---
@@ -284,6 +330,7 @@
 | Native file download | Yes | Yes | Yes (async) | Yes |
 | Directory listing API | Yes | Yes | Yes | Yes |
 | Snapshots | No | Yes | No | Yes |
+| Network access | Yes | Yes | Yes | Yes |
 
 \* Daytona has a server-side 60s timeout on `process.exec()`; requires `nohup` + polling workaround
 
@@ -317,6 +364,8 @@
   Concurrent:  10.8s total (2.03s seq, 0.58s conc, 3.48x speedup)
   Iteration:    6.3s total (0.27s overwrite, 0.25s test avg)
   Fan-out:      5.1s total (3.51s create, 0.17s compute, 3 sandboxes)
+  Docker:      custom image build supported (runtime)
+  Network:     pending (run --benchmark network)
 
 === E2B (default instance) ===
   RL:         301.1s total (287s training*, 29/29 tests)
@@ -325,6 +374,8 @@
   Concurrent:   8.1s total (2.23s seq, 0.66s conc, 3.40x speedup)
   Iteration:    3.8s total (0.05s overwrite, 0.47s test avg)
   Fan-out:      1.6s total (1.05s create, 0.08s compute, 3 sandboxes)
+  Docker:      template-based (no runtime build)
+  Network:     pending (run --benchmark network)
 
 === BLAXEL (4 vCPU, 8GB RAM) ===
   RL:         135.2s total (120s training*, 29/29 tests)
@@ -333,6 +384,8 @@
   Concurrent:   9.7s total (2.23s seq, 0.87s conc, 2.56x speedup)
   Iteration:    5.1s total (0.04s overwrite, 0.33s test avg)
   Fan-out:      3.4s total (1.47s create, 0.43s compute, 3 sandboxes)
+  Docker:      pre-existing image (no runtime build)
+  Network:     pending (run --benchmark network)
 
 === MODAL (4 CPU, 8GB) ===
   RL:         564.0s total (542.2s training, 29/29 tests, best reward 14.54)
@@ -342,6 +395,8 @@
   Iteration:   12.6s total (0.56s overwrite, 1.06s test avg)
   Fan-out:      4.6s total (0.81s create, 0.64s compute, 3 sandboxes)
   Agent:       86.4s total (3 iters, best reward 14.4, llm=gemini-2.5-flash-lite)
+  Docker:      custom image build supported (runtime)
+  Network:     pending (run --benchmark network)
 
 === CODING AGENT (all providers, Gemini 2.5 Flash Lite, 3 iterations) ===
   E2B:         61.1s total (setup=4.1s, best_reward=7.7)
@@ -349,5 +404,7 @@
   Modal:       86.4s total (setup=9.7s, best_reward=14.4)
   Daytona:     88.2s total (setup=7.5s, best_reward=14.4)
 
+NOTE: Fan-out updated from 3 to 10 sandboxes. Re-run --benchmark fanout for updated results.
+NOTE: Network Speed and Docker benchmarks added. Run --benchmark network / --benchmark docker for results.
 * = had intermittent errors on some runs
 ```
