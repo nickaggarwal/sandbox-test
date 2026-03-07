@@ -42,7 +42,7 @@ sandbox-test/
 │
 ├── Results
 │   ├── rl_output/                  # Benchmark JSON reports, agent weights
-│   ├── FULL_BENCHMARK_REPORT.md    # Complete results across all 6 benchmarks
+│   ├── FULL_BENCHMARK_REPORT.md    # Complete results across all 9 benchmarks
 │   ├── SANDBOX_BENCHMARK_REPORT.md # Original 3-provider report
 │   └── DAYTONA_VS_E2B_SUMMARY.md   # Head-to-head comparison
 │
@@ -247,13 +247,13 @@ Full results with per-step timings: [FULL_BENCHMARK_REPORT.md](FULL_BENCHMARK_RE
 | Pause/Resume | E2B (15.4s) | Modal (22.7s) | Daytona (23.3s) | -- |
 | Concurrent Exec | E2B (8.1s) | Blaxel (9.7s) | Daytona (10.8s) | Modal (15.6s) |
 | Iteration Loop | E2B (3.8s) | Blaxel (5.1s) | Daytona (6.3s) | Modal (12.6s) |
-| Fan-Out (3 sandboxes) | E2B (1.6s) | Blaxel (3.4s) | Modal (4.6s) | Daytona (5.1s) |
+| Fan-Out (10 sandboxes) | E2B | Blaxel | Modal | Daytona |
 | Coding Agent** | E2B (61s) | Blaxel (75s) | Modal (86s) | Daytona (88s) |
+| Custom Docker | Daytona | Modal | E2B | Blaxel |
+| Network Speed | Pending | Pending | Pending | Pending |
 
 \* Had intermittent stability issues on long runs
 \** Coding Agent times include LLM latency (Gemini 2.5 Flash Lite); not directly comparable to synthetic benchmarks
-
-\* Had intermittent stability issues on long runs
 
 ### Best Provider by Use Case
 
@@ -262,17 +262,20 @@ Full results with per-step timings: [FULL_BENCHMARK_REPORT.md](FULL_BENCHMARK_RE
 | Long compute (5+ min) | Daytona | Most reliable, configurable resources |
 | Coding agent iteration | E2B | 3.8s loop, 0.05s file writes |
 | Parallel tool execution | Daytona | 0.58s for 4 concurrent commands |
-| Multi-sandbox fan-out | E2B | 3 sandboxes in 1.6s |
+| Multi-sandbox fan-out | E2B | 10 sandboxes, fastest I/O across sandboxes |
 | Pause/resume | E2B | 0.9s pause, 0.2s resume |
 | Large file processing | Blaxel | 0.2s for 1MB round-trip |
 | Fastest cold start | Modal | 0.27s per sandbox |
+| Custom Docker images | Daytona / Modal | Runtime image build, deps baked in |
+| Network-heavy workloads | Pending | Run `--benchmark network` for results |
 
 ### Key Findings
 
 - **All 4 providers support true parallel exec** -- agents can fire lint/test/typecheck simultaneously for 2.5-5x speedups
-- **E2B wins 5 of 6 benchmarks** on total time, driven by fast file I/O (8x faster than Daytona) and sub-second sandbox creation
+- **E2B wins 5 of 7 synthetic benchmarks** on total time, driven by fast file I/O (8x faster than Daytona) and sub-second sandbox creation
 - **Daytona is the most reliable** for long-running compute (5+ minutes) where E2B and Blaxel can drop connections
-- **Modal has the fastest sandbox creation** (0.27s) but the slowest file I/O, making it less suited for iteration-heavy agent workflows
+- **Daytona and Modal lead on custom Docker images** -- both support runtime image building with pre-baked dependencies, eliminating repeated pip installs
+- **Modal has the fastest sandbox creation** (0.27s) and highest parallel speedup (5.06x) but the slowest file I/O, making it less suited for iteration-heavy agent workflows
 - **Blaxel excels at short bursts** -- fastest test execution (0.25s) and large file I/O (0.2s for 1MB) but lacks pause/resume
 
 ---
@@ -281,12 +284,16 @@ Full results with per-step timings: [FULL_BENCHMARK_REPORT.md](FULL_BENCHMARK_RE
 
 | Capability | Daytona | E2B | Blaxel | Modal |
 |-----------|---------|-----|--------|-------|
-| Custom CPU/Memory | Yes | No | Yes | Yes |
-| Custom Docker images | Yes | Template-based | Yes | Yes |
-| Native pause/resume | Stop/start (11s) | Yes (0.9s) | No | Via snapshots |
+| Sandbox creation | 0.6-1.7s | 0.1-0.3s | 0.3-0.5s | 0.3-0.8s |
+| Custom CPU/Memory | Yes | No (fixed) | Yes | Yes |
+| Custom Docker images | Yes (runtime build) | Template-based | Yes (Docker Hub) | Yes (runtime build) |
+| Native pause/resume | Stop/start (11s) | Yes (0.9s) | No | Via snapshots (1.5s) |
 | Exec timeout limit | 60s* | None | None | None |
 | Parallel exec speedup | 3.48x | 3.40x | 2.56x | 5.06x |
+| Native file upload/download | Yes | Yes | Yes (async) | Yes |
 | Snapshots | No | Yes | No | Yes |
+| Network access | Yes | Yes | Yes | Yes |
+| Auth method | API key | API key | API key | `~/.modal.toml` |
 
 \* Requires `nohup` + polling workaround for commands >60s
 
@@ -303,5 +310,8 @@ Full results with per-step timings: [FULL_BENCHMARK_REPORT.md](FULL_BENCHMARK_RE
 | Connection drops on runs >5min | E2B | Use Daytona for long compute |
 | No pause/resume API | Blaxel | Not available in SDK |
 | Async-to-sync bridging | Blaxel | Uses `asyncio.new_event_loop()` per instance |
+| Region warning | Blaxel | Set `BL_REGION` env var to suppress FutureWarning |
 | Slow `sandbox.open()` I/O | Modal | Batch file operations when possible |
-| Auth via config file | Modal | Run `modal token set` (no api_key param) |
+| Auth via config file (no api_key param) | Modal | Run `modal token set` (uses `~/.modal.toml`) |
+| Slowest file I/O of all providers | Modal | ~1.2s per upload, ~0.8s per download; minimize file ops |
+| Highest per-command exec latency | Modal | 0.45-1.6s per command; concurrent exec mitigates (5.06x speedup) |
