@@ -414,8 +414,46 @@ def _step_run_workload(provider, sandbox_ctx):
     return step
 
 
-def _step_comparison(provider, api_key, custom_create_dur, custom_verify_dur):
-    """Step 5: Compare custom image vs default image + runtime pip install."""
+def _step_stock_boot(provider, api_key):
+    """Step 5: Boot a sandbox from stock (default) image to measure baseline boot time."""
+    step = StepProfile(name='docker_stock_boot', started_at=time.time())
+
+    baseline_sandbox_ctx = None
+    try:
+        if provider == 'daytona':
+            daytona, sandbox = _create_daytona_default_sandbox(api_key)
+            baseline_sandbox_ctx = ('daytona', daytona, sandbox)
+        elif provider == 'modal':
+            app, sandbox = _create_modal_default_sandbox()
+            baseline_sandbox_ctx = ('modal', app, sandbox)
+        elif provider == 'e2b':
+            sandbox = _create_e2b_sandbox(api_key)
+            baseline_sandbox_ctx = ('e2b', None, sandbox)
+        elif provider == 'blaxel':
+            sandbox, loop, name = _create_blaxel_sandbox(api_key)
+            baseline_sandbox_ctx = ('blaxel', loop, sandbox, name)
+
+        step.ended_at = time.time()
+        step.duration_s = step.ended_at - step.started_at
+        step.success = True
+        step.detail = 'stock image boot: {:.2f}s'.format(step.duration_s)
+
+    except Exception as e:
+        step.ended_at = time.time()
+        step.duration_s = step.ended_at - step.started_at
+        step.success = False
+        step.detail = 'stock boot failed: {}'.format(str(e)[:200])
+
+    finally:
+        if baseline_sandbox_ctx:
+            _destroy_sandbox(provider, baseline_sandbox_ctx)
+
+    return step
+
+
+def _step_comparison(provider, api_key, custom_create_dur, custom_verify_dur,
+                     stock_boot_dur):
+    """Step 6: Compare custom image vs stock image boot + runtime pip install."""
     step = StepProfile(name='docker_comparison', started_at=time.time())
 
     if not _supports_image_build(provider):
@@ -423,12 +461,11 @@ def _step_comparison(provider, api_key, custom_create_dur, custom_verify_dur):
         step.duration_s = 0.0
         step.success = True
         step.detail = (
-            'no runtime build support; '
-            'custom_create={:.1f}s, verify(+pip)={:.1f}s'
-        ).format(custom_create_dur, custom_verify_dur)
+            'stock_boot={:.2f}s, custom_create={:.1f}s, verify(+pip)={:.1f}s'
+        ).format(stock_boot_dur, custom_create_dur, custom_verify_dur)
         return step
 
-    # Create a default sandbox + pip install to measure the baseline
+    # Create a default sandbox + pip install to measure the full baseline
     baseline_sandbox_ctx = None
     try:
         # Create default sandbox
@@ -469,10 +506,9 @@ def _step_comparison(provider, api_key, custom_create_dur, custom_verify_dur):
         step.duration_s = step.ended_at - step.started_at
         step.success = True
         step.detail = (
-            'baseline(create+pip)={:.1f}s, '
-            'custom(create+verify)={:.1f}s, '
-            'speedup={:.2f}x'
-        ).format(baseline_total, custom_total, speedup)
+            'stock_boot={:.2f}s, baseline(create+pip)={:.1f}s, '
+            'custom(create+verify)={:.1f}s, speedup={:.2f}x'
+        ).format(stock_boot_dur, baseline_total, custom_total, speedup)
 
     except Exception as e:
         step.ended_at = time.time()
@@ -531,14 +567,14 @@ def run_docker_benchmark(runner, provider, api_key=None):
         provider, 'yes' if _supports_image_build(provider) else 'no'))
 
     # Step 1: Build custom image
-    print('    [DOCKER] Step 1/5: Build custom image...')
+    print('    [DOCKER] Step 1/6: Build custom image...')
     build_step, image = _step_build_image(provider)
     steps.append(build_step)
     print('    [DOCKER]   {:.1f}s - {}'.format(
         build_step.duration_s, build_step.detail))
 
     # Step 2: Create sandbox from custom image
-    print('    [DOCKER] Step 2/5: Create sandbox...')
+    print('    [DOCKER] Step 2/6: Create sandbox (custom image)...')
     create_step, sandbox_ctx = _step_create_sandbox(provider, api_key, image)
     steps.append(create_step)
     print('    [DOCKER]   {:.1f}s - {}'.format(
@@ -550,25 +586,33 @@ def run_docker_benchmark(runner, provider, api_key=None):
 
     try:
         # Step 3: Verify deps
-        print('    [DOCKER] Step 3/5: Verify pre-installed deps...')
+        print('    [DOCKER] Step 3/6: Verify pre-installed deps...')
         verify_step = _step_verify_deps(provider, sandbox_ctx)
         steps.append(verify_step)
         print('    [DOCKER]   {:.1f}s - {}'.format(
             verify_step.duration_s, verify_step.detail))
 
         # Step 4: Run workload
-        print('    [DOCKER] Step 4/5: Run compute workload...')
+        print('    [DOCKER] Step 4/6: Run compute workload...')
         workload_step = _step_run_workload(provider, sandbox_ctx)
         steps.append(workload_step)
         print('    [DOCKER]   {:.1f}s - {}'.format(
             workload_step.duration_s, workload_step.detail))
 
-        # Step 5: Compare against baseline
-        print('    [DOCKER] Step 5/5: Compare vs baseline...')
+        # Step 5: Stock image boot time (for comparison)
+        print('    [DOCKER] Step 5/6: Stock image boot time...')
+        stock_step = _step_stock_boot(provider, api_key)
+        steps.append(stock_step)
+        print('    [DOCKER]   {:.1f}s - {}'.format(
+            stock_step.duration_s, stock_step.detail))
+
+        # Step 6: Compare against baseline
+        print('    [DOCKER] Step 6/6: Compare vs baseline...')
         compare_step = _step_comparison(
             provider, api_key,
             custom_create_dur=create_step.duration_s,
             custom_verify_dur=verify_step.duration_s,
+            stock_boot_dur=stock_step.duration_s,
         )
         steps.append(compare_step)
         print('    [DOCKER]   {:.1f}s - {}'.format(

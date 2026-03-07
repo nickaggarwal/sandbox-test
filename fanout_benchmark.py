@@ -127,18 +127,75 @@ def _get_base_dir(provider):
         return '/home/user/fanout_bench'
 
 
+# ── Custom Image Helpers ───────────────────────────────────────────
+
+def _build_custom_image(provider):
+    """Build a custom image with pre-installed deps for fan-out."""
+    if provider == 'daytona':
+        from daytona import Image
+        return Image.debian_slim('3.12').pip_install('numpy')
+    elif provider == 'modal':
+        import modal
+        return modal.Image.debian_slim(python_version='3.12').pip_install('numpy')
+    return None
+
+
+def _create_runner_with_custom_image(provider, api_key, image):
+    """Create a sandbox runner using a custom image."""
+    if provider == 'daytona':
+        from daytona import Daytona, DaytonaConfig, CreateSandboxFromImageParams, Resources
+        from daytona_sandbox import DaytonaSandboxRunner
+        runner = DaytonaSandboxRunner(api_key=api_key)
+        daytona = Daytona(DaytonaConfig(api_key=api_key, target='us'))
+        sandbox = daytona.create(
+            CreateSandboxFromImageParams(
+                image=image,
+                resources=Resources(cpu=4, memory=8, disk=10),
+                auto_stop_interval=30,
+            ),
+            timeout=300,
+        )
+        runner._daytona = daytona
+        runner._sandbox = sandbox
+        runner.sandbox_id = sandbox.id
+        return runner
+    elif provider == 'modal':
+        import modal
+        from modal_sandbox import ModalSandboxRunner
+        runner = ModalSandboxRunner()
+        runner._app = modal.App.lookup("sandbox-rl-test", create_if_missing=True)
+        runner._sandbox = modal.Sandbox.create(
+            image=image,
+            app=runner._app,
+            timeout=600,
+            cpu=4.0,
+            memory=8192,
+        )
+        runner.sandbox_id = runner._sandbox.object_id
+        return runner
+    else:
+        # E2B and Blaxel don't support custom images -- fall back to default
+        return _create_runner_with_key(provider, api_key)
+
+
 # ── Benchmark Steps ────────────────────────────────────────────────
 
-def _step_create_sandboxes(provider, api_key, num_sandboxes):
+def _step_create_sandboxes(provider, api_key, num_sandboxes,
+                           custom_image=None):
     """Create N sandboxes concurrently."""
-    step = StepProfile(name='fo_create_sandboxes', started_at=time.time())
+    step_name = 'fo_create_custom' if custom_image else 'fo_create_sandboxes'
+    step = StepProfile(name=step_name, started_at=time.time())
 
     runners = []
     errors = []
 
     def _create_one(idx):
-        runner = _create_runner_with_key(provider, api_key)
-        runner.create_sandbox()
+        if custom_image:
+            runner = _create_runner_with_custom_image(
+                provider, api_key, custom_image)
+        else:
+            runner = _create_runner_with_key(provider, api_key)
+            runner.create_sandbox()
         return runner
 
     with ThreadPoolExecutor(max_workers=num_sandboxes) as pool:
@@ -342,10 +399,16 @@ def run_fanout_benchmark(runner, provider, api_key=None, num_sandboxes=3):
     Returns:
         list[StepProfile]: Profiling data for each benchmark step.
     """
+    supports_custom = provider in ('daytona', 'modal')
+    total_steps = 6 if supports_custom else 5
+    step_num = 0
     steps = []
     runners = []
 
-    print('    [FO] Step 1/5: Create {} sandboxes...'.format(num_sandboxes))
+    # Step 1: Create N sandboxes with stock images
+    step_num += 1
+    print('    [FO] Step {}/{}: Create {} sandboxes (stock image)...'.format(
+        step_num, total_steps, num_sandboxes))
     create_step, runners = _step_create_sandboxes(
         provider, api_key, num_sandboxes)
     steps.append(create_step)
@@ -356,32 +419,64 @@ def run_fanout_benchmark(runner, provider, api_key=None, num_sandboxes=3):
         return steps
 
     try:
-        print('    [FO] Step 2/5: Upload code to {} sandboxes...'.format(
-            len(runners)))
+        step_num += 1
+        print('    [FO] Step {}/{}: Upload code to {} sandboxes...'.format(
+            step_num, total_steps, len(runners)))
         upload_step = _step_upload_code(runners, provider)
         steps.append(upload_step)
         print('    [FO]   {:.1f}s - {}'.format(
             upload_step.duration_s, upload_step.detail))
 
-        print('    [FO] Step 3/5: Run tasks on {} sandboxes...'.format(
-            len(runners)))
+        step_num += 1
+        print('    [FO] Step {}/{}: Run tasks on {} sandboxes...'.format(
+            step_num, total_steps, len(runners)))
         tasks_step = _step_run_different_tasks(runners, provider)
         steps.append(tasks_step)
         print('    [FO]   {:.1f}s - {}'.format(
             tasks_step.duration_s, tasks_step.detail))
 
-        print('    [FO] Step 4/5: Collect results...')
+        step_num += 1
+        print('    [FO] Step {}/{}: Collect results...'.format(
+            step_num, total_steps))
         collect_step = _step_collect_results(runners, provider)
         steps.append(collect_step)
         print('    [FO]   {:.1f}s - {}'.format(
             collect_step.duration_s, collect_step.detail))
 
     finally:
-        print('    [FO] Step 5/5: Destroy {} sandboxes...'.format(
-            len(runners)))
+        step_num += 1
+        print('    [FO] Step {}/{}: Destroy {} sandboxes...'.format(
+            step_num, total_steps, len(runners)))
         destroy_step = _step_destroy_sandboxes(runners)
         steps.append(destroy_step)
         print('    [FO]   {:.1f}s - {}'.format(
             destroy_step.duration_s, destroy_step.detail))
+
+    # Step 6 (Daytona/Modal only): Fan-out with custom images
+    if supports_custom:
+        step_num += 1
+        print('    [FO] Step {}/{}: Create {} sandboxes (custom image)...'.format(
+            step_num, total_steps, num_sandboxes))
+        try:
+            custom_image = _build_custom_image(provider)
+            custom_step, custom_runners = _step_create_sandboxes(
+                provider, api_key, num_sandboxes, custom_image=custom_image)
+            steps.append(custom_step)
+            print('    [FO]   {:.1f}s - {}'.format(
+                custom_step.duration_s, custom_step.detail))
+
+            # Destroy the custom image sandboxes
+            if custom_runners:
+                _step_destroy_sandboxes(custom_runners)
+        except Exception as e:
+            err_step = StepProfile(name='fo_create_custom',
+                                  started_at=time.time())
+            err_step.ended_at = time.time()
+            err_step.duration_s = 0.0
+            err_step.success = False
+            err_step.detail = 'custom image fan-out failed: {}'.format(
+                str(e)[:200])
+            steps.append(err_step)
+            print('    [FO]   FAILED - {}'.format(err_step.detail))
 
     return steps

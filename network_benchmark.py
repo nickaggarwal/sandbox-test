@@ -4,41 +4,72 @@ Network Speed Benchmark for Sandbox Profiling.
 Benchmarks network latency, throughput (download/upload), DNS resolution,
 and real-world package install speed from inside each sandbox.
 Returns a list of StepProfile objects compatible with the parallel profiler.
+
+All tests use pure Python (urllib/socket) -- no curl dependency.
 """
 import time
 
 from run_parallel_profiled import StepProfile
 
 
+# ── Helper: write a Python script and run it ───────────────────────
+
+def _run_script(runner, base_dir, filename, script):
+    """Write a Python script to the sandbox and execute it."""
+    import base64
+    encoded = base64.b64encode(script.encode('utf-8')).decode()
+    write_cmd = (
+        "python3 -c \""
+        "import base64; "
+        "data = base64.b64decode('{}'); "
+        "f = open('{}/{}', 'wb'); "
+        "f.write(data); f.close()\""
+    ).format(encoded, base_dir, filename)
+    runner.exec(write_cmd, cwd=base_dir)
+    return runner.exec('python3 {}/{}'.format(base_dir, filename), cwd=base_dir)
+
+
 # ── Benchmark Steps ─────────────────────────────────────────────────
+
+LATENCY_SCRIPT = """\
+import urllib.request
+import json
+import time
+
+times = []
+for _ in range(5):
+    t0 = time.time()
+    try:
+        req = urllib.request.Request('https://www.google.com/robots.txt')
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            resp.read()
+        times.append(time.time() - t0)
+    except Exception:
+        pass
+
+if times:
+    print(json.dumps({
+        'min': round(min(times) * 1000, 1),
+        'avg': round(sum(times) / len(times) * 1000, 1),
+        'max': round(max(times) * 1000, 1),
+        'samples': len(times)
+    }))
+else:
+    print('ERROR: no successful requests')
+"""
+
 
 def _step_net_latency(runner, base_dir):
     """Measure HTTP round-trip latency with 5 small GET requests."""
     step = StepProfile(name='net_latency', started_at=time.time())
 
     try:
-        # Use curl with timing output for 5 requests to a fast endpoint
-        cmd = (
-            "python3 -c \""
-            "import subprocess, json; "
-            "times = []; "
-            "[times.append(float(subprocess.run("
-            "['curl', '-s', '-o', '/dev/null', '-w', '%{time_total}', "
-            "'https://www.google.com/robots.txt'], "
-            "capture_output=True, text=True).stdout)) "
-            "for _ in range(5)]; "
-            "print(json.dumps({"
-            "'min': round(min(times)*1000, 1), "
-            "'avg': round(sum(times)/len(times)*1000, 1), "
-            "'max': round(max(times)*1000, 1), "
-            "'samples': len(times)"
-            "}))\""
-        )
-        result = runner.exec(cmd, cwd=base_dir)
+        result = _run_script(runner, base_dir, 'net_latency.py', LATENCY_SCRIPT)
 
         import json
-        if result['exit_code'] == 0 and result['result'].strip():
-            data = json.loads(result['result'].strip())
+        output = result['result'].strip()
+        if result['exit_code'] == 0 and output and not output.startswith('ERROR'):
+            data = json.loads(output)
             step.ended_at = time.time()
             step.duration_s = step.ended_at - step.started_at
             step.success = True
@@ -47,7 +78,7 @@ def _step_net_latency(runner, base_dir):
             step.ended_at = time.time()
             step.duration_s = step.ended_at - step.started_at
             step.success = False
-            step.detail = 'curl failed: {}'.format(result['result'][:200])
+            step.detail = 'latency test failed: {}'.format(output[:200])
     except Exception as e:
         step.ended_at = time.time()
         step.duration_s = step.ended_at - step.started_at
@@ -55,6 +86,32 @@ def _step_net_latency(runner, base_dir):
         step.detail = str(e)[:200]
 
     return step
+
+
+DOWNLOAD_SCRIPT = """\
+import urllib.request
+import json
+import time
+
+url = 'https://speed.cloudflare.com/__down?bytes=10000000'
+t0 = time.time()
+try:
+    req = urllib.request.Request(url, headers={
+        'User-Agent': 'Mozilla/5.0 (compatible; SandboxBenchmark/1.0)'
+    })
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        data = resp.read()
+    elapsed = time.time() - t0
+    size = len(data)
+    speed_mbps = (size / (1024 * 1024)) / elapsed if elapsed > 0 else 0
+    print(json.dumps({
+        'size_mb': round(size / (1024 * 1024), 1),
+        'time_s': round(elapsed, 2),
+        'speed_mbps': round(speed_mbps, 2)
+    }))
+except Exception as e:
+    print(json.dumps({'error': str(e)[:200]}))
+"""
 
 
 def _step_net_download(runner, base_dir):
@@ -62,37 +119,27 @@ def _step_net_download(runner, base_dir):
     step = StepProfile(name='net_download', started_at=time.time())
 
     try:
-        # Download ~10MB from Cloudflare speed test and measure throughput
-        cmd = (
-            "curl -s -o /dev/null "
-            "-w '%{speed_download} %{size_download} %{time_total}' "
-            "'https://speed.cloudflare.com/__down?bytes=10000000'"
-        )
-        result = runner.exec(cmd, cwd=base_dir)
+        result = _run_script(runner, base_dir, 'net_download.py', DOWNLOAD_SCRIPT)
 
-        if result['exit_code'] == 0 and result['result'].strip():
-            parts = result['result'].strip().split()
-            if len(parts) >= 3:
-                speed_bps = float(parts[0])
-                size_bytes = int(float(parts[1]))
-                total_time = float(parts[2])
-                speed_mbps = speed_bps / (1024 * 1024)
-
-                step.ended_at = time.time()
-                step.duration_s = step.ended_at - step.started_at
-                step.success = size_bytes > 0
-                step.detail = '{:.1f}MB in {:.1f}s ({:.2f} MB/s)'.format(
-                    size_bytes / (1024 * 1024), total_time, speed_mbps)
-            else:
+        import json
+        output = result['result'].strip()
+        if result['exit_code'] == 0 and output:
+            data = json.loads(output)
+            if 'error' in data:
                 step.ended_at = time.time()
                 step.duration_s = step.ended_at - step.started_at
                 step.success = False
-                step.detail = 'unexpected curl output: {}'.format(result['result'][:200])
+                step.detail = 'download error: {}'.format(data['error'])
+            else:
+                step.ended_at = time.time()
+                step.duration_s = step.ended_at - step.started_at
+                step.success = data['size_mb'] > 0
+                step.detail = '{size_mb}MB in {time_s}s ({speed_mbps} MB/s)'.format(**data)
         else:
             step.ended_at = time.time()
             step.duration_s = step.ended_at - step.started_at
             step.success = False
-            step.detail = 'download failed: {}'.format(result['result'][:200])
+            step.detail = 'download failed: {}'.format(output[:200])
     except Exception as e:
         step.ended_at = time.time()
         step.duration_s = step.ended_at - step.started_at
@@ -100,6 +147,50 @@ def _step_net_download(runner, base_dir):
         step.detail = str(e)[:200]
 
     return step
+
+
+UPLOAD_SCRIPT = """\
+import urllib.request
+import json
+import time
+import os
+
+# Generate 5MB of random data
+payload = os.urandom(5 * 1024 * 1024)
+
+# POST to httpbin.org/post
+boundary = '----PythonBenchmark'
+header_part = ('--' + boundary + '\\r\\n'
+    'Content-Disposition: form-data; name="file"; filename="test.bin"\\r\\n'
+    'Content-Type: application/octet-stream\\r\\n\\r\\n').encode()
+footer_part = ('\\r\\n--' + boundary + '--\\r\\n').encode()
+body = header_part + payload + footer_part
+
+req = urllib.request.Request(
+    'https://httpbin.org/post',
+    data=body,
+    headers={
+        'Content-Type': 'multipart/form-data; boundary=' + boundary,
+        'Content-Length': str(len(body))
+    },
+    method='POST'
+)
+
+t0 = time.time()
+try:
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        resp.read()
+    elapsed = time.time() - t0
+    size_mb = len(payload) / (1024 * 1024)
+    speed = size_mb / elapsed if elapsed > 0 else 0
+    print(json.dumps({
+        'size_mb': round(size_mb, 1),
+        'time_s': round(elapsed, 2),
+        'speed_mbps': round(speed, 2)
+    }))
+except Exception as e:
+    print(json.dumps({'error': str(e)[:200]}))
+"""
 
 
 def _step_net_upload(runner, base_dir):
@@ -107,56 +198,27 @@ def _step_net_upload(runner, base_dir):
     step = StepProfile(name='net_upload', started_at=time.time())
 
     try:
-        # Generate 5MB of random data
-        gen_cmd = (
-            "python3 -c \""
-            "import os; "
-            "f = open('{}/upload_test.bin', 'wb'); "
-            "f.write(os.urandom(5 * 1024 * 1024)); "
-            "f.close(); "
-            "print('generated')\""
-        ).format(base_dir)
-        gen_result = runner.exec(gen_cmd, cwd=base_dir)
+        result = _run_script(runner, base_dir, 'net_upload.py', UPLOAD_SCRIPT)
 
-        if gen_result['exit_code'] != 0:
-            step.ended_at = time.time()
-            step.duration_s = step.ended_at - step.started_at
-            step.success = False
-            step.detail = 'file generation failed: {}'.format(gen_result['result'][:200])
-            return step
-
-        # Upload to httpbin.org/post and measure speed
-        upload_cmd = (
-            "curl -s -o /dev/null "
-            "-w '%{speed_upload} %{size_upload} %{time_total}' "
-            "-X POST -F 'file=@{}/upload_test.bin' "
-            "https://httpbin.org/post"
-        ).format(base_dir)
-        result = runner.exec(upload_cmd, cwd=base_dir)
-
-        if result['exit_code'] == 0 and result['result'].strip():
-            parts = result['result'].strip().split()
-            if len(parts) >= 3:
-                speed_bps = float(parts[0])
-                size_bytes = int(float(parts[1]))
-                total_time = float(parts[2])
-                speed_mbps = speed_bps / (1024 * 1024)
-
-                step.ended_at = time.time()
-                step.duration_s = step.ended_at - step.started_at
-                step.success = size_bytes > 0
-                step.detail = '{:.1f}MB in {:.1f}s ({:.2f} MB/s)'.format(
-                    size_bytes / (1024 * 1024), total_time, speed_mbps)
-            else:
+        import json
+        output = result['result'].strip()
+        if result['exit_code'] == 0 and output:
+            data = json.loads(output)
+            if 'error' in data:
                 step.ended_at = time.time()
                 step.duration_s = step.ended_at - step.started_at
                 step.success = False
-                step.detail = 'unexpected curl output: {}'.format(result['result'][:200])
+                step.detail = 'upload error: {}'.format(data['error'])
+            else:
+                step.ended_at = time.time()
+                step.duration_s = step.ended_at - step.started_at
+                step.success = data['size_mb'] > 0
+                step.detail = '{size_mb}MB in {time_s}s ({speed_mbps} MB/s)'.format(**data)
         else:
             step.ended_at = time.time()
             step.duration_s = step.ended_at - step.started_at
             step.success = False
-            step.detail = 'upload failed: {}'.format(result['result'][:200])
+            step.detail = 'upload failed: {}'.format(output[:200])
     except Exception as e:
         step.ended_at = time.time()
         step.duration_s = step.ended_at - step.started_at
@@ -166,37 +228,43 @@ def _step_net_upload(runner, base_dir):
     return step
 
 
+DNS_SCRIPT = """\
+import socket
+import time
+import json
+
+hosts = ['google.com', 'github.com', 'pypi.org', 'cloudflare.com', 'amazonaws.com']
+results = []
+for h in hosts:
+    t0 = time.time()
+    try:
+        socket.getaddrinfo(h, 443)
+        results.append({'host': h, 'ms': round((time.time() - t0) * 1000, 2), 'ok': True})
+    except Exception:
+        results.append({'host': h, 'ms': round((time.time() - t0) * 1000, 2), 'ok': False})
+
+times = [r['ms'] for r in results if r['ok']]
+print(json.dumps({
+    'resolved': sum(1 for r in results if r['ok']),
+    'total': len(hosts),
+    'min': round(min(times), 2) if times else 0,
+    'avg': round(sum(times) / len(times), 2) if times else 0,
+    'max': round(max(times), 2) if times else 0
+}))
+"""
+
+
 def _step_net_dns(runner, base_dir):
     """Measure DNS resolution time for multiple hostnames."""
     step = StepProfile(name='net_dns', started_at=time.time())
 
     try:
-        cmd = (
-            "python3 -c \""
-            "import socket, time, json; "
-            "hosts = ['google.com', 'github.com', 'pypi.org', 'cloudflare.com', 'amazonaws.com']; "
-            "results = []; "
-            "for h in hosts: "
-            "    t0 = time.time(); "
-            "    try: "
-            "        socket.getaddrinfo(h, 443); "
-            "        results.append({'host': h, 'ms': round((time.time()-t0)*1000, 2), 'ok': True}); "
-            "    except Exception as e: "
-            "        results.append({'host': h, 'ms': round((time.time()-t0)*1000, 2), 'ok': False}); "
-            "times = [r['ms'] for r in results if r['ok']]; "
-            "print(json.dumps({"
-            "'resolved': sum(1 for r in results if r['ok']), "
-            "'total': len(hosts), "
-            "'min': round(min(times), 2) if times else 0, "
-            "'avg': round(sum(times)/len(times), 2) if times else 0, "
-            "'max': round(max(times), 2) if times else 0"
-            "}))\""
-        )
-        result = runner.exec(cmd, cwd=base_dir)
+        result = _run_script(runner, base_dir, 'net_dns.py', DNS_SCRIPT)
 
         import json
-        if result['exit_code'] == 0 and result['result'].strip():
-            data = json.loads(result['result'].strip())
+        output = result['result'].strip()
+        if result['exit_code'] == 0 and output:
+            data = json.loads(output)
             step.ended_at = time.time()
             step.duration_s = step.ended_at - step.started_at
             step.success = data['resolved'] == data['total']
@@ -205,7 +273,7 @@ def _step_net_dns(runner, base_dir):
             step.ended_at = time.time()
             step.duration_s = step.ended_at - step.started_at
             step.success = False
-            step.detail = 'DNS test failed: {}'.format(result['result'][:200])
+            step.detail = 'DNS test failed: {}'.format(output[:200])
     except Exception as e:
         step.ended_at = time.time()
         step.duration_s = step.ended_at - step.started_at
@@ -213,6 +281,17 @@ def _step_net_dns(runner, base_dir):
         step.detail = str(e)[:200]
 
     return step
+
+
+PIP_INSTALL_SCRIPT = """\
+import subprocess
+import time
+
+t0 = time.time()
+r = subprocess.run(['pip', 'install', 'requests'], capture_output=True, text=True)
+elapsed = time.time() - t0
+print('{:.2f} {}'.format(elapsed, r.returncode))
+"""
 
 
 def _step_net_pip_install(runner, base_dir):
@@ -227,19 +306,11 @@ def _step_net_pip_install(runner, base_dir):
         runner.exec('pip cache purge 2>/dev/null', cwd=base_dir)
 
         # Time the install
-        cmd = (
-            "python3 -c \""
-            "import subprocess, time; "
-            "t0 = time.time(); "
-            "r = subprocess.run(['pip', 'install', 'requests'], "
-            "capture_output=True, text=True); "
-            "elapsed = time.time() - t0; "
-            "print('{:.2f} {}'.format(elapsed, r.returncode))\""
-        )
-        result = runner.exec(cmd, cwd=base_dir)
+        result = _run_script(runner, base_dir, 'net_pip.py', PIP_INSTALL_SCRIPT)
 
-        if result['exit_code'] == 0 and result['result'].strip():
-            parts = result['result'].strip().split()
+        output = result['result'].strip()
+        if result['exit_code'] == 0 and output:
+            parts = output.split()
             if len(parts) >= 2:
                 elapsed = float(parts[0])
                 exit_code = int(parts[1])
@@ -253,12 +324,12 @@ def _step_net_pip_install(runner, base_dir):
                 step.ended_at = time.time()
                 step.duration_s = step.ended_at - step.started_at
                 step.success = False
-                step.detail = 'unexpected output: {}'.format(result['result'][:200])
+                step.detail = 'unexpected output: {}'.format(output[:200])
         else:
             step.ended_at = time.time()
             step.duration_s = step.ended_at - step.started_at
             step.success = False
-            step.detail = 'pip install failed: {}'.format(result['result'][:200])
+            step.detail = 'pip install failed: {}'.format(output[:200])
     except Exception as e:
         step.ended_at = time.time()
         step.duration_s = step.ended_at - step.started_at
