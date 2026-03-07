@@ -413,8 +413,175 @@ def run_profiled_fanout_benchmark(
 
     from fanout_benchmark import run_fanout_benchmark
     fo_steps = run_fanout_benchmark(
-        None, provider, api_key=api_key, num_sandboxes=3)
+        None, provider, api_key=api_key, num_sandboxes=10)
     profile.steps.extend(fo_steps)
+
+    profile.total_duration_s = time.time() - pipeline_start
+    log(f'DONE in {profile.total_duration_s:.1f}s')
+    return profile
+
+
+# ── Coding Agent Benchmark Pipeline ──────────────────────────────
+
+def run_profiled_agent_benchmark(
+    label,
+    provider='e2b',
+    log_prefix='',
+    stagger_delay=0,
+    project_dir='.',
+    llm_backend='gemini',
+    llm_model=None,
+    llm_api_key=None,
+    agent_iterations=3,
+    reward_threshold=25.0,
+    bootstrap_app=False,
+):
+    """Run the coding agent benchmark with full profiling.
+
+    The coding agent manages its own sandbox lifecycle internally,
+    so this wrapper does not create/destroy a sandbox separately.
+    """
+    if stagger_delay > 0:
+        print(f'{log_prefix}[{label}] Staggering start by {stagger_delay}s...')
+        time.sleep(stagger_delay)
+
+    profile = SandboxProfile(
+        sandbox_label=label,
+        provider=provider,
+        config={
+            'benchmark': 'coding_agent',
+            'llm_backend': llm_backend,
+            'llm_model': llm_model or 'default',
+            'max_iterations': agent_iterations,
+            'reward_threshold': reward_threshold,
+            'bootstrap_app': bootstrap_app,
+        },
+    )
+    pipeline_start = time.time()
+
+    def log(msg):
+        print(f'{log_prefix}[{label}] {msg}')
+
+    log(f'Running coding agent benchmark ({provider}, llm={llm_backend})...')
+
+    from coding_agent_benchmark import run_coding_agent_benchmark
+    agent_steps = run_coding_agent_benchmark(
+        runner=None,
+        provider=provider,
+        project_dir=project_dir,
+        llm_backend=llm_backend,
+        llm_model=llm_model,
+        llm_api_key=llm_api_key,
+        max_iterations=agent_iterations,
+        reward_threshold=reward_threshold,
+        bootstrap_app=bootstrap_app,
+    )
+    profile.steps.extend(agent_steps)
+
+    profile.total_duration_s = time.time() - pipeline_start
+    log(f'DONE in {profile.total_duration_s:.1f}s')
+    return profile
+
+
+# ── Network Speed Benchmark Pipeline ─────────────────────────────
+
+def run_profiled_network_benchmark(
+    label,
+    provider='daytona',
+    log_prefix='',
+    stagger_delay=0,
+):
+    """Run the network speed benchmark pipeline with full profiling."""
+    if stagger_delay > 0:
+        print(f'{log_prefix}[{label}] Staggering start by {stagger_delay}s...')
+        time.sleep(stagger_delay)
+
+    profile = SandboxProfile(
+        sandbox_label=label,
+        provider=provider,
+        config={'benchmark': 'network'},
+    )
+    pipeline_start = time.time()
+
+    def log(msg):
+        print(f'{log_prefix}[{label}] {msg}')
+
+    runner = create_runner(provider)
+
+    try:
+        # Create sandbox
+        step = profile.add_step('create_sandbox')
+        log(f'Creating {provider} sandbox...')
+        try:
+            runner.create_sandbox()
+            profile.sandbox_id = runner.sandbox_id or ''
+            profile.finish_step(step, success=True, detail=profile.sandbox_id)
+            log(f'  Sandbox ready: {profile.sandbox_id[:20]}...')
+        except Exception as e:
+            profile.finish_step(step, success=False, detail=str(e))
+            profile.error = f'Create failed: {e}'
+            log(f'  CREATE FAILED: {e}')
+            return profile
+
+        # Run network benchmark steps
+        from network_benchmark import run_network_benchmark
+        log('Running network speed benchmark...')
+        net_steps = run_network_benchmark(runner, provider)
+        profile.steps.extend(net_steps)
+
+    finally:
+        step = profile.add_step('destroy_sandbox')
+        log('Destroying sandbox...')
+        try:
+            runner.destroy()
+            profile.finish_step(step, success=True)
+        except Exception as e:
+            profile.finish_step(step, success=False, detail=str(e))
+
+    profile.total_duration_s = time.time() - pipeline_start
+    log(f'DONE in {profile.total_duration_s:.1f}s')
+    return profile
+
+
+# ── Docker Image Benchmark Pipeline ──────────────────────────────
+
+def run_profiled_docker_benchmark(
+    label,
+    provider='daytona',
+    log_prefix='',
+    stagger_delay=0,
+):
+    """Run the custom Docker image benchmark with full profiling.
+
+    Like fanout, this benchmark manages its own sandbox lifecycle
+    internally (creates sandboxes with custom images).
+    """
+    if stagger_delay > 0:
+        print(f'{log_prefix}[{label}] Staggering start by {stagger_delay}s...')
+        time.sleep(stagger_delay)
+
+    profile = SandboxProfile(
+        sandbox_label=label,
+        provider=provider,
+        config={'benchmark': 'docker'},
+    )
+    pipeline_start = time.time()
+
+    def log(msg):
+        print(f'{log_prefix}[{label}] {msg}')
+
+    log(f'Running Docker image benchmark ({provider})...')
+
+    api_key = {
+        'daytona': DAYTONA_API_KEY,
+        'e2b': E2B_API_KEY,
+        'blaxel': BLAXEL_API_KEY,
+    }.get(provider)
+
+    from docker_benchmark import run_docker_benchmark
+    docker_steps = run_docker_benchmark(
+        None, provider, api_key=api_key)
+    profile.steps.extend(docker_steps)
 
     profile.total_duration_s = time.time() - pipeline_start
     log(f'DONE in {profile.total_duration_s:.1f}s')
@@ -633,6 +800,37 @@ def run_parallel(
                     log_prefix=f'[{i+1}/{len(configs)}] ',
                     stagger_delay=i * stagger_s,
                 )
+            elif benchmark_type == 'docker':
+                future = pool.submit(
+                    run_profiled_docker_benchmark,
+                    label=label,
+                    provider=provider,
+                    log_prefix=f'[{i+1}/{len(configs)}] ',
+                    stagger_delay=i * stagger_s,
+                )
+            elif benchmark_type == 'network':
+                future = pool.submit(
+                    run_profiled_network_benchmark,
+                    label=label,
+                    provider=provider,
+                    log_prefix=f'[{i+1}/{len(configs)}] ',
+                    stagger_delay=i * stagger_s,
+                )
+            elif benchmark_type == 'agent':
+                future = pool.submit(
+                    run_profiled_agent_benchmark,
+                    label=label,
+                    provider=provider,
+                    log_prefix=f'[{i+1}/{len(configs)}] ',
+                    stagger_delay=i * stagger_s,
+                    project_dir=project_dir,
+                    llm_backend=cfg.get('llm_backend', 'gemini'),
+                    llm_model=cfg.get('llm_model'),
+                    llm_api_key=cfg.get('llm_api_key'),
+                    agent_iterations=cfg.get('agent_iterations', 3),
+                    reward_threshold=cfg.get('reward_threshold', 25.0),
+                    bootstrap_app=cfg.get('bootstrap_app', False),
+                )
             else:
                 future = pool.submit(
                     run_profiled_sandbox,
@@ -724,6 +922,15 @@ def _print_report(profiles, total_wall, providers_used):
         'iter_test_pass', 'iter_add_feature', 'iter_final_validation',
         'fo_create_sandboxes', 'fo_upload_code', 'fo_run_tasks',
         'fo_collect_results', 'fo_destroy_sandboxes',
+        'agent_setup', 'agent_upload_project',
+        'agent_iteration_1', 'agent_iteration_2', 'agent_iteration_3',
+        'agent_iteration_4', 'agent_iteration_5',
+        'agent_final_result',
+        'docker_build_image', 'docker_create_sandbox',
+        'docker_verify_deps', 'docker_run_workload',
+        'docker_comparison',
+        'net_latency', 'net_download', 'net_upload',
+        'net_dns', 'net_pip_install',
         'destroy_sandbox',
     ]
     all_step_names = set()
@@ -887,12 +1094,43 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--benchmark',
-        choices=['rl', 'fs', 'pause', 'concurrent', 'iteration', 'fanout', 'all'],
+        choices=['rl', 'fs', 'pause', 'concurrent', 'iteration', 'fanout', 'agent', 'docker', 'network', 'all'],
         default='rl',
         help='Benchmark type: "rl" (default), "fs" (filesystem), '
              '"pause" (async task pause/resume), "concurrent" (concurrent exec), '
              '"iteration" (edit-test loop), "fanout" (multi-sandbox fan-out), '
+             '"agent" (LLM coding agent loop), '
+             '"docker" (custom Docker image), '
+             '"network" (network speed), '
              '"all" (all benchmarks)',
+    )
+    parser.add_argument(
+        '--llm',
+        choices=['gemini', 'vertex-claude'],
+        default='gemini',
+        help='LLM backend for agent benchmark (default: gemini)',
+    )
+    parser.add_argument(
+        '--llm-model',
+        default=None,
+        help='Model name override for agent benchmark',
+    )
+    parser.add_argument(
+        '--llm-api-key',
+        default=None,
+        help='API key for the LLM (or set GEMINI_API_KEY in .env)',
+    )
+    parser.add_argument(
+        '--agent-iterations', type=int, default=3,
+        help='Max generate-test-fix cycles for agent benchmark (default: 3)',
+    )
+    parser.add_argument(
+        '--reward-threshold', type=float, default=25.0,
+        help='Stop agent when total reward reaches this value (default: 25.0)',
+    )
+    parser.add_argument(
+        '--bootstrap-app', action='store_true',
+        help='Agent generates the Django app from scratch (no local project upload)',
     )
 
     args = parser.parse_args()
@@ -1090,6 +1328,99 @@ if __name__ == '__main__':
             configs = fanout_configs
         else:  # 'all'
             configs = configs + fanout_configs
+
+    # Add coding agent benchmark configs if requested
+    if args.benchmark in ('agent', 'all'):
+        agent_configs = []
+        if args.provider in ('both', 'all'):
+            if args.provider == 'all':
+                agent_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+            else:
+                agent_providers = ['daytona', 'e2b']
+            for prov in agent_providers:
+                agent_configs.append({
+                    'label': f'{prov}-agent',
+                    'provider': prov,
+                    'benchmark': 'agent',
+                    'llm_backend': args.llm,
+                    'llm_model': args.llm_model,
+                    'llm_api_key': args.llm_api_key,
+                    'agent_iterations': args.agent_iterations,
+                    'reward_threshold': args.reward_threshold,
+                    'bootstrap_app': args.bootstrap_app,
+                })
+        else:
+            for i in range(args.sandboxes):
+                agent_configs.append({
+                    'label': f'{args.provider}-agent-{i+1}',
+                    'provider': args.provider,
+                    'benchmark': 'agent',
+                    'llm_backend': args.llm,
+                    'llm_model': args.llm_model,
+                    'llm_api_key': args.llm_api_key,
+                    'agent_iterations': args.agent_iterations,
+                    'reward_threshold': args.reward_threshold,
+                    'bootstrap_app': args.bootstrap_app,
+                })
+
+        if args.benchmark == 'agent':
+            configs = agent_configs
+        else:  # 'all'
+            configs = configs + agent_configs
+
+    # Add custom Docker image benchmark configs if requested
+    if args.benchmark in ('docker', 'all'):
+        docker_configs = []
+        if args.provider in ('both', 'all'):
+            if args.provider == 'all':
+                docker_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+            else:
+                docker_providers = ['daytona', 'e2b']
+            for prov in docker_providers:
+                docker_configs.append({
+                    'label': f'{prov}-docker',
+                    'provider': prov,
+                    'benchmark': 'docker',
+                })
+        else:
+            for i in range(args.sandboxes):
+                docker_configs.append({
+                    'label': f'{args.provider}-docker-{i+1}',
+                    'provider': args.provider,
+                    'benchmark': 'docker',
+                })
+
+        if args.benchmark == 'docker':
+            configs = docker_configs
+        else:  # 'all'
+            configs = configs + docker_configs
+
+    # Add network speed benchmark configs if requested
+    if args.benchmark in ('network', 'all'):
+        network_configs = []
+        if args.provider in ('both', 'all'):
+            if args.provider == 'all':
+                net_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+            else:
+                net_providers = ['daytona', 'e2b']
+            for prov in net_providers:
+                network_configs.append({
+                    'label': f'{prov}-network',
+                    'provider': prov,
+                    'benchmark': 'network',
+                })
+        else:
+            for i in range(args.sandboxes):
+                network_configs.append({
+                    'label': f'{args.provider}-network-{i+1}',
+                    'provider': args.provider,
+                    'benchmark': 'network',
+                })
+
+        if args.benchmark == 'network':
+            configs = network_configs
+        else:  # 'all'
+            configs = configs + network_configs
 
     run_parallel(
         configs=configs,
