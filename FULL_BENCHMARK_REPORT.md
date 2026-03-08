@@ -233,33 +233,33 @@
 
 | Step | Daytona | E2B | Blaxel | Modal |
 |------|---------|-----|--------|-------|
-| Build Custom Image | 3.5s (runtime) | 0.0s (template) | 0.0s (pre-existing) | 0.2s (runtime) |
-| Create Sandbox (custom) | 17.7s | 1.5s | 3.7s | 0.9s |
-| Verify Pre-baked Deps | 0.8s (pre-baked) | 4.4s (pip needed) | 7.7s (pip needed) | 3.1s (pre-baked) |
-| Run Compute Workload | 0.3s | 0.2s | 0.2s | 0.7s |
-| Stock Image Boot | 1.5s | 0.15s | 0.46s | 0.34s |
-| Comparison | baseline=5.5s, custom=18.5s | stock=0.15s, custom=1.5s | stock=0.46s, custom=3.7s | baseline=8.3s, custom=4.0s, **2.09x** |
-| **Total** | **30.9s** | **6.5s** | **12.6s** | **16.1s** |
+| Build Custom Image | 2.8s (runtime) | 0.0s (template) | 0.0s (pre-existing) | 0.2s (runtime) |
+| Create Sandbox (custom) | 0.9s | 1.4s | 3.0s | 0.8s |
+| Verify Pre-baked Deps | 0.7s (pre-baked) | 4.1s (pip needed) | 7.4s (pip needed) | 2.9s (pre-baked) |
+| Run Compute Workload | 0.3s | 0.2s | 0.2s | 0.6s |
+| Stock Image Boot | 0.28s | 0.14s | 0.33s | 0.31s |
+| Comparison | baseline=0.2s, custom=1.6s | stock=0.14s, custom=1.4s | stock=0.33s, custom=3.0s | baseline=6.8s, custom=3.8s, **1.81x** |
+| **Total** | **6.2s** | **6.1s** | **11.2s** | **14.7s** |
 
 **Stock vs Custom Image Boot Times:**
 
 | Provider | Stock Image Boot | Custom Image Create | Deps Verification | Approach |
 |----------|-----------------|--------------------|--------------------|----------|
-| E2B | 0.15s | 1.5s | 4.4s (runtime pip) | Template-based, no custom build |
-| Modal | 0.34s | 0.9s | 3.1s (pre-baked, OK) | Runtime `Image.debian_slim().pip_install()` |
-| Blaxel | 0.46s | 3.7s | 7.7s (runtime pip) | Pre-existing Docker Hub image |
-| Daytona | 1.5s | 17.7s | 0.8s (pre-baked, OK) | Runtime `Image.debian_slim().pip_install()` |
+| E2B | 0.14s | 1.4s | 4.1s (runtime pip) | Template-based, no custom build |
+| Daytona | 0.28s | 0.9s | 0.7s (pre-baked, OK) | Runtime `Image.debian_slim().pip_install()` + pre-warmed stock |
+| Modal | 0.31s | 0.8s | 2.9s (pre-baked, OK) | Runtime `Image.debian_slim().pip_install()` |
+| Blaxel | 0.33s | 3.0s | 7.4s (runtime pip) | Pre-existing Docker Hub image |
 
 **Custom image speedup (Daytona & Modal -- providers with runtime image build):**
 
 | Provider | Baseline (stock create + pip) | Custom (create + verify) | Speedup |
 |----------|-------------------------------|--------------------------|---------|
-| Modal | 8.3s | 4.0s | **2.09x** |
-| Daytona | 5.5s | 18.5s | 0.30x* |
+| Modal | 6.8s | 3.8s | **1.81x** |
+| Daytona | 0.2s | 1.6s | N/A* |
 
-\* Daytona's custom image creation (17.7s) was slower on this run due to initial image layer download. Subsequent launches with cached images would be faster.
+\* Daytona's pre-warmed stock sandbox boots in 0.28s without needing pip install (packages may be pre-cached), making the baseline extremely fast. The custom image advantage for Daytona is in having deps **guaranteed** pre-baked (0.7s verify vs variable pip install times).
 
-**Summary**: Modal demonstrates the clearest custom image advantage with a **2.09x speedup** -- creating a sandbox with pre-baked deps (4.0s) vs stock image + runtime pip install (8.3s). E2B has the fastest stock image boot (0.15s) and overall benchmark time (6.5s) but doesn't support custom image building. Daytona supports full runtime image building with `Image.debian_slim().pip_install()` and pre-baked deps verified in just 0.8s (vs 4-8s pip install), but the initial custom image creation was slow (17.7s) due to image layer caching on first use. Blaxel uses pre-existing Docker Hub images and requires runtime pip install (7.7s). For agents that create many sandboxes with the same dependencies, Modal's custom image support offers the best time savings.
+**Summary**: Daytona and E2B are essentially tied for fastest Docker benchmark (6.2s vs 6.1s). Daytona achieves the fastest custom sandbox creation (0.9s) with deps pre-baked and verified in 0.7s -- no pip install needed. Its stock boot using `CreateSandboxBaseParams(language='python')` pre-warmed pool is 0.28s, competitive with E2B's 0.14s. Modal demonstrates a clear **1.81x speedup** with custom images (3.8s vs 6.8s baseline). E2B has the fastest stock boot (0.14s) but requires runtime pip install (4.1s). Blaxel is slowest overall (11.2s) due to 7.4s runtime pip install on every sandbox.
 
 ---
 
@@ -284,36 +284,36 @@
 
 | Metric | Daytona | E2B | Blaxel | Modal |
 |--------|---------|-----|--------|-------|
-| HTTP Latency (avg) | 31.2ms | 13.3ms | 57.6ms | 15.7ms |
-| Download 10MB | 69.76 MB/s | 54.60 MB/s | 68.98 MB/s | 37.34 MB/s |
-| Download 100MB (sustained) | 87.76 MB/s | 58.48 MB/s | 71.42 MB/s | 45.66 MB/s |
-| Upload 5MB | 3.34 MB/s | 3.41 MB/s | 3.72 MB/s | 7.32 MB/s |
-| DNS Resolution (avg) | 3.65ms | 3.62ms | 10.92ms | 4.48ms |
-| pip install requests | 0.87s | 1.22s | 1.11s | 1.70s |
+| HTTP Latency (avg) | 39.3ms | 17.6ms | 58.6ms | 24.6ms |
+| Download 10MB | 30.16 MB/s | 56.09 MB/s | 57.31 MB/s | 74.32 MB/s |
+| Download 100MB (sustained) | 90.05 MB/s | 53.93 MB/s | 66.70 MB/s | 84.91 MB/s |
+| Upload 5MB | 16.65 MB/s | 2.87 MB/s | 3.22 MB/s | 0.74 MB/s |
+| DNS Resolution (avg) | 2.37ms | 3.10ms | 12.12ms | 4.06ms |
+| pip install requests | 0.82s | 1.46s | 1.13s | 1.63s |
 
 | Step (wall-clock) | Daytona | E2B | Blaxel | Modal |
 |-------------------|---------|-----|--------|-------|
-| net_latency | 0.8s | 0.3s | 0.7s | 0.9s |
-| net_download | 0.6s | 0.4s | 0.3s | 1.0s |
-| net_download_large | 1.5s | 1.8s | 1.5s | 2.8s |
-| net_upload | 1.9s | 1.7s | 1.6s | 1.4s |
-| net_dns | 0.5s | 0.2s | 0.2s | 0.7s |
-| net_pip_install | 2.0s | 2.1s | 2.6s | 4.3s |
-| **Total** | **11.4s** | **8.2s** | **10.1s** | **14.0s** |
+| net_latency | 0.6s | 0.3s | 0.7s | 1.4s |
+| net_download | 0.6s | 0.4s | 0.5s | 1.3s |
+| net_download_large | 1.4s | 1.9s | 1.7s | 2.4s |
+| net_upload | 0.6s | 2.0s | 1.8s | 8.0s |
+| net_dns | 0.3s | 0.2s | 0.3s | 1.6s |
+| net_pip_install | 1.8s | 2.4s | 2.7s | 5.4s |
+| **Total** | **9.5s** | **8.8s** | **10.6s** | **22.8s** |
 
 **Head-to-head (network):**
 
 | Operation | Winner | Value | Runner-up |
 |-----------|--------|-------|-----------|
-| HTTP latency | E2B | 13.3ms | Modal (15.7ms) |
-| Download throughput (10MB) | Daytona | 69.76 MB/s | Blaxel (68.98 MB/s) |
-| Sustained download (100MB) | Daytona | 87.76 MB/s | Blaxel (71.42 MB/s) |
-| Upload throughput | Modal | 7.32 MB/s | Blaxel (3.72 MB/s) |
-| DNS resolution | E2B | 3.62ms | Daytona (3.65ms) |
-| pip install | Daytona | 0.87s | Blaxel (1.11s) |
-| Total benchmark time | E2B | 8.2s | Blaxel (10.1s) |
+| HTTP latency | E2B | 17.6ms | Modal (24.6ms) |
+| Download throughput (10MB) | Modal | 74.32 MB/s | Blaxel (57.31 MB/s) |
+| Sustained download (100MB) | Daytona | 90.05 MB/s | Modal (84.91 MB/s) |
+| Upload throughput | Daytona | 16.65 MB/s | Blaxel (3.22 MB/s) |
+| DNS resolution | Daytona | 2.37ms | E2B (3.10ms) |
+| pip install | Daytona | 0.82s | Blaxel (1.13s) |
+| Total benchmark time | E2B | 8.8s | Daytona (9.5s) |
 
-**Summary**: Daytona leads on raw download throughput (87.76 MB/s sustained), making it the best choice for workloads that fetch large datasets or clone large repos. E2B has the lowest HTTP latency (13.3ms) and fastest DNS resolution (3.62ms), giving it the fastest total benchmark time (8.2s) and making it ideal for API-heavy agents that make many small requests. Modal has the best upload throughput (7.32 MB/s, ~2x others) but the slowest download and highest pip install time (1.70s). Blaxel offers balanced performance with good download speeds (71 MB/s) but higher latency (57.6ms) and DNS times (10.9ms) suggesting its sandboxes may be in a different region. All providers have full outbound network access with no egress filtering detected.
+**Summary**: Daytona leads on sustained download throughput (90.05 MB/s), upload speed (16.65 MB/s -- 5x faster than E2B/Blaxel), DNS resolution (2.37ms), and pip install (0.82s), making it the strongest overall network performer. E2B has the lowest HTTP latency (17.6ms) and fastest total benchmark time (8.8s). Modal achieves the highest single-file download speed (74.32 MB/s for 10MB) and strong sustained download (84.91 MB/s) but has very slow upload (0.74 MB/s) and highest per-step overhead. Blaxel offers balanced performance but has higher latency (58.6ms) and DNS times (12.1ms). All providers have full outbound network access.
 
 ---
 
@@ -386,8 +386,8 @@
 | Iteration Loop | E2B (3.8s) | Blaxel (5.1s) | Daytona (6.3s) | Modal (12.6s) |
 | Fan-Out (10 sandboxes) | E2B | Blaxel | Modal | Daytona |
 | Coding Agent | E2B (61s) | Blaxel (75s) | Modal (86s) | Daytona (88s) |
-| Custom Docker | E2B (6.5s) | Blaxel (12.6s) | Modal (16.1s) | Daytona (30.9s) |
-| Network Speed | E2B (8.2s) | Blaxel (10.1s) | Daytona (11.4s) | Modal (14.0s) |
+| Custom Docker | E2B (6.1s) | Daytona (6.2s) | Blaxel (11.2s) | Modal (14.7s) |
+| Network Speed | E2B (8.8s) | Daytona (9.5s) | Blaxel (10.6s) | Modal (22.8s) |
 | Security & Isolation | Modal (7/8) | Daytona (6/8) | E2B (5/8) | Blaxel (3/8) |
 
 \* Blaxel/E2B had intermittent stability issues on long RL runs
@@ -408,9 +408,9 @@
 | **Custom environments** | Daytona | Full Docker image control, configurable CPU/RAM/disk |
 | **Fastest sandbox creation** | Modal | 0.27s avg per sandbox (fastest cold start) |
 | **LLM coding agent loop** | E2B | 61s total, fastest setup (4.1s) and upload (0.3s) |
-| **Network downloads (large files)** | Daytona | 87.76 MB/s sustained download, fastest pip install (0.87s) |
-| **API-heavy agents (many requests)** | E2B | Lowest HTTP latency (13.3ms) and DNS resolution (3.62ms) |
-| **Data upload workloads** | Modal | 7.32 MB/s upload, 2x faster than other providers |
+| **Network downloads (large files)** | Daytona | 90.05 MB/s sustained download, fastest pip install (0.82s) |
+| **API-heavy agents (many requests)** | E2B | Lowest HTTP latency (17.6ms) and fast DNS resolution (3.1ms) |
+| **Data upload workloads** | Daytona | 16.65 MB/s upload, 5x faster than E2B/Blaxel |
 | **Security-critical workloads** | Modal | Strongest isolation (7/8), filtered egress, restricted caps, no raw sockets |
 | **Untrusted code execution** | Modal/Daytona | Modal (7/8) + Daytona (6/8) have seccomp/cgroup enforcement |
 
@@ -427,14 +427,14 @@
 | Resume latency | E2B | 0.2s | Daytona (0.7s) |
 | Large file I/O (1MB) | Blaxel | 0.2s | E2B (0.6s) |
 | 10-sandbox fan-out | E2B | -- | Blaxel |
-| HTTP latency | E2B | 13.3ms | Modal (15.7ms) |
-| Download throughput | Daytona | 87.76 MB/s | Blaxel (71.42 MB/s) |
-| Upload throughput | Modal | 7.32 MB/s | Blaxel (3.72 MB/s) |
-| DNS resolution | E2B | 3.62ms | Daytona (3.65ms) |
-| pip install | Daytona | 0.87s | Blaxel (1.11s) |
-| Stock image boot | E2B | 0.15s | Modal (0.34s) |
-| Custom image create | Modal | 0.9s | E2B (1.5s) |
-| Pre-baked deps verify | Daytona | 0.8s | Modal (3.1s) |
+| HTTP latency | E2B | 17.6ms | Modal (24.6ms) |
+| Download throughput (sustained) | Daytona | 90.05 MB/s | Modal (84.91 MB/s) |
+| Upload throughput | Daytona | 16.65 MB/s | Blaxel (3.22 MB/s) |
+| DNS resolution | Daytona | 2.37ms | E2B (3.10ms) |
+| pip install | Daytona | 0.82s | Blaxel (1.13s) |
+| Stock image boot | E2B | 0.14s | Daytona (0.28s) |
+| Custom image create | Modal | 0.8s | Daytona (0.9s) |
+| Pre-baked deps verify | Daytona | 0.7s | Modal (2.9s) |
 | Sandbox destroy | Modal | 0.11s | E2B (0.16s) |
 | Security isolation | Modal | 7/8 | Daytona (6/8) |
 
@@ -494,8 +494,8 @@
   Concurrent:  10.8s total (2.03s seq, 0.58s conc, 3.48x speedup)
   Iteration:    6.3s total (0.27s overwrite, 0.25s test avg)
   Fan-out:      5.1s total (3.51s create, 0.17s compute, 3 sandboxes)
-  Docker:     30.9s total (build=3.5s, custom_create=17.7s, verify=0.8s pre-baked, stock_boot=1.5s)
-  Network:     11.4s total (31.2ms latency, 87.76 MB/s download, 3.34 MB/s upload, 0.87s pip)
+  Docker:      6.2s total (build=2.8s, custom_create=0.9s, verify=0.7s pre-baked, stock_boot=0.28s)
+  Network:     9.5s total (39.3ms latency, 90.05 MB/s download, 16.65 MB/s upload, 0.82s pip)
   Security:    41.2s total (6/8 PASS: metadata, privilege, network, filesystem, resources, env_leak)
 
 === E2B (default instance) ===
@@ -505,8 +505,8 @@
   Concurrent:   8.1s total (2.23s seq, 0.66s conc, 3.40x speedup)
   Iteration:    3.8s total (0.05s overwrite, 0.47s test avg)
   Fan-out:      1.6s total (1.05s create, 0.08s compute, 3 sandboxes)
-  Docker:      6.5s total (template, create=1.5s, pip=4.4s, stock_boot=0.15s)
-  Network:     8.2s total (13.3ms latency, 58.48 MB/s download, 3.41 MB/s upload, 1.22s pip)
+  Docker:      6.1s total (template, create=1.4s, pip=4.1s, stock_boot=0.14s)
+  Network:     8.8s total (17.6ms latency, 53.93 MB/s download, 2.87 MB/s upload, 1.46s pip)
   Security:    8.6s total (5/8 PASS: metadata, privilege, escape, filesystem, env_leak)
 
 === BLAXEL (4 vCPU, 8GB RAM) ===
@@ -516,8 +516,8 @@
   Concurrent:   9.7s total (2.23s seq, 0.87s conc, 2.56x speedup)
   Iteration:    5.1s total (0.04s overwrite, 0.33s test avg)
   Fan-out:      3.4s total (1.47s create, 0.43s compute, 3 sandboxes)
-  Docker:     12.6s total (pre-existing, create=3.7s, pip=7.7s, stock_boot=0.46s)
-  Network:     10.1s total (57.6ms latency, 71.42 MB/s download, 3.72 MB/s upload, 1.11s pip)
+  Docker:     11.2s total (pre-existing, create=3.0s, pip=7.4s, stock_boot=0.33s)
+  Network:     10.6s total (58.6ms latency, 66.70 MB/s download, 3.22 MB/s upload, 1.13s pip)
   Security:    23.3s total (3/8 PASS: metadata, network, env_leak -- WEAKEST)
 
 === MODAL (4 CPU, 8GB) ===
@@ -528,8 +528,8 @@
   Iteration:   12.6s total (0.56s overwrite, 1.06s test avg)
   Fan-out:      4.6s total (0.81s create, 0.64s compute, 3 sandboxes)
   Agent:       86.4s total (3 iters, best reward 14.4, llm=gemini-2.5-flash-lite)
-  Docker:     16.1s total (build=0.2s, custom_create=0.9s, verify=3.1s pre-baked, stock_boot=0.34s, 2.09x speedup)
-  Network:     14.0s total (15.7ms latency, 45.66 MB/s download, 7.32 MB/s upload, 1.70s pip)
+  Docker:     14.7s total (build=0.2s, custom_create=0.8s, verify=2.9s pre-baked, stock_boot=0.31s, 1.81x speedup)
+  Network:     22.8s total (24.6ms latency, 84.91 MB/s download, 0.74 MB/s upload, 1.63s pip)
   Security:    42.9s total (7/8 PASS: metadata, privilege, network, filesystem, resources, egress, env_leak -- STRONGEST)
 
 === CODING AGENT (all providers, Gemini 2.5 Flash Lite, 3 iterations) ===

@@ -1,21 +1,24 @@
 {
-  "timestamp": "2026-03-07T16:32:07.670862",
-  "wall_clock_s": 5.22,
-  "serial_sum_s": 5.22,
-  "speedup": 1.0,
-  "sandbox_count": 1,
+  "timestamp": "2026-03-07T16:37:23.937918",
+  "wall_clock_s": 31.61,
+  "serial_sum_s": 51.74,
+  "speedup": 1.64,
+  "sandbox_count": 4,
   "providers": [
-    "daytona"
+    "blaxel",
+    "daytona",
+    "e2b",
+    "modal"
   ],
   "profiles": [
     {
-      "sandbox_label": "daytona-docker-1",
-      "provider": "daytona",
-      "sandbox_id": "",
+      "sandbox_label": "blaxel-network",
+      "provider": "blaxel",
+      "sandbox_id": "rl-test-afe130f4",
       "config": {
-        "benchmark": "docker"
+        "benchmark": "network"
       },
-      "total_duration_s": 5.22,
+      "total_duration_s": 10.59,
       "tests_passed": 0,
       "tests_total": 0,
       "rl_best_reward": 0.0,
@@ -23,40 +26,247 @@
       "rl_best_actions": [],
       "steps": [
         {
-          "name": "docker_build_image",
-          "duration_s": 1.9,
+          "name": "create_sandbox",
+          "duration_s": 0.35,
           "success": true,
-          "detail": "custom image built with 5 deps"
+          "detail": "rl-test-afe130f4"
         },
         {
-          "name": "docker_create_sandbox",
-          "duration_s": 0.77,
+          "name": "net_latency",
+          "duration_s": 0.73,
           "success": true,
-          "detail": "sandbox created from custom image in 0.77s"
+          "detail": "min=54.3ms avg=58.6ms max=74.3ms (5 samples)"
         },
         {
-          "name": "docker_verify_deps",
-          "duration_s": 0.8,
+          "name": "net_download",
+          "duration_s": 0.5,
           "success": true,
-          "detail": "pre-baked deps verify=OK, no pip install needed"
+          "detail": "9.5MB in 0.17s (57.31 MB/s)"
         },
         {
-          "name": "docker_run_workload",
+          "name": "net_download_large",
+          "duration_s": 1.7,
+          "success": true,
+          "detail": "95.4MB in 1.43s (66.7 MB/s)"
+        },
+        {
+          "name": "net_upload",
+          "duration_s": 1.85,
+          "success": true,
+          "detail": "5.0MB in 1.55s (3.22 MB/s)"
+        },
+        {
+          "name": "net_dns",
+          "duration_s": 0.26,
+          "success": true,
+          "detail": "5/5 resolved, min=6.03ms avg=12.12ms max=22.86ms"
+        },
+        {
+          "name": "net_pip_install",
+          "duration_s": 2.7,
+          "success": true,
+          "detail": "pip install requests: 1.13s (exit=0)"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.16,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "daytona-network",
+      "provider": "daytona",
+      "sandbox_id": "aa3ab0cf-73ba-41e5-a6fb-5bd23bd9bbb3",
+      "config": {
+        "benchmark": "network"
+      },
+      "total_duration_s": 9.55,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 1.73,
+          "success": true,
+          "detail": "aa3ab0cf-73ba-41e5-a6fb-5bd23bd9bbb3"
+        },
+        {
+          "name": "net_latency",
+          "duration_s": 0.57,
+          "success": true,
+          "detail": "min=29.4ms avg=39.3ms max=56.0ms (5 samples)"
+        },
+        {
+          "name": "net_download",
+          "duration_s": 0.61,
+          "success": true,
+          "detail": "9.5MB in 0.32s (30.16 MB/s)"
+        },
+        {
+          "name": "net_download_large",
+          "duration_s": 1.37,
+          "success": true,
+          "detail": "95.4MB in 1.06s (90.05 MB/s)"
+        },
+        {
+          "name": "net_upload",
+          "duration_s": 0.62,
+          "success": true,
+          "detail": "5.0MB in 0.3s (16.65 MB/s)"
+        },
+        {
+          "name": "net_dns",
+          "duration_s": 0.33,
+          "success": true,
+          "detail": "5/5 resolved, min=1.88ms avg=2.37ms max=4.09ms"
+        },
+        {
+          "name": "net_pip_install",
+          "duration_s": 1.75,
+          "success": true,
+          "detail": "pip install requests: 0.82s (exit=0)"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.16,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "e2b-network",
+      "provider": "e2b",
+      "sandbox_id": "idr6xwiy67dd9h9en6o3o",
+      "config": {
+        "benchmark": "network"
+      },
+      "total_duration_s": 8.75,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.26,
+          "success": true,
+          "detail": "idr6xwiy67dd9h9en6o3o"
+        },
+        {
+          "name": "net_latency",
+          "duration_s": 0.32,
+          "success": true,
+          "detail": "min=7.7ms avg=17.6ms max=29.6ms (5 samples)"
+        },
+        {
+          "name": "net_download",
           "duration_s": 0.39,
           "success": true,
-          "detail": "matrix shape: (200, 200)\ndjango version: 6.0.3\nWORKLOAD_OK"
+          "detail": "9.5MB in 0.17s (56.09 MB/s)"
         },
         {
-          "name": "docker_stock_boot",
-          "duration_s": 0.15,
+          "name": "net_download_large",
+          "duration_s": 1.95,
           "success": true,
-          "detail": "stock image boot: 0.15s"
+          "detail": "95.4MB in 1.77s (53.93 MB/s)"
         },
         {
-          "name": "docker_comparison",
-          "duration_s": 0.72,
+          "name": "net_upload",
+          "duration_s": 1.97,
           "success": true,
-          "detail": "stock_boot=0.15s, baseline(create+pip)=0.3s, custom(create+verify)=1.6s, speedup=0.18x"
+          "detail": "5.0MB in 1.74s (2.87 MB/s)"
+        },
+        {
+          "name": "net_dns",
+          "duration_s": 0.17,
+          "success": true,
+          "detail": "5/5 resolved, min=0.99ms avg=3.1ms max=8.15ms"
+        },
+        {
+          "name": "net_pip_install",
+          "duration_s": 2.44,
+          "success": true,
+          "detail": "pip install requests: 1.46s (exit=0)"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.11,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "modal-network",
+      "provider": "modal",
+      "sandbox_id": "sb-SifS683PnGRpE1bC1qmvou",
+      "config": {
+        "benchmark": "network"
+      },
+      "total_duration_s": 22.85,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 0.3,
+          "success": true,
+          "detail": "sb-SifS683PnGRpE1bC1qmvou"
+        },
+        {
+          "name": "net_latency",
+          "duration_s": 1.39,
+          "success": true,
+          "detail": "min=21.5ms avg=24.6ms max=32.9ms (5 samples)"
+        },
+        {
+          "name": "net_download",
+          "duration_s": 1.34,
+          "success": true,
+          "detail": "9.5MB in 0.13s (74.32 MB/s)"
+        },
+        {
+          "name": "net_download_large",
+          "duration_s": 2.37,
+          "success": true,
+          "detail": "95.4MB in 1.12s (84.91 MB/s)"
+        },
+        {
+          "name": "net_upload",
+          "duration_s": 8.05,
+          "success": true,
+          "detail": "5.0MB in 6.78s (0.74 MB/s)"
+        },
+        {
+          "name": "net_dns",
+          "duration_s": 1.57,
+          "success": true,
+          "detail": "5/5 resolved, min=0.63ms avg=4.06ms max=10.19ms"
+        },
+        {
+          "name": "net_pip_install",
+          "duration_s": 5.44,
+          "success": true,
+          "detail": "pip install requests: 1.63s (exit=0)"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.11,
+          "success": true,
+          "detail": ""
         }
       ],
       "error": ""
