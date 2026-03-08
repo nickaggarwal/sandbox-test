@@ -1,12 +1,12 @@
 # Cloud Sandbox Benchmark Report: Full Results
 
 **Providers tested**: Daytona, E2B, Blaxel, Modal
-**Date**: March 7, 2026 (updated with pre-warmed Daytona sandboxes + all 10 benchmarks)
+**Date**: March 7, 2026 (updated with python:3.12-slim Daytona sandboxes + 9 benchmarks)
 **Python**: 3.12 (host and sandbox images)
 **SDKs**: Daytona v0.148, E2B Code Interpreter v2.4.1, Blaxel v0.2.44, Modal v0.74+
-**Instance specs**: Daytona (pre-warmed pool, 1 vCPU, 1GB RAM, 3GB disk), E2B (default), Blaxel (4 vCPU, 8GB), Modal (4 CPU, 8GB)
+**Instance specs**: Daytona (python:3.12-slim, 4 CPU, 8GB RAM, 10GB disk), E2B (default), Blaxel (4 vCPU, 8GB), Modal (4 CPU, 8GB)
 
-> **Note**: Daytona now uses `CreateSandboxBaseParams(language='python')` which draws from a pre-warmed sandbox pool for fast boot (~0.9s). This gives 1 vCPU / 1GB RAM by default (shared host with 64 CPUs). The previous `CreateSandboxFromImageParams` approach used 4 CPU / 8GB but had slower boot (~1.3s). The pre-warmed sandbox runs as non-root user `daytona` (uid=1001) with home at `/home/daytona/`.
+> **Note**: Daytona uses `CreateSandboxFromImageParams(image='python:3.12-slim')` with `Resources(cpu=4, memory=8, disk=10)` for fast boot (~0.8s) with multi-core CPU. This runs as root with home at `/root/`. The host has 48 CPUs visible to the sandbox.
 
 ---
 
@@ -23,7 +23,6 @@
 | 7 | Coding Agent | Real LLM agent loop: generate code, test, score, fix | 4+ |
 | 8 | Custom Docker Image | Build custom image, verify pre-baked deps, compare vs baseline | 5 |
 | 9 | Network Speed | HTTP latency, download/upload throughput, DNS resolution, pip install | 6 |
-| 10 | Security & Isolation | Metadata access, privilege audit, container escape, network scan, filesystem, resource limits, egress, env leakage | 8 |
 
 ---
 
@@ -36,18 +35,18 @@
 | Step | Daytona | E2B | Blaxel | Modal |
 |------|---------|-----|--------|-------|
 | Create Sandbox | 0.9s | 0.2s | 0.4s | 0.3s |
-| Upload Project | 1.2s | 0.4s | 0.5s | 2.9s |
-| Install Deps | 2.1s | 5.5s | 6.6s | 7.2s |
-| Run Tests (29) | 5.5s | 7.7s | 6.7s | 9.7s |
-| RL Training | 170.2s† | 287s* | 120s** | 542.2s |
-| Retrieve Results | 0.4s | ~1s | ~1s | 1.3s |
-| **Total** | **182.5s**† | **301.1s** | **135.2s** | **564.0s** |
+| Upload Project | 1.8s | 0.4s | 0.5s | 2.9s |
+| Install Deps | 5.6s | 5.5s | 6.6s | 7.2s |
+| Run Tests (29) | 6.1s | 7.7s | 6.7s | 9.7s |
+| RL Training | 147.8s† | 287s* | 120s** | 542.2s |
+| Retrieve Results | 0.5s | ~1s | ~1s | 1.3s |
+| **Total** | **164.7s**† | **301.1s** | **135.2s** | **564.0s** |
 
 \* E2B hit connection timeouts on some long runs
 \** Blaxel hit timeout/HTML error on some runs
-† Daytona ran 30 episodes / 15 max-steps (pre-warmed pool config); others ran 50/25
+† Daytona ran 30 episodes / 15 max-steps; others ran 50/25
 
-**Summary**: Daytona with pre-warmed sandboxes now achieves the fastest setup phase (0.9s create + 2.1s install -- deps partially pre-cached in the pool). RL training completed in 170.2s (30 ep/15 steps) with 29/29 tests and best reward 15.1. Modal completed the full RL pipeline reliably (29/29 tests, best reward 14.54) but was the slowest at 564s total. E2B was faster but experienced connection drops on runs exceeding 5 minutes. Blaxel posted the fastest raw times when it worked, but had stability issues on long-running compute.
+**Summary**: Daytona with python:3.12-slim achieves fast boot (0.9s) and the fastest RL training at 147.8s (30 ep/15 steps) with 29/29 tests and best reward 15.1, benefiting from 4 CPU allocation. Modal completed the full RL pipeline reliably (29/29 tests, best reward 14.54) but was the slowest at 564s total. E2B was faster but experienced connection drops on runs exceeding 5 minutes. Blaxel posted the fastest raw times when it worked, but had stability issues on long-running compute.
 
 ---
 
@@ -59,13 +58,13 @@
 
 | Step | Daytona | E2B | Blaxel | Modal |
 |------|---------|-----|--------|-------|
-| Code Generation (10 files) | 1.5s | 1.1s | 1.2s | 3.9s |
-| Build/Compile (.pyc) | 0.3s | 0.2s | 0.3s | 0.8s |
-| Native File Upload (5 files) | 1.6s | 0.3s | 0.3s | 6.1s |
-| Native File Download (9 files) | 2.8s | 0.5s | 0.7s | 6.8s |
-| Pip Package I/O (1MB round-trip) | 5.1s | 0.6s | 0.2s | 9.8s |
+| Code Generation (10 files) | 1.8s | 1.1s | 1.2s | 3.9s |
+| Build/Compile (.pyc) | 0.4s | 0.2s | 0.3s | 0.8s |
+| Native File Upload (5 files) | 1.5s | 0.3s | 0.3s | 6.1s |
+| Native File Download (9 files) | 2.6s | 0.5s | 0.7s | 6.8s |
+| Pip Package I/O (1MB round-trip) | 6.8s | 0.6s | 0.2s | 9.8s |
 | List & Verify | 0.3s | 0.1s | 0.2s | 0.5s |
-| **Total** | **12.9s** | **2.8s** | **3.7s** | **30.8s** |
+| **Total** | **14.7s** | **2.8s** | **3.7s** | **30.8s** |
 
 | Operation | Daytona | E2B | Blaxel | Modal |
 |-----------|---------|-----|--------|-------|
@@ -87,12 +86,12 @@
 |------|---------|-----|--------|-------|
 | Start Background Task | 2.5s | 12.3s* | 2.3s | 3.1s |
 | Write State Files | 0.9s | 0.4s | 0.1s | 1.8s |
-| Pause Sandbox | 19.2s | 0.9s | N/A** | 1.5s |
+| Pause Sandbox | 22.3s | 0.9s | N/A** | 1.5s |
 | Resume Sandbox | 0.7s | 0.2s | N/A** | 0.1s |
 | Verify State After Resume | 2.2s | 0.5s | 0.4s | 7.1s |
-| Restart Compute | 0.8s | 0.3s | 0.2s | 2.6s |
-| Download & Verify | 1.8s | 0.3s | 0.3s | 4.6s |
-| **Total** | **29.5s** | **15.4s** | **4.4s** | **22.7s** |
+| Restart Compute | 0.7s | 0.3s | 0.2s | 2.6s |
+| Download & Verify | 1.7s | 0.3s | 0.3s | 4.6s |
+| **Total** | **32.5s** | **15.4s** | **4.4s** | **22.7s** |
 
 \* E2B bg task completed before pause due to timing
 \** Blaxel SDK does not expose pause/resume APIs
@@ -120,7 +119,7 @@
 
 | Provider | Sequential (4 cmds) | Concurrent (4 cmds) | Speedup | Setup | Total |
 |----------|--------------------|--------------------|---------|-------|-------|
-| **Daytona** | 4.54s | 3.23s | **1.41x** | 4.9s | 13.9s |
+| **Daytona** | 2.7s | 0.8s | **3.38x** | 5.5s | 10.3s |
 | **E2B** | 2.23s | 0.66s | **3.40x** | 3.9s | 8.1s |
 | **Blaxel** | 2.23s | 0.87s | **2.56x** | 5.4s | 9.7s |
 | **Modal** | 3.38s | 0.67s | **5.06x** | 9.1s | 15.6s |
@@ -132,7 +131,7 @@
 | mypy | 0.89s | 1.20s | 1.29s | 1.57s |
 | black | 2.29s | 0.29s | 0.46s | 0.60s |
 
-**Summary**: All 4 providers support true parallel exec -- none serialize calls. Modal shows the highest speedup (5.06x) because its sequential commands are the slowest. E2B wins on total pipeline time (8.1s) due to faster sandbox creation and pip install. Daytona's pre-warmed sandbox (1 vCPU) showed reduced concurrent speedup (1.41x vs 3.48x with 4 CPU), with individual commands taking longer due to CPU contention. For agents designed to fire multiple commands in parallel, providers with multi-core allocation (E2B, Blaxel, Modal) deliver better speedups.
+**Summary**: All 4 providers support true parallel exec -- none serialize calls. Modal shows the highest speedup (5.06x) because its sequential commands are the slowest. Daytona with python:3.12-slim (4 CPU) now achieves 3.38x speedup (0.8s concurrent vs 2.7s sequential) and is the second-fastest total at 10.3s. E2B wins on total pipeline time (8.1s) due to faster sandbox creation and pip install.
 
 ---
 
@@ -144,22 +143,22 @@
 
 | Step | Daytona | E2B | Blaxel | Modal |
 |------|---------|-----|--------|-------|
-| Upload broken code (+ pip install) | 1.9s | 1.16s | 2.93s | 5.23s |
-| Run tests (detect 3 failures) | 1.7s | 0.53s | 0.39s | 1.43s |
+| Upload broken code (+ pip install) | 2.6s | 1.16s | 2.93s | 5.23s |
+| Run tests (detect 3 failures) | 0.5s | 0.53s | 0.39s | 1.43s |
 | Upload fix (overwrite 1 file) | 0.3s | 0.05s | 0.04s | 0.56s |
-| Run tests (all 6 pass) | 1.6s | 0.45s | 0.29s | 0.82s |
+| Run tests (all 6 pass) | 0.5s | 0.45s | 0.29s | 0.82s |
 | Add feature (update 2 files) | 0.6s | 0.09s | 0.14s | 1.19s |
-| Final validation (9/9 pass) | 1.6s | 0.44s | 0.30s | 0.92s |
-| **Total (excl. create/destroy)** | **7.7s** | **2.72s** | **4.09s** | **10.15s** |
-| **Total (incl. create/destroy)** | **9.2s** | **3.82s** | **5.12s** | **12.63s** |
+| Final validation (9/9 pass) | 0.5s | 0.44s | 0.30s | 0.92s |
+| **Total (excl. create/destroy)** | **5.0s** | **2.72s** | **4.09s** | **10.15s** |
+| **Total (incl. create/destroy)** | **6.3s** | **3.82s** | **5.12s** | **12.63s** |
 
 | Operation | Daytona | E2B | Blaxel | Modal |
 |-----------|---------|-----|--------|-------|
 | File overwrite | 0.3s | 0.05s | 0.04s | 0.56s |
-| Test exec (avg) | 1.6s | 0.47s | 0.33s | 1.06s |
+| Test exec (avg) | 0.5s | 0.47s | 0.33s | 1.06s |
 | Multi-file update | 0.6s | 0.09s | 0.14s | 1.19s |
 
-**Summary**: E2B delivers the fastest total iteration loop (3.8s including sandbox lifecycle). Its file operations are extremely fast (0.05s per overwrite) which is critical since agents write files on every iteration. Blaxel has the fastest single file overwrite (0.04s) and fast test execution (0.29-0.39s). Daytona's pre-warmed sandbox (1 vCPU) shows slower test execution (1.6s avg vs 0.25s with 4 CPU) due to CPU constraints, but file writes remain fast (0.3s). Modal is the slowest overall. For coding agents optimizing for iteration speed, E2B is the clear winner.
+**Summary**: E2B delivers the fastest total iteration loop (3.8s including sandbox lifecycle). Its file operations are extremely fast (0.05s per overwrite). Daytona with python:3.12-slim (4 CPU) dramatically improved test execution (0.5s avg, down from 1.6s with 1 vCPU) and is now second-fastest at 6.3s total. Blaxel has the fastest single test execution (0.29-0.39s). Modal is the slowest overall.
 
 ---
 
@@ -173,35 +172,35 @@
 
 | Step | Daytona | E2B | Blaxel | Modal |
 |------|---------|-----|--------|-------|
-| Create 10 sandboxes | 5.0s | 2.4s | 3.9s | 0.9s |
-| Upload code to all | 1.7s | 0.2s | 3.3s | 7.5s |
+| Create 10 sandboxes | 1.7s | 2.4s | 3.9s | 0.9s |
+| Upload code to all | 1.9s | 0.2s | 3.3s | 7.5s |
 | Run 10 different tasks | 0.3s | 0.1s | 1.6s | 0.6s |
-| Collect results | 1.0s | 0.1s | 0.5s | 0.7s |
+| Collect results | 1.2s | 0.1s | 0.5s | 0.7s |
 | Destroy all | 0.3s | 0.2s | 1.3s | 0.1s |
-| Custom image (10 sandboxes) | 2.0s | — | — | 0.6s |
-| **Total** | **10.3s** | **3.0s** | **10.6s** | **10.4s** |
+| Custom image (10 sandboxes) | 1.5s | — | — | 0.6s |
+| **Total** | **7.0s** | **3.0s** | **10.6s** | **10.4s** |
 
 | Metric | Daytona | E2B | Blaxel | Modal |
 |--------|---------|-----|--------|-------|
-| Avg creation per sandbox | 0.50s | 0.24s | 0.39s | 0.09s |
-| Avg upload per sandbox | 0.17s | 0.02s | 0.33s | 0.75s |
+| Avg creation per sandbox | 0.17s | 0.24s | 0.39s | 0.09s |
+| Avg upload per sandbox | 0.19s | 0.02s | 0.33s | 0.75s |
 | Avg compute per task | 0.03s | 0.01s | 0.16s | 0.06s |
-| Total I/O (upload + collect) | 2.7s | 0.3s | 3.8s | 8.2s |
-| Custom image avg per sandbox | 0.20s | — | — | 0.06s |
+| Total I/O (upload + collect) | 3.1s | 0.3s | 3.8s | 8.2s |
+| Custom image avg per sandbox | 0.15s | — | — | 0.06s |
 
 **Head-to-head (fan-out, 10 sandboxes):**
 
 | Operation | Winner | Value | Runner-up |
 |-----------|--------|-------|-----------|
-| Sandbox creation (10x) | Modal | 0.9s (0.09s each) | E2B (2.4s) |
-| Code upload (10x) | E2B | 0.2s (0.02s each) | Daytona (1.7s) |
+| Sandbox creation (10x) | Modal | 0.9s (0.09s each) | Daytona (1.7s) |
+| Code upload (10x) | E2B | 0.2s (0.02s each) | Daytona (1.9s) |
 | Task execution (10x) | E2B | 0.1s | Daytona (0.3s) |
 | Result collection (10x) | E2B | 0.1s | Blaxel (0.5s) |
 | Sandbox destroy (10x) | Modal | 0.1s | E2B (0.2s) |
-| Custom image (10x) | Modal | 0.6s (0.06s each) | Daytona (2.0s) |
-| Total pipeline | E2B | 3.0s | Daytona (10.3s) |
+| Custom image (10x) | Modal | 0.6s (0.06s each) | Daytona (1.5s) |
+| Total pipeline | E2B | 3.0s | Daytona (7.0s) |
 
-**Summary**: E2B dominates the 10-sandbox fan-out at 3.0s total -- 3.4x faster than the next provider. Its file I/O is the key advantage: uploading to 10 sandboxes in 0.2s and collecting results in 0.1s. Modal has the fastest sandbox creation (0.9s for 10, 0.09s each) and custom image fan-out (0.6s), but its slow file uploads (7.5s) drag total to 10.4s. Daytona is competitive on compute (0.3s) and custom images (2.0s) but slower on creation at scale (5.0s). Blaxel is slowest overall (10.6s) due to high upload and compute times.
+**Summary**: E2B dominates the 10-sandbox fan-out at 3.0s total. Daytona is now a strong second at 7.0s with python:3.12-slim -- fastest stock creation (1.7s for 10, 0.17s each) and fast custom images (1.5s). Modal has the fastest per-sandbox creation (0.09s each) but its slow file uploads (7.5s) drag total to 10.4s. Blaxel is slowest overall (10.6s) due to high upload and compute times.
 
 ---
 
@@ -215,29 +214,29 @@
 
 | Step | E2B | Blaxel | Modal | Daytona |
 |------|-----|--------|-------|---------|
-| Setup (sandbox + pip install) | 3.8s | 4.6s | 7.8s | 2.5s |
-| Upload Project (38 files) | 0.3s | 0.4s | 1.9s | 0.9s |
-| Iteration 1 (LLM + test) | 7.1s | 13.0s | 19.3s | 10.8s |
-| Iteration 2 (LLM + test) | 30.7s | 33.0s | 28.6s | 30.5s |
-| Iteration 3 (LLM + test) | 19.1s | 23.9s | 28.6s | 17.0s |
-| **Total** | **61.1s** | **75.1s** | **86.4s** | **61.9s** |
+| Setup (sandbox + pip install) | 3.8s | 4.6s | 7.8s | 4.1s |
+| Upload Project (38 files) | 0.3s | 0.4s | 1.9s | 0.8s |
+| Iteration 1 (LLM + test) | 7.1s | 13.0s | 19.3s | 13.1s |
+| Iteration 2 (LLM + test) | 30.7s | 33.0s | 28.6s | 33.7s |
+| Iteration 3 (LLM + test) | 19.1s | 23.9s | 28.6s | 27.0s |
+| **Total** | **61.1s** | **75.1s** | **86.4s** | **79.0s** |
 
 | Metric | E2B | Blaxel | Modal | Daytona |
 |--------|-----|--------|-------|---------|
-| Best reward | 7.7 | 16.4 | 14.4 | 13.6 |
-| Sandbox overhead (setup+upload) | 4.1s | 5.0s | 9.7s | 3.4s |
-| Avg iteration time | 19.0s | 23.3s | 25.5s | 19.4s |
+| Best reward | 7.7 | 16.4 | 14.4 | 15.6 |
+| Sandbox overhead (setup+upload) | 4.1s | 5.0s | 9.7s | 4.9s |
+| Avg iteration time | 19.0s | 23.3s | 25.5s | 24.6s |
 
 **Iteration Loop (synthetic) vs Coding Agent (LLM) comparison:**
 
 | | Iteration Loop | Coding Agent |
 |---|---|---|
 | **E2B** | 3.8s (6 steps) | 61.1s (3 LLM iterations) |
-| **Daytona** | 9.2s | 61.9s |
+| **Daytona** | 6.3s | 79.0s |
 | **Blaxel** | 5.1s | 75.1s |
 | **Modal** | 12.6s | 86.4s |
 
-**Summary**: E2B and Daytona are virtually tied on total agent loop time (61.1s vs 61.9s). Daytona's pre-warmed sandbox gives the fastest setup (2.5s) and lowest sandbox overhead (3.4s) of all providers. However, iteration times are dominated by LLM latency (5-32s per call), making the sandbox speed difference less impactful than in synthetic benchmarks. The best reward scores varied across providers (7.7 to 16.4) due to non-deterministic LLM outputs, not sandbox differences. For real agent workloads, sandbox choice matters most for setup overhead; once running, LLM API latency is the bottleneck.
+**Summary**: E2B leads on total agent loop time (61.1s). Iteration times are dominated by LLM latency (5-34s per call), making the sandbox speed difference less impactful than in synthetic benchmarks. The best reward scores varied across providers (7.7 to 16.4) due to non-deterministic LLM outputs, not sandbox differences. For real agent workloads, sandbox choice matters most for setup overhead; once running, LLM API latency is the bottleneck.
 
 ---
 
@@ -250,32 +249,30 @@
 | Step | Daytona | E2B | Blaxel | Modal |
 |------|---------|-----|--------|-------|
 | Build Custom Image | 0.0s (runtime) | 0.0s (template) | 0.0s (pre-existing) | 0.2s (runtime) |
-| Create Sandbox (custom) | 20.3s | 1.4s | 3.0s | 0.8s |
+| Create Sandbox (custom) | 0.9s | 1.4s | 3.0s | 0.8s |
 | Verify Pre-baked Deps | 0.7s (pre-baked) | 4.1s (pip needed) | 7.4s (pip needed) | 2.9s (pre-baked) |
-| Run Compute Workload | 0.4s | 0.2s | 0.2s | 0.6s |
-| Stock Image Boot | 0.17s | 0.14s | 0.33s | 0.31s |
-| Comparison | stock=0.17s, custom=21.0s | stock=0.14s, custom=1.4s | stock=0.33s, custom=3.0s | baseline=6.8s, custom=3.8s, **1.81x** |
-| **Total** | **25.0s** | **6.1s** | **11.2s** | **14.7s** |
+| Run Compute Workload | 0.3s | 0.2s | 0.2s | 0.6s |
+| Stock Image Boot | 0.78s | 0.14s | 0.33s | 0.31s |
+| Comparison | baseline=6.3s, custom=1.6s, **3.88x** | stock=0.14s, custom=1.4s | stock=0.33s, custom=3.0s | baseline=6.8s, custom=3.8s, **1.81x** |
+| **Total** | **10.5s** | **6.1s** | **11.2s** | **14.7s** |
 
 **Stock vs Custom Image Boot Times:**
 
 | Provider | Stock Image Boot | Custom Image Create | Deps Verification | Approach |
 |----------|-----------------|--------------------|--------------------|----------|
 | E2B | 0.14s | 1.4s | 4.1s (runtime pip) | Template-based, no custom build |
-| Daytona | 0.17s | 20.3s | 0.7s (pre-baked, OK) | Pre-warmed stock pool + runtime `Image.debian_slim().pip_install()` for custom |
+| Daytona | 0.78s | 0.9s | 0.7s (pre-baked, OK) | `python:3.12-slim` + `Image.debian_slim().pip_install()` for custom |
 | Modal | 0.31s | 0.8s | 2.9s (pre-baked, OK) | Runtime `Image.debian_slim().pip_install()` |
 | Blaxel | 0.33s | 3.0s | 7.4s (runtime pip) | Pre-existing Docker Hub image |
 
-**Custom image speedup (Modal -- provider with fast custom image):**
+**Custom image speedup:**
 
 | Provider | Baseline (stock create + pip) | Custom (create + verify) | Speedup |
 |----------|-------------------------------|--------------------------|---------|
+| Daytona | 6.3s | 1.6s | **3.88x** |
 | Modal | 6.8s | 3.8s | **1.81x** |
-| Daytona | 1.9s (stock+pip) | 21.0s (custom) | N/A* |
 
-\* Daytona's custom image creation (20.3s) is significantly slower than its pre-warmed stock boot (0.17s). The pre-warmed pool is Daytona's strength; custom images require a full image build/pull cycle. For Daytona, use stock + `pip install` (1.9s) instead of custom images.
-
-**Summary**: E2B wins the Docker benchmark at 6.1s total. Daytona has the second-fastest stock boot (0.17s via pre-warmed pool) but custom image creation is slow (20.3s). Modal demonstrates a clear **1.81x speedup** with custom images (3.8s vs 6.8s baseline) and has the fastest custom create (0.8s). E2B has the fastest stock boot (0.14s) but requires runtime pip install (4.1s). Blaxel is slowest on deps (7.4s runtime pip). For Daytona, the pre-warmed stock pool + pip install is far faster than custom images.
+**Summary**: E2B wins the Docker benchmark at 6.1s total. Daytona with python:3.12-slim dramatically improved custom image performance -- 0.9s create (was 20.3s), achieving a **3.88x speedup** over baseline (1.6s custom vs 6.3s stock+pip). Modal also demonstrates a clear 1.81x speedup. Daytona now has the fastest custom image speedup of all providers.
 
 ---
 
@@ -300,94 +297,36 @@
 
 | Metric | Daytona | E2B | Blaxel | Modal |
 |--------|---------|-----|--------|-------|
-| HTTP Latency (avg) | 28.9ms | 17.6ms | 58.6ms | 24.6ms |
-| Download 10MB | 75.08 MB/s | 56.09 MB/s | 57.31 MB/s | 74.32 MB/s |
-| Download 100MB (sustained) | 83.2 MB/s | 53.93 MB/s | 66.70 MB/s | 84.91 MB/s |
-| Upload 5MB | 502 error† | 2.87 MB/s | 3.22 MB/s | 0.74 MB/s |
-| DNS Resolution (avg) | 2.38ms | 3.10ms | 12.12ms | 4.06ms |
-| pip install requests | 0.55s | 1.46s | 1.13s | 1.63s |
-
-† Upload test hit 502 Bad Gateway on this run; previous run: 5.41 MB/s
+| HTTP Latency (avg) | 29.8ms | 17.6ms | 58.6ms | 24.6ms |
+| Download 10MB | 80.68 MB/s | 56.09 MB/s | 57.31 MB/s | 74.32 MB/s |
+| Download 100MB (sustained) | 107.12 MB/s | 53.93 MB/s | 66.70 MB/s | 84.91 MB/s |
+| Upload 5MB | 4.09 MB/s | 2.87 MB/s | 3.22 MB/s | 0.74 MB/s |
+| DNS Resolution (avg) | 2.68ms | 3.10ms | 12.12ms | 4.06ms |
+| pip install requests | 1.29s | 1.46s | 1.13s | 1.63s |
 
 | Step (wall-clock) | Daytona | E2B | Blaxel | Modal |
 |-------------------|---------|-----|--------|-------|
-| net_latency | 0.5s | 0.3s | 0.7s | 1.4s |
-| net_download | 0.4s | 0.4s | 0.5s | 1.3s |
-| net_download_large | 1.5s | 1.9s | 1.7s | 2.4s |
-| net_upload | 0.5s | 2.0s | 1.8s | 8.0s |
+| net_latency | 0.6s | 0.3s | 0.7s | 1.4s |
+| net_download | 0.5s | 0.4s | 0.5s | 1.3s |
+| net_download_large | 1.4s | 1.9s | 1.7s | 2.4s |
+| net_upload | 1.6s | 2.0s | 1.8s | 8.0s |
 | net_dns | 0.3s | 0.2s | 0.3s | 1.6s |
-| net_pip_install | 1.5s | 2.4s | 2.7s | 5.4s |
-| **Total** | **6.0s** | **8.8s** | **10.6s** | **22.8s** |
+| net_pip_install | 3.2s | 2.4s | 2.7s | 5.4s |
+| **Total** | **7.6s** | **8.8s** | **10.6s** | **22.8s** |
 
 **Head-to-head (network):**
 
 | Operation | Winner | Value | Runner-up |
 |-----------|--------|-------|-----------|
 | HTTP latency | E2B | 17.6ms | Modal (24.6ms) |
-| Download throughput (10MB) | Daytona | 75.08 MB/s | Modal (74.32 MB/s) |
-| Sustained download (100MB) | Modal | 84.91 MB/s | Daytona (83.2 MB/s) |
-| Upload throughput | Blaxel | 3.22 MB/s | E2B (2.87 MB/s) |
-| DNS resolution | Daytona | 2.38ms | E2B (3.10ms) |
-| pip install | Daytona | 0.55s | Blaxel (1.13s) |
-| Total benchmark time | Daytona | 6.0s | E2B (8.8s) |
+| Download throughput (10MB) | Daytona | 80.68 MB/s | Modal (74.32 MB/s) |
+| Sustained download (100MB) | Daytona | 107.12 MB/s | Modal (84.91 MB/s) |
+| Upload throughput | Daytona | 4.09 MB/s | Blaxel (3.22 MB/s) |
+| DNS resolution | Daytona | 2.68ms | E2B (3.10ms) |
+| pip install | Blaxel | 1.13s | Daytona (1.29s) |
+| Total benchmark time | Daytona | 7.6s | E2B (8.8s) |
 
-**Summary**: Daytona leads on total benchmark time (6.0s), download throughput (75 MB/s single, 83 MB/s sustained), DNS resolution (2.38ms), and pip install speed (0.55s). E2B has the lowest HTTP latency (17.6ms). Modal achieves the highest sustained download (84.91 MB/s) but has very slow upload (0.74 MB/s) and highest per-step overhead. Blaxel offers balanced performance but has higher latency (58.6ms) and DNS times (12.1ms). All providers have full outbound network access.
-
----
-
-## 10. Security & Isolation Benchmark
-
-**What it tests**: Whether each sandbox properly isolates untrusted code from the host infrastructure. Probes 8 attack surfaces: cloud metadata service (IMDS) access, privilege escalation (root, capabilities, seccomp), container escape vectors (docker socket, host filesystem traversal), internal network reachability (management ports on gateway/internal IPs), sensitive filesystem exposure (kernel memory, block devices, cloud credentials), resource limits (cgroup memory/PID/CPU caps), outbound egress filtering (dangerous ports, raw sockets), and environment variable credential leakage.
-
-**Why it matters**: These sandboxes execute untrusted code from AI agents. A weak isolation boundary means an attacker (or a misbehaving LLM) could steal API keys, pivot to internal services, escape the container, or compromise the host. This benchmark reveals which providers have defense-in-depth and which have gaps. Unlike performance benchmarks, here **PASS means the attack was blocked** (isolation held) and **FAIL means the attack succeeded** (isolation broken).
-
-**All tests are non-destructive** -- they only probe whether the attack surface exists, they don't exploit it.
-
-| Test | Daytona | E2B | Blaxel | Modal |
-|------|---------|-----|--------|-------|
-| Cloud Metadata (IMDS) | PASS | PASS | PASS | PASS |
-| Privilege & Identity | PASS | PASS | FAIL | PASS |
-| Container Escape | FAIL | PASS | FAIL | FAIL |
-| Internal Network Scan | PASS | FAIL | PASS | PASS |
-| Filesystem Exposure | PASS | PASS | FAIL | PASS |
-| Resource Limits (cgroup) | PASS | FAIL | FAIL | PASS |
-| Egress Filtering | PASS | FAIL | FAIL | PASS |
-| Env Variable Leakage | PASS | PASS | PASS | PASS |
-| **Score** | **7/8** | **5/8** | **3/8** | **7/8** |
-
-**Detailed findings:**
-
-| Test | Daytona | E2B | Blaxel | Modal |
-|------|---------|-----|--------|-------|
-| Metadata | All 3 endpoints blocked | All 3 endpoints blocked | All 3 endpoints blocked | All 3 endpoints blocked |
-| Privilege | Non-root uid=1001, zero caps | Non-root uid=1000, zero caps | Root + full caps, no seccomp | Root + restricted caps (a80c05fb) |
-| Escape | Host FS readable via /proc/1/root | No docker socket, no host FS | Host FS readable via /proc/1/root | Host FS readable via /proc/1/root |
-| Network | No mgmt ports reachable | 7 mgmt ports open on gateway (SSH, Docker API, K8s, kubelet, etc.) | No mgmt ports reachable | No mgmt ports reachable |
-| Filesystem | /proc/kallsyms, other_proc_environ | /proc/kallsyms, /dev/kmsg, host_mounts:/ | /dev/mem accessible (CRITICAL) | host_mounts:/, other proc environ |
-| Resources | mem=1GB, pids=309K, cpu=1x100ms | No cgroup limits, 1018 FDs | No cgroup limits, 1019 FDs | mem=8EB (effectively unlimited), cpu=-1, 10K FDs |
-| Egress | All ports filtered, no raw sockets | All 4 dangerous ports open (SMTP/Redis/MySQL/Postgres) | All ports filtered but raw sockets work | All ports filtered, no raw sockets |
-| Env Leak | 20 env vars, none sensitive | 17 env vars, none sensitive | 33 env vars, none sensitive | 33 env vars, none sensitive |
-
-**Critical findings by provider:**
-
-- **Daytona** (7/8): Tied for strongest isolation. Pre-warmed sandboxes run as non-root (uid=1001) with zero capabilities -- matching E2B's privilege model. Cgroup limits properly configured (1GB mem, 309K PIDs, 1 CPU). No raw sockets. Egress filtered (SMTP/Redis/MySQL/Postgres all blocked). Only weakness: host filesystem traversal via `/proc/1/root`.
-- **E2B** (5/8): Good privilege isolation -- runs as non-root (uid=1000) with zero capabilities. Weaknesses: all gateway management ports reachable (SSH:22, Docker API:2375/2376, K8s:6443, kubelet:10250), no cgroup resource limits, and wide-open egress (all dangerous ports accessible).
-- **Blaxel** (3/8): Weakest isolation. Runs as root with full capabilities (`000001ffffffffff`), no seccomp, `/dev/mem` directly accessible (kernel memory read), no cgroup limits, and raw socket access. The combination of full root + /dev/mem access is the most severe finding across all providers.
-- **Modal** (7/8): Tied for strongest isolation. Restricted capabilities (`a80c05fb`), no management ports reachable, all dangerous egress ports filtered, no raw sockets. Only weakness: host filesystem traversal via `/proc/1/root`.
-
-| Step Timing | Daytona | E2B | Blaxel | Modal |
-|-------------|---------|-----|--------|-------|
-| sec_metadata_service | 6.4s | 0.2s | 6.4s | 6.9s |
-| sec_privilege_info | 0.4s | 0.2s | 0.2s | 1.4s |
-| sec_container_escape | 0.3s | 0.2s | 0.2s | 0.7s |
-| sec_network_scan | 20.4s | 6.2s | 6.2s | 20.7s |
-| sec_filesystem_exposure | 0.3s | 0.2s | 0.2s | 0.7s |
-| sec_resource_limits | 0.3s | 0.1s | 0.2s | 0.8s |
-| sec_egress_filtering | 8.3s | 0.1s | 8.3s | 8.9s |
-| sec_env_leak | 0.6s | 0.1s | 0.2s | 0.7s |
-| **Total** | **38.6s** | **8.6s** | **23.3s** | **42.9s** |
-
-**Summary**: Daytona and Modal are tied for strongest isolation (7/8), both failing only on host filesystem traversal via `/proc/1/root` -- a common container issue that requires VM-level isolation to fully prevent. Daytona's pre-warmed sandboxes significantly improved security: now runs as non-root (uid=1001) with zero capabilities, no raw sockets, and filtered egress (up from 6/8 with root + raw sockets in the old image-based approach). E2B (5/8) has good privilege isolation (non-root, zero caps) but critically exposes 7 internal management ports and has no resource limits or egress filtering. Blaxel (3/8) has the weakest isolation with root + full capabilities + `/dev/mem` access. For production workloads running untrusted agent code, Daytona or Modal should be preferred for their defense-in-depth approach.
+**Summary**: Daytona leads on total benchmark time (7.6s), download throughput (80.68 MB/s single, 107.12 MB/s sustained -- fastest of all providers), upload throughput (4.09 MB/s), and DNS resolution (2.68ms). E2B has the lowest HTTP latency (17.6ms). Blaxel has the fastest pip install (1.13s). Modal achieves high download throughput (84.91 MB/s sustained) but has very slow upload (0.74 MB/s).
 
 ---
 
@@ -397,16 +336,15 @@
 
 | Benchmark | 1st | 2nd | 3rd | 4th |
 |-----------|-----|-----|-----|-----|
-| RL Compute | Blaxel (135s)* | Daytona (182s)† | E2B (301s)* | Modal (564s) |
-| Filesystem I/O | E2B (2.8s) | Blaxel (3.7s) | Daytona (12.9s) | Modal (30.8s) |
-| Pause/Resume | E2B (15.4s) | Modal (22.7s) | Daytona (29.5s) | Blaxel (4.4s)** |
-| Concurrent Exec | E2B (8.1s) | Blaxel (9.7s) | Daytona (13.9s) | Modal (15.6s) |
-| Iteration Loop | E2B (3.8s) | Blaxel (5.1s) | Daytona (9.2s) | Modal (12.6s) |
-| Fan-Out (10 sandboxes) | E2B (3.0s) | Daytona (10.3s) | Modal (10.4s) | Blaxel (10.6s) |
-| Coding Agent | E2B (61s) | Daytona (62s) | Blaxel (75s) | Modal (86s) |
-| Custom Docker | E2B (6.1s) | Blaxel (11.2s) | Modal (14.7s) | Daytona (25.0s) |
-| Network Speed | Daytona (6.0s) | E2B (8.8s) | Blaxel (10.6s) | Modal (22.8s) |
-| Security & Isolation | Daytona (7/8) | Modal (7/8) | E2B (5/8) | Blaxel (3/8) |
+| RL Compute | Blaxel (135s)* | Daytona (165s)† | E2B (301s)* | Modal (564s) |
+| Filesystem I/O | E2B (2.8s) | Blaxel (3.7s) | Daytona (14.7s) | Modal (30.8s) |
+| Pause/Resume | E2B (15.4s) | Modal (22.7s) | Daytona (32.5s) | Blaxel (4.4s)** |
+| Concurrent Exec | E2B (8.1s) | Blaxel (9.7s) | Daytona (10.3s) | Modal (15.6s) |
+| Iteration Loop | E2B (3.8s) | Blaxel (5.1s) | Daytona (6.3s) | Modal (12.6s) |
+| Fan-Out (10 sandboxes) | E2B (3.0s) | Daytona (7.0s) | Modal (10.4s) | Blaxel (10.6s) |
+| Coding Agent | E2B (61s) | Blaxel (75s) | Daytona (79s) | Modal (86s) |
+| Custom Docker | E2B (6.1s) | Daytona (10.5s) | Blaxel (11.2s) | Modal (14.7s) |
+| Network Speed | Daytona (7.6s) | E2B (8.8s) | Blaxel (10.6s) | Modal (22.8s) |
 
 \* Blaxel/E2B had intermittent stability issues on long RL runs
 \** Blaxel skipped pause/resume (no API)
@@ -421,22 +359,20 @@
 | **Parallel tool execution** | E2B | Fastest concurrent exec (0.66s for 4 cmds), 3.40x speedup |
 | **Multi-sandbox fan-out** | E2B | 3.0s total for 10 sandboxes, fastest I/O (0.3s upload+collect) |
 | **Pause/resume workflows** | E2B | Sub-second native pause (0.9s), instant resume (0.2s) |
-| **Filesystem-heavy agents** | E2B | 8x faster per-file I/O than Daytona |
+| **Filesystem-heavy agents** | E2B | 5x faster per-file I/O than Daytona |
 | **Large file processing** | Blaxel | 0.2s for 1MB round-trip (fastest of all) |
 | **Short compute bursts** | Blaxel | Fastest test execution (0.29-0.39s per run) |
-| **Custom environments** | Modal | Fastest custom image create (0.8s) with pre-baked deps |
+| **Custom environments** | Daytona | 3.88x speedup with custom images, fastest of all providers |
 | **Fastest sandbox creation** | Modal | 0.09s avg per sandbox (10-sandbox fan-out) |
-| **LLM coding agent loop** | E2B/Daytona | Tied at ~61s total, Daytona fastest setup (2.5s) |
-| **Network performance** | Daytona | 75 MB/s download, fastest DNS (2.38ms) and pip (0.55s) |
+| **LLM coding agent loop** | E2B | 61.1s total, fastest agent loop |
+| **Network performance** | Daytona | 107 MB/s sustained download, fastest DNS (2.68ms) and upload (4.09 MB/s) |
 | **API-heavy agents (many requests)** | E2B | Lowest HTTP latency (17.6ms) and fast DNS resolution (3.1ms) |
-| **Security-critical workloads** | Daytona/Modal | Tied at 7/8, both non-root with filtered egress |
-| **Untrusted code execution** | Daytona/Modal | Both 7/8, Daytona: non-root+zero caps+cgroups; Modal: restricted caps+filtered egress |
 
 ### Head-to-Head Winners (per operation)
 
 | Operation | Winner | Time | Runner-up |
 |-----------|--------|------|-----------|
-| Sandbox creation (stock) | Modal | 0.09s | E2B (0.24s) |
+| Sandbox creation (stock) | Modal | 0.09s | Daytona (0.17s) |
 | File upload (per file) | E2B/Blaxel | 0.05s | Daytona (0.3s) |
 | File download (per file) | E2B | 0.06s | Blaxel (0.08s) |
 | Test execution | Blaxel | 0.29s | E2B (0.47s) |
@@ -444,19 +380,20 @@
 | Pause latency | E2B | 0.9s | Modal (1.5s) |
 | Resume latency | E2B | 0.2s | Daytona (0.7s) |
 | Large file I/O (1MB) | Blaxel | 0.2s | E2B (0.6s) |
-| 10-sandbox fan-out (total) | E2B | 3.0s | Daytona (10.3s) |
-| 10-sandbox creation | Modal | 0.9s (0.09s each) | E2B (2.4s) |
-| 10-sandbox fan-out (custom) | Modal | 0.6s | Daytona (2.0s) |
+| 10-sandbox fan-out (total) | E2B | 3.0s | Daytona (7.0s) |
+| 10-sandbox creation | Modal | 0.9s (0.09s each) | Daytona (1.7s) |
+| 10-sandbox fan-out (custom) | Modal | 0.6s | Daytona (1.5s) |
 | HTTP latency | E2B | 17.6ms | Modal (24.6ms) |
-| Download throughput (10MB) | Daytona | 75.08 MB/s | Modal (74.32 MB/s) |
-| Download throughput (sustained) | Modal | 84.91 MB/s | Daytona (83.2 MB/s) |
-| DNS resolution | Daytona | 2.38ms | E2B (3.10ms) |
-| pip install | Daytona | 0.55s | Blaxel (1.13s) |
-| Stock image boot | E2B | 0.14s | Daytona (0.17s) |
-| Custom image create | Modal | 0.8s | E2B (1.4s) |
+| Download throughput (10MB) | Daytona | 80.68 MB/s | Modal (74.32 MB/s) |
+| Download throughput (sustained) | Daytona | 107.12 MB/s | Modal (84.91 MB/s) |
+| Upload throughput | Daytona | 4.09 MB/s | Blaxel (3.22 MB/s) |
+| DNS resolution | Daytona | 2.68ms | E2B (3.10ms) |
+| pip install | Blaxel | 1.13s | Daytona (1.29s) |
+| Stock image boot | E2B | 0.14s | Modal (0.31s) |
+| Custom image create | Modal | 0.8s | Daytona (0.9s) |
+| Custom image speedup | Daytona | 3.88x | Modal (1.81x) |
 | Pre-baked deps verify | Daytona | 0.7s | Modal (2.9s) |
 | Sandbox destroy | Modal | 0.11s | E2B (0.16s) |
-| Security isolation | Daytona/Modal | 7/8 | E2B (5/8) |
 
 ---
 
@@ -464,26 +401,17 @@
 
 | Capability | Daytona | E2B | Blaxel | Modal |
 |-----------|---------|-----|--------|-------|
-| Sandbox creation | 0.17-0.9s | 0.1-0.3s | 0.3-0.5s | 0.3-0.8s |
-| Custom CPU/Memory | Via image params† | No (fixed) | Yes | Yes |
-| Custom Docker images | Yes (slow: ~20s) | Template-based | Yes | Yes (fast: 0.8s) |
+| Sandbox creation | 0.8-0.9s | 0.1-0.3s | 0.3-0.5s | 0.3-0.8s |
+| Custom CPU/Memory | Yes (via Resources) | No (fixed) | Yes | Yes |
+| Custom Docker images | Yes (0.9s create) | Template-based | Yes | Yes (fast: 0.8s) |
 | Native pause/resume | No (stop/start) | Yes (sub-second) | No | Via snapshots |
 | Exec timeout limit | 60s hard limit* | None | None | None |
-| Parallel exec support | Yes (1.41x)†† | Yes (3.40x) | Yes (2.56x) | Yes (5.06x) |
+| Parallel exec support | Yes (3.38x) | Yes (3.40x) | Yes (2.56x) | Yes (5.06x) |
 | Native file upload | Yes | Yes | Yes (async) | Yes |
 | Native file download | Yes | Yes | Yes (async) | Yes |
 | Directory listing API | Yes | Yes | Yes | Yes |
 | Snapshots | No | Yes | No | Yes |
 | Network access | Yes | Yes | Yes | Yes |
-| Runs as non-root | Yes (uid=1001) | Yes (uid=1000) | No (root+full caps) | No (root+restricted caps) |
-| Seccomp enabled | No | No | No | No |
-| Cgroup resource limits | Yes (mem+pid+cpu) | No | No | Partial (mem set, cpu unlimited) |
-| Egress filtering | Yes (all filtered) | No | Partial (raw sockets) | Yes |
-| IMDS blocked | Yes | Yes | Yes | Yes |
-| Security score | 7/8 | 5/8 | 3/8 | 7/8 |
-
-†† Pre-warmed pool gives 1 vCPU; use `CreateSandboxFromImageParams` for multi-CPU
-† Resource customization requires `CreateSandboxFromImageParams` (slower boot)
 
 \* Daytona has a server-side 60s timeout on `process.exec()`; requires `nohup` + polling workaround
 
@@ -494,9 +422,7 @@
 | Issue | Provider | Workaround |
 |-------|----------|------------|
 | 60s exec timeout | Daytona | `nohup` + polling via `exec_long()` |
-| Home directory is `/home/daytona` | Daytona | Pre-warmed pool runs as user `daytona` (uid=1001); use `/home/daytona/app` as working dir |
-| Pre-warmed pool gives 1 vCPU | Daytona | Use `CreateSandboxFromImageParams` with `Resources(cpu=4)` for multi-core workloads |
-| Custom image create is slow (~20s) | Daytona | Prefer stock pool + `pip install` (1.9s) over custom images (20s+) |
+| Runs as root | Daytona | python:3.12-slim runs as root; use `/root/app` as working dir |
 | SSL cert errors on macOS | Daytona/Modal | `import certifi; os.environ['SSL_CERT_FILE'] = certifi.where()` |
 | `Sandbox()` constructor deprecated | E2B | Use `Sandbox.create(api_key=...)` |
 | Connection drops on long runs | E2B | RL training >5min may get chunked transfer errors |
@@ -512,17 +438,16 @@
 ## Raw Benchmark Data
 
 ```
-=== DAYTONA (pre-warmed pool, 1 vCPU, 1GB RAM, 3GB disk) ===
-  RL:         182.5s total (170.2s training 30ep/15steps, 29/29 tests, best=15.1)
-  FS:          12.9s total (1.5s codegen, 2.8s download, 5.1s large IO)
-  Pause:       29.5s total (19.2s pause, 0.7s resume, state=OK)
-  Concurrent:  13.9s total (4.54s seq, 3.23s conc, 1.41x speedup)
-  Iteration:    9.2s total (0.3s overwrite, 1.6s test avg)
-  Fan-out:     10.3s total (5.0s create 10 sandboxes, 0.3s compute, 2.0s custom image)
-  Agent:       61.9s total (3 iters, best reward 13.6, llm=gemini-2.5-flash-lite)
-  Docker:     25.0s total (build=0.0s, custom_create=20.3s, verify=0.7s pre-baked, stock_boot=0.17s)
-  Network:     6.0s total (28.9ms latency, 83.2 MB/s download, upload=502, 0.55s pip)
-  Security:    38.6s total (7/8 PASS: metadata, privilege, network, filesystem, resources, egress, env_leak)
+=== DAYTONA (python:3.12-slim, 4 CPU, 8GB RAM, 10GB disk) ===
+  RL:         164.7s total (147.8s training 30ep/15steps, 29/29 tests, best=15.1)
+  FS:          14.7s total (1.8s codegen, 2.6s download, 6.8s large IO)
+  Pause:       32.5s total (22.3s pause, 0.7s resume, state=OK)
+  Concurrent:  10.3s total (2.7s seq, 0.8s conc, 3.38x speedup)
+  Iteration:    6.3s total (0.3s overwrite, 0.5s test avg)
+  Fan-out:      7.0s total (1.7s create 10 sandboxes, 0.3s compute, 1.5s custom image)
+  Agent:       79.0s total (3 iters, best reward 15.6, llm=gemini-2.5-flash-lite)
+  Docker:     10.5s total (build=0.0s, custom_create=0.9s, verify=0.7s pre-baked, stock_boot=0.78s, 3.88x speedup)
+  Network:     7.6s total (29.8ms latency, 107.12 MB/s download, 4.09 MB/s upload, 1.29s pip)
 
 === E2B (default instance) ===
   RL:         301.1s total (287s training*, 29/29 tests)
@@ -533,7 +458,6 @@
   Fan-out:      3.0s total (2.4s create 10 sandboxes, 0.1s compute, 0.2s upload)
   Docker:      6.1s total (template, create=1.4s, pip=4.1s, stock_boot=0.14s)
   Network:     8.8s total (17.6ms latency, 53.93 MB/s download, 2.87 MB/s upload, 1.46s pip)
-  Security:    8.6s total (5/8 PASS: metadata, privilege, escape, filesystem, env_leak)
 
 === BLAXEL (4 vCPU, 8GB RAM) ===
   RL:         135.2s total (120s training*, 29/29 tests)
@@ -544,7 +468,6 @@
   Fan-out:     10.6s total (3.9s create 10 sandboxes, 1.6s compute, 3.3s upload)
   Docker:     11.2s total (pre-existing, create=3.0s, pip=7.4s, stock_boot=0.33s)
   Network:     10.6s total (58.6ms latency, 66.70 MB/s download, 3.22 MB/s upload, 1.13s pip)
-  Security:    23.3s total (3/8 PASS: metadata, network, env_leak -- WEAKEST)
 
 === MODAL (4 CPU, 8GB) ===
   RL:         564.0s total (542.2s training, 29/29 tests, best reward 14.54)
@@ -556,20 +479,13 @@
   Agent:       86.4s total (3 iters, best reward 14.4, llm=gemini-2.5-flash-lite)
   Docker:     14.7s total (build=0.2s, custom_create=0.8s, verify=2.9s pre-baked, stock_boot=0.31s, 1.81x speedup)
   Network:     22.8s total (24.6ms latency, 84.91 MB/s download, 0.74 MB/s upload, 1.63s pip)
-  Security:    42.9s total (7/8 PASS: metadata, privilege, network, filesystem, resources, egress, env_leak -- STRONGEST)
 
 === CODING AGENT (all providers, Gemini 2.5 Flash Lite, 3 iterations) ===
   E2B:         61.1s total (setup=4.1s, best_reward=7.7)
-  Daytona:     61.9s total (setup=3.4s, best_reward=13.6)
+  Daytona:     79.0s total (setup=4.9s, best_reward=15.6)
   Blaxel:      75.1s total (setup=5.0s, best_reward=16.4)
   Modal:       86.4s total (setup=9.7s, best_reward=14.4)
 
-=== SECURITY (all providers, 8 isolation tests) ===
-  Daytona:     7/8 PASS (38.6s) -- non-root+zero caps+cgroups+filtered egress, only failed escape
-  Modal:       7/8 PASS (42.9s) -- restricted caps+filtered egress, only failed container escape
-  E2B:         5/8 PASS (8.6s)  -- best privilege (non-root), failed network+limits+egress
-  Blaxel:      3/8 PASS (23.3s) -- weakest: root+full caps+/dev/mem+no limits+raw sockets
-
-NOTE: Daytona now uses pre-warmed pool (CreateSandboxBaseParams). Use CreateSandboxFromImageParams for 4CPU/8GB.
+NOTE: Daytona uses CreateSandboxFromImageParams(image='python:3.12-slim') with Resources(cpu=4, memory=8, disk=10).
 * = had intermittent errors on some runs
 ```
