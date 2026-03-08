@@ -422,7 +422,7 @@ def run_network_benchmark(runner, provider):
         list[StepProfile]: Profiling data for each benchmark step.
     """
     if provider == 'daytona':
-        base_dir = '/root/net_bench'
+        base_dir = '/home/daytona/net_bench'
     elif provider == 'blaxel':
         base_dir = '/blaxel/net_bench'
     elif provider == 'modal':

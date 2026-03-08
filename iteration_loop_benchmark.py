@@ -417,7 +417,7 @@ def run_iteration_loop_benchmark(runner, provider):
         list[StepProfile]: Profiling data for each benchmark step.
     """
     if provider == 'daytona':
-        base_dir = '/root/iter_bench'
+        base_dir = '/home/daytona/iter_bench'
     elif provider == 'blaxel':
         base_dir = '/blaxel/iter_bench'
     elif provider == 'modal':

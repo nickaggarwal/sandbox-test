@@ -305,7 +305,7 @@ def run_concurrent_exec_benchmark(runner, provider):
         list[StepProfile]: Profiling data for each benchmark step.
     """
     if provider == 'daytona':
-        base_dir = '/root/concurrent_bench'
+        base_dir = '/home/daytona/concurrent_bench'
     elif provider == 'blaxel':
         base_dir = '/blaxel/concurrent_bench'
     elif provider == 'modal':

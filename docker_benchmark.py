@@ -57,7 +57,7 @@ WORKLOAD_SCRIPT = (
 def _get_base_dir(provider):
     """Get the base directory for this benchmark in a given provider."""
     if provider == 'daytona':
-        return '/root/docker_bench'
+        return '/home/daytona/docker_bench'
     elif provider == 'blaxel':
         return '/blaxel/docker_bench'
     elif provider == 'modal':
@@ -186,7 +186,7 @@ def _create_blaxel_sandbox(api_key, workspace='inferless'):
 
 # ── Exec helpers ──────────────────────────────────────────────────
 
-def _exec_daytona(sandbox, command, cwd='/root/docker_bench', timeout=300):
+def _exec_daytona(sandbox, command, cwd='/home/daytona/docker_bench', timeout=300):
     """Run a command in a Daytona sandbox."""
     try:
         response = sandbox.process.exec(command, cwd=cwd, timeout=timeout)

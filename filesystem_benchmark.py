@@ -418,7 +418,7 @@ def run_filesystem_benchmark(runner, provider):
         list[StepProfile]: Profiling data for each benchmark step.
     """
     if provider == 'daytona':
-        base_dir = '/root/fs_bench'
+        base_dir = '/home/daytona/fs_bench'
     elif provider == 'blaxel':
         base_dir = '/blaxel/fs_bench'
     elif provider == 'modal':

@@ -1,0 +1,575 @@
+==========================================================================
+  PARALLEL SANDBOX PROFILING - 11 sandboxes, 3 concurrent
+  Providers: daytona
+  Stagger: 2.0s between launches
+==========================================================================
+  Started: 2026-03-07T16:44:47.879224
+
+[2/11] [daytona-fs-1] Staggering start by 2.0s...
+[3/11] [daytona-pause-1] Staggering start by 4.0s...
+[1/11] [daytona-1] Creating daytona sandbox...
+[2/11] [daytona-fs-1] Creating daytona sandbox...
+[Daytona SDK] Created sandbox: e51ea658-b135-44e5-9513-c09f4b7ac465
+[1/11] [daytona-1]   Sandbox ready: e51ea658-b135-44e5-9...
+[1/11] [daytona-1] Uploading project...
+  Bundling 42 files into tar.gz...
+  Archive: 89.7KB compressed (42 files)
+[3/11] [daytona-pause-1] Creating daytona sandbox...
+  Upload complete
+[1/11] [daytona-1]   Upload complete
+[1/11] [daytona-1] Installing dependencies...
+[Daytona SDK] Running: pip install django djangorestframework pytz gymnasium numpy
+[Daytona SDK] Created sandbox: 723adae7-02aa-46b4-9988-851325ce1c66
+[3/11] [daytona-pause-1]   Sandbox ready: 723adae7-02aa-46b4-9...
+[3/11] [daytona-pause-1] Running async task + pause/resume benchmark...
+    [ASYNC] Step 1/7: Start background task...
+[Daytona SDK] Created sandbox: 3e987cdb-05af-4c6f-94ff-4c6ebede2665
+[2/11] [daytona-fs-1]   Sandbox ready: 3e987cdb-05af-4c6f-9...
+[2/11] [daytona-fs-1] Running filesystem benchmark...
+    [FS] Step 1/6: Code generation...
+    [ASYNC]   2.5s - bg task started, progress: {"step": 5, "total": 20, "pct": 25.0, "ts": 1772930695.4091282}
+    [ASYNC] Step 2/7: Write state files...
+    [FS]   1.5s - 10 files, 78KB total
+    [FS] Step 2/6: Build/compile...
+    [FS]   0.3s - 10 .pyc files generated
+    [FS] Step 3/6: Native file upload...
+    [ASYNC]   0.9s - 3/3 files, 10KB
+    [ASYNC] Step 3/7: Pause sandbox...
+  Exit code: 0
+[Daytona SDK] Running: python manage.py migrate --run-syncdb
+    [FS]   1.6s - 5/5 files, 32KB
+    [FS] Step 4/6: Native file download...
+  Exit code: 0
+[1/11] [daytona-1]   Install OK
+[1/11] [daytona-1] Running Django tests...
+    [FS]   2.7s - 9 files, 44KB
+    [FS] Step 5/6: Pip package store & retrieve...
+    [FS]   5.3s - 3 wheels: down 647KB, up 647KB, integrity=OK
+    [FS] Step 6/6: List & verify...
+    [FS]   0.3s - 31 files total, native: 20 entries
+[2/11] [daytona-fs-1] Destroying sandbox...
+[Daytona SDK] Destroyed sandbox: 3e987cdb-05af-4c6f-94ff-4c6ebede2665
+[2/11] [daytona-fs-1] DONE in 16.3s
+[4/11] [daytona-concurrent-1] Staggering start by 6.0s...
+[1/11] [daytona-1]   Tests: 29/29 passed
+[1/11] [daytona-1] RL training (30 ep, 15 steps)...
+[4/11] [daytona-concurrent-1] Creating daytona sandbox...
+[Daytona SDK] Created sandbox: 9a32e381-5792-49aa-8049-b26dbebcc668
+[4/11] [daytona-concurrent-1]   Sandbox ready: 9a32e381-5792-49aa-8...
+[4/11] [daytona-concurrent-1] Running concurrent exec benchmark...
+    [CE] Step 1/4: Setup workspace...
+    [CE]   4.9s - 5/5 files, pip OK
+    [CE] Step 2/4: Sequential exec (baseline)...
+    [CE]   2.0s - 4 sequential: 1.99s (flake8=0.27s, pytest=0.29s, mypy=1.00s, black=0.43s)
+    [CE] Step 3/4: Concurrent exec...
+    [CE]   0.6s - 4 concurrent: 0.60s (flake8=0.26s, mypy=0.48s, pytest=0.53s, black=0.60s)
+    [CE] Step 4/4: Comparison...
+    [CE]   speedup=3.33x, seq=1.99s, conc=0.60s, parallel=yes
+[4/11] [daytona-concurrent-1] Destroying sandbox...
+[Daytona SDK] Destroyed sandbox: 9a32e381-5792-49aa-8049-b26dbebcc668
+[4/11] [daytona-concurrent-1] DONE in 8.8s
+[5/11] [daytona-iteration-1] Staggering start by 8.0s...
+    [ASYNC]   25.9s - paused in 25.887s
+    [ASYNC] Step 4/7: Resume sandbox...
+    [ASYNC]   0.6s - resumed in 0.566s
+    [ASYNC] Step 5/7: Verify state after resume...
+    [ASYNC]   2.0s - 5/5 files, json=OK, bin=OK
+    [ASYNC] Step 6/7: Restart task after resume...
+    [ASYNC]   0.7s - compute OK, fib50 in 0.007s
+    [ASYNC] Step 7/7: Download & verify results...
+    [ASYNC]   1.7s - 6/6 files, 10KB total
+[3/11] [daytona-pause-1] Destroying sandbox...
+[Daytona SDK] Destroyed sandbox: 723adae7-02aa-46b4-9988-851325ce1c66
+[3/11] [daytona-pause-1] DONE in 35.6s
+[6/11] [daytona-fanout-1] Staggering start by 10.0s...
+[5/11] [daytona-iteration-1] Creating daytona sandbox...
+[Daytona SDK] Created sandbox: cda8d413-f43d-4c88-8107-f7d66e24dc91
+[5/11] [daytona-iteration-1]   Sandbox ready: cda8d413-f43d-4c88-8...
+[5/11] [daytona-iteration-1] Running iteration loop benchmark...
+    [ITER] Step 1/6: Upload broken code...
+    [ITER]   1.9s - 2 files uploaded, 1466B
+    [ITER] Step 2/6: Run tests (expect fail)...
+    [ITER]   0.3s - 3 failures, 0 errors, exit=1, exec=0.31s
+    [ITER] Step 3/6: Upload fix...
+    [ITER]   0.3s - 802B written, overwrite in 0.274s
+    [ITER] Step 4/6: Run tests (expect pass)...
+    [ITER]   0.3s - 6 tests passed, exec=0.26s
+    [ITER] Step 5/6: Add feature (iteration 2)...
+    [ITER]   0.5s - 2 files updated, 2009B, iteration 2
+    [ITER] Step 6/6: Final validation...
+    [ITER]   0.3s - 9/9 tests passed, final validation OK
+[5/11] [daytona-iteration-1] Destroying sandbox...
+[Daytona SDK] Destroyed sandbox: cda8d413-f43d-4c88-8107-f7d66e24dc91
+[5/11] [daytona-iteration-1] DONE in 4.6s
+[7/11] [daytona-agent-1] Staggering start by 12.0s...
+[6/11] [daytona-fanout-1] Running fan-out benchmark (daytona)...
+    [FO] Step 1/6: Create 10 sandboxes (stock image)...
+[Daytona SDK] Created sandbox: 61e28201-1960-470a-a29b-e86cf4ed8493
+[Daytona SDK] Created sandbox: 6dfcd241-428d-4b3b-9c76-ca6a64df7c29
+[Daytona SDK] Created sandbox: 83a0605d-99aa-460a-93d8-ad9b4d9a6e72
+[Daytona SDK] Created sandbox: c2c6549b-9041-40fd-aca4-6feea09fdaea
+[Daytona SDK] Created sandbox: 3a0e79ec-cbd7-4511-9454-5c91e55c1442
+[Daytona SDK] Created sandbox: fa07a46c-9857-4ba2-8f1a-6c4c395c457a
+[Daytona SDK] Created sandbox: 2c5dc0e2-dbcb-450d-8723-6fcdf97eb35e
+[Daytona SDK] Created sandbox: 0300c0f1-98a3-45a0-af27-c60b13fbadaa
+[Daytona SDK] Created sandbox: 17d9910a-b94d-47cc-a7bf-5178e731027b
+[Daytona SDK] Created sandbox: a77ab9fe-3b54-460b-bd5f-cd85ae87382c
+    [FO]   6.9s - 10 sandboxes in 6.88s (avg 0.69s each)
+    [FO] Step 2/6: Upload code to 10 sandboxes...
+[7/11] [daytona-agent-1] Running coding agent benchmark (daytona, llm=gemini)...
+    [AGENT] Step 1: Setting up sandbox...
+[Agent] Creating daytona sandbox...
+    [FO]   1.7s - 10 sandboxes loaded, 1364B each, wall=1.73s
+    [FO] Step 3/6: Run tasks on 10 sandboxes...
+[Daytona SDK] Created sandbox: 2d3f3c00-6396-48dd-a1ff-edf4531da20f
+[Agent] Sandbox ready: 2d3f3c00-6396-48dd-a1ff-edf4531da20f
+    [FO]   0.3s - 10 tasks done, wall=0.34s, times=[0.10s, 0.12s, 0.12s, 0.11s, 0.14s, 0.16s, 0.16s, 0.30s, 0.32s, 0.34s]
+    [FO] Step 4/6: Collect results...
+[Agent] Installing base dependencies...
+    [FO]   1.3s - 10 results collected, wall=1.31s, valid=True
+    [FO] Step 5/6: Destroy 10 sandboxes...
+[Daytona SDK] Destroyed sandbox: 17d9910a-b94d-47cc-a7bf-5178e731027b
+[Daytona SDK] Destroyed sandbox: 0300c0f1-98a3-45a0-af27-c60b13fbadaa
+[Daytona SDK] Destroyed sandbox: 3a0e79ec-cbd7-4511-9454-5c91e55c1442
+[Daytona SDK] Destroyed sandbox: c2c6549b-9041-40fd-aca4-6feea09fdaea
+[Daytona SDK] Destroyed sandbox: 2c5dc0e2-dbcb-450d-8723-6fcdf97eb35e
+[Daytona SDK] Destroyed sandbox: 83a0605d-99aa-460a-93d8-ad9b4d9a6e72
+[Daytona SDK] Destroyed sandbox: 6dfcd241-428d-4b3b-9c76-ca6a64df7c29
+[Daytona SDK] Destroyed sandbox: fa07a46c-9857-4ba2-8f1a-6c4c395c457a
+[Daytona SDK] Destroyed sandbox: a77ab9fe-3b54-460b-bd5f-cd85ae87382c
+[Daytona SDK] Destroyed sandbox: 61e28201-1960-470a-a29b-e86cf4ed8493
+    [FO]   0.3s - 10 sandboxes destroyed in 0.31s
+    [FO] Step 6/6: Create 10 sandboxes (custom image)...
+[Agent] pip install exit code: 0
+    [AGENT]   4.4s - sandbox=2d3f3c00-6396-48dd-a1ff-edf4531da20f, provider=daytona, llm=gemini/gemini-2.5-flash-lite
+    [AGENT] Step 2: Uploading project...
+  Bundling 42 files into tar.gz...
+  Archive: 89.7KB compressed (42 files)
+  Upload complete
+    [AGENT]   0.8s - uploaded from .
+
+    [AGENT] Starting 3 iterations (llm=gemini/gemini-2.5-flash-lite, threshold=25.0)...
+    [AGENT] Step 3: Iteration 1/3...
+    [AGENT]   LLM returned 1 blocks in 10.5s
+    [AGENT]   11.4s - tests=FAIL, reward=6.8, best=6.8, llm=10.5s, upload=0.4s, test=0.5s, blocks=1
+    [AGENT] Step 4: Iteration 2/3...
+    [FO]   34.2s - 10 sandboxes in 34.19s (avg 3.42s each)
+[6/11] [daytona-fanout-1] DONE in 44.8s
+[8/11] [daytona-docker-1] Staggering start by 14.0s...
+    [AGENT]   LLM returned 2 blocks in 20.6s
+    [AGENT]   21.9s - tests=FAIL, reward=10.6, best=10.6, llm=20.6s, upload=0.8s, test=0.5s, blocks=2
+    [AGENT] Step 5: Iteration 3/3...
+[8/11] [daytona-docker-1] Running Docker image benchmark (daytona)...
+    [DOCKER] Provider: daytona (image build=yes)
+    [DOCKER] Step 1/6: Build custom image...
+    [DOCKER]   0.0s - custom image built with 5 deps
+    [DOCKER] Step 2/6: Create sandbox (custom image)...
+    [DOCKER]   0.8s - sandbox created from custom image in 0.79s
+    [DOCKER] Step 3/6: Verify pre-installed deps...
+    [DOCKER]   0.7s - pre-baked deps verify=OK, no pip install needed
+    [DOCKER] Step 4/6: Run compute workload...
+    [DOCKER]   0.3s - matrix shape: (200, 200)
+django version: 6.0.3
+WORKLOAD_OK
+    [DOCKER] Step 5/6: Stock image boot time...
+    [DOCKER]   0.1s - stock image boot: 0.14s
+    [DOCKER] Step 6/6: Compare vs baseline...
+    [DOCKER]   0.6s - stock_boot=0.14s, baseline(create+pip)=0.2s, custom(create+verify)=1.5s, speedup=0.16x
+    [DOCKER] Destroying sandbox...
+[8/11] [daytona-docker-1] DONE in 3.2s
+[9/11] [daytona-security-1] Staggering start by 16.0s...
+    [AGENT]   LLM returned 1 blocks in 19.8s
+    [AGENT]   20.7s - tests=FAIL, reward=10.4, best=10.6, llm=19.8s, upload=0.5s, test=0.5s, blocks=1
+    [AGENT] Final: iterations=3, best_reward=10.6, threshold=25.0, llm=gemini/gemini-2.5-flash-lite
+[Agent] Cleaning up sandbox...
+[Daytona SDK] Destroyed sandbox: 2d3f3c00-6396-48dd-a1ff-edf4531da20f
+[7/11] [daytona-agent-1] DONE in 59.3s
+[10/11] [daytona-sec-exploits-1] Staggering start by 18.0s...
+[9/11] [daytona-security-1] Creating daytona sandbox...
+[Daytona SDK] Created sandbox: fcf95363-ddc3-4a6d-8b1f-b801a85c8db7
+[9/11] [daytona-security-1]   Sandbox ready: fcf95363-ddc3-4a6d-8...
+[9/11] [daytona-security-1] Running security & isolation benchmark...
+    [SEC] Step 1/8: Cloud metadata / IMDS access...
+    [SEC]   6.4s - all metadata endpoints blocked
+    [SEC] Step 2/8: Privilege & identity audit...
+[10/11] [daytona-sec-exploits-1] Creating daytona sandbox...
+    [SEC]   0.3s - root but restricted: caps=000001ffffffffff, seccomp=2, shadow=True
+    [SEC] Step 3/8: Container/VM escape surface...
+    [SEC]   0.3s - CRITICAL: host_fs_readable:hostname=fcf95363-ddc3-4a6d-8b1f-b801a85c8db7
+    [SEC] Step 4/8: Internal network scan...
+[Daytona SDK] Created sandbox: 51a48dae-e02f-405a-af8e-dedcca42e19e
+[10/11] [daytona-sec-exploits-1]   Sandbox ready: 51a48dae-e02f-405a-a...
+[10/11] [daytona-sec-exploits-1] Running security exploit validation...
+    [EXPLOIT] Step 1/5: /dev/mem physical memory read...
+    [EXPLOIT]   0.5s - blocked: PermissionError: [Errno 13] Permission denied: '/dev/mem'
+    [EXPLOIT] Step 2/5: Host filesystem traversal via /proc/1/root...
+    [EXPLOIT]   0.7s - EXPLOITED: 7/9 host files readable via /proc/1/root; host_passwd=root:x:0:0:root:/root:/bin/bash; host_hostname=51a48dae
+    [EXPLOIT] Step 3/5: Raw ICMP socket ping...
+    [EXPLOIT]   3.5s - EXPLOITED: raw ICMP socket created, 1/2 targets replied: dns_google(8.8.8.8)=2.14ms
+    [EXPLOIT] Step 4/5: Linux capability abuse...
+    [EXPLOIT]   0.4s - EXPLOITED: 41/41 caps effective (CapEff=000001ffffffffff), 5 dangerous ops succeeded: ptrace_proc1_mem, ptrace_proc1_map
+    [EXPLOIT] Step 5/5: Resource exhaustion (safe)...
+    [EXPLOIT]   1.7s - EXPLOITED: no effective resource limits; mem=520MB; fds=1021; pids=100; memory_cgroup=8589934592; pids_cgroup=629145
+[10/11] [daytona-sec-exploits-1] Destroying sandbox...
+[Daytona SDK] Destroyed sandbox: 51a48dae-e02f-405a-af8e-dedcca42e19e
+[10/11] [daytona-sec-exploits-1] DONE in 8.7s
+[11/11] [daytona-network-1] Staggering start by 20.0s...
+    [SEC]   20.3s - no mgmt ports reachable; gw=1.0.20.172
+    [SEC] Step 5/8: Sensitive filesystem exposure...
+    [SEC]   0.2s - accessible: /proc/kallsyms, /dev/kmsg, other_proc_environ
+    [SEC] Step 6/8: Resource limits (cgroup)...
+    [SEC]   0.3s - limits configured: mem=8589934592; pids=463663; cpu=400000 100000; fds_opened=1021; nofile=1024/524288
+    [SEC] Step 7/8: Egress filtering...
+[11/11] [daytona-network-1] Creating daytona sandbox...
+[Daytona SDK] Created sandbox: 26b98449-8e63-46e5-81f1-b8278f41fdf0
+[11/11] [daytona-network-1]   Sandbox ready: 26b98449-8e63-46e5-8...
+[11/11] [daytona-network-1] Running network speed benchmark...
+    [SEC]   8.3s - weak egress filtering: SMTP=filtered; Redis=filtered; MySQL=filtered; Postgres=filtered; raw_socket=True; ipv6=False
+    [SEC] Step 8/8: Environment variable leakage...
+    [NET] Step 1/6: HTTP latency...
+    [SEC]   0.3s - no sensitive env vars leaked (total=15)
+[9/11] [daytona-security-1] Destroying sandbox...
+[Daytona SDK] Destroyed sandbox: fcf95363-ddc3-4a6d-8b1f-b801a85c8db7
+[9/11] [daytona-security-1] DONE in 37.3s
+    [NET]   0.4s - min=8.6ms avg=22.7ms max=51.4ms (5 samples)
+    [NET] Step 2/6: Download throughput (10MB)...
+    [NET]   0.4s - 9.5MB in 0.13s (73.14 MB/s)
+    [NET] Step 3/6: Download throughput (100MB)...
+    [NET]   1.6s - 95.4MB in 1.4s (68.27 MB/s)
+    [NET] Step 4/6: Upload throughput (5MB)...
+    [NET]   1.2s - 5.0MB in 0.92s (5.41 MB/s)
+    [NET] Step 5/6: DNS resolution...
+    [NET]   0.2s - 5/5 resolved, min=1.28ms avg=2.11ms max=3.39ms
+    [NET] Step 6/6: pip install (real-world)...
+    [NET]   1.5s - pip install requests: 0.73s (exit=0)
+[11/11] [daytona-network-1] Destroying sandbox...
+[Daytona SDK] Destroyed sandbox: 26b98449-8e63-46e5-81f1-b8278f41fdf0
+[11/11] [daytona-network-1] DONE in 6.3s
+[1/11] [daytona-1]   Training complete, fetching results...
+[1/11] [daytona-1] Retrieving results...
+[1/11] [daytona-1]   Best reward: 15.100000000000007
+[1/11] [daytona-1] Destroying sandbox...
+[Daytona SDK] Destroyed sandbox: e51ea658-b135-44e5-9513-c09f4b7ac465
+[1/11] [daytona-1] DONE in 268.3s
+
+==========================================================================
+  PROFILING REPORT
+==========================================================================
+
+  daytona-1 [daytona] (sandbox: e51ea658-b135-44...)
+  Config: episodes=30, max_steps=15
+  create_sandbox                1.3s  [OK]
+  upload_project                1.4s  [OK]
+  install_deps                  5.3s  [OK]
+  run_tests                    10.8s  [OK]
+  rl_training                 246.2s  [OK]
+  retrieve_results              0.5s  [OK]
+  destroy_sandbox               0.9s  [OK]
+  ──────────────────────────────────────────────────
+  Total:      268.3s
+  Tests:    29/29
+  RL Best:  15.100000000000007
+  RL Avg:   10.810000000000002
+
+  daytona-agent-1 [daytona] (sandbox: N/A)
+  Config: episodes=None, max_steps=None
+  agent_setup                   4.4s  [OK]
+  agent_upload_project          0.8s  [OK]
+  agent_iteration_1            11.4s  [OK]
+  agent_iteration_2            21.9s  [OK]
+  agent_iteration_3            20.7s  [OK]
+  agent_final_result            0.0s  [FAIL]
+  ──────────────────────────────────────────────────
+  Total:       59.3s
+  Tests:    0/0
+  RL Best:  0.0
+  RL Avg:   0.0
+
+  daytona-concurrent-1 [daytona] (sandbox: 9a32e381-5792-49...)
+  Config: episodes=None, max_steps=None
+  create_sandbox                0.8s  [OK]
+  ce_setup_workspace            4.9s  [OK]
+  ce_sequential_exec            2.0s  [OK]
+  ce_concurrent_exec            0.6s  [OK]
+  ce_comparison                 0.0s  [OK]
+  destroy_sandbox               0.2s  [OK]
+  ──────────────────────────────────────────────────
+  Total:        8.8s
+  Tests:    0/0
+  RL Best:  0.0
+  RL Avg:   0.0
+
+  daytona-docker-1 [daytona] (sandbox: N/A)
+  Config: episodes=None, max_steps=None
+  docker_build_image            0.0s  [OK]
+  docker_create_sandbox         0.8s  [OK]
+  docker_verify_deps            0.7s  [OK]
+  docker_run_workload           0.3s  [OK]
+  docker_stock_boot             0.1s  [OK]
+  docker_comparison             0.6s  [OK]
+  ──────────────────────────────────────────────────
+  Total:        3.2s
+  Tests:    0/0
+  RL Best:  0.0
+  RL Avg:   0.0
+
+  daytona-fanout-1 [daytona] (sandbox: N/A)
+  Config: episodes=None, max_steps=None
+  fo_create_sandboxes           6.9s  [OK]
+  fo_upload_code                1.7s  [OK]
+  fo_run_tasks                  0.3s  [OK]
+  fo_collect_results            1.3s  [OK]
+  fo_destroy_sandboxes          0.3s  [OK]
+  fo_create_custom             34.2s  [OK]
+  ──────────────────────────────────────────────────
+  Total:       44.8s
+  Tests:    0/0
+  RL Best:  0.0
+  RL Avg:   0.0
+
+  daytona-fs-1 [daytona] (sandbox: 3e987cdb-05af-4c...)
+  Config: episodes=None, max_steps=None
+  create_sandbox                4.0s  [OK]
+  fs_code_generation            1.5s  [OK]
+  fs_build_compile              0.3s  [OK]
+  fs_upload_files               1.6s  [OK]
+  fs_download_files             2.7s  [OK]
+  fs_pip_package_io             5.3s  [OK]
+  fs_list_verify                0.3s  [OK]
+  destroy_sandbox               0.3s  [OK]
+  ──────────────────────────────────────────────────
+  Total:       16.3s
+  Tests:    0/0
+  RL Best:  0.0
+  RL Avg:   0.0
+
+  daytona-iteration-1 [daytona] (sandbox: cda8d413-f43d-4c...)
+  Config: episodes=None, max_steps=None
+  create_sandbox                0.6s  [OK]
+  iter_upload_broken            1.9s  [OK]
+  iter_test_fail                0.3s  [OK]
+  iter_upload_fix               0.3s  [OK]
+  iter_test_pass                0.3s  [OK]
+  iter_add_feature              0.5s  [OK]
+  iter_final_validation         0.3s  [OK]
+  destroy_sandbox               0.2s  [OK]
+  ──────────────────────────────────────────────────
+  Total:        4.6s
+  Tests:    0/0
+  RL Best:  0.0
+  RL Avg:   0.0
+
+  daytona-network-1 [daytona] (sandbox: 26b98449-8e63-46...)
+  Config: episodes=None, max_steps=None
+  create_sandbox                0.6s  [OK]
+  net_latency                   0.4s  [OK]
+  net_download                  0.4s  [OK]
+  net_download_large            1.6s  [OK]
+  net_upload                    1.2s  [OK]
+  net_dns                       0.2s  [OK]
+  net_pip_install               1.5s  [OK]
+  destroy_sandbox               0.2s  [OK]
+  ──────────────────────────────────────────────────
+  Total:        6.3s
+  Tests:    0/0
+  RL Best:  0.0
+  RL Avg:   0.0
+
+  daytona-pause-1 [daytona] (sandbox: 723adae7-02aa-46...)
+  Config: episodes=None, max_steps=None
+  create_sandbox                0.8s  [OK]
+  async_start_task              2.5s  [OK]
+  async_write_state             0.9s  [OK]
+  async_pause                  25.9s  [OK]
+  async_resume                  0.6s  [OK]
+  async_verify_state            2.0s  [OK]
+  async_restart_task            0.7s  [OK]
+  async_download_verify         1.7s  [OK]
+  destroy_sandbox               0.3s  [OK]
+  ──────────────────────────────────────────────────
+  Total:       35.6s
+  Tests:    0/0
+  RL Best:  0.0
+  RL Avg:   0.0
+
+  daytona-sec-exploits-1 [daytona] (sandbox: 51a48dae-e02f-40...)
+  Config: episodes=None, max_steps=None
+  create_sandbox                1.2s  [OK]
+  exploit_devmem_read           0.5s  [OK]
+  exploit_host_fs_traversal     0.7s  [FAIL]
+  exploit_raw_socket_ping       3.5s  [FAIL]
+  exploit_capability_abuse      0.4s  [FAIL]
+  exploit_resource_exhaustion     1.7s  [FAIL]
+  destroy_sandbox               0.2s  [OK]
+  ──────────────────────────────────────────────────
+  Total:        8.7s
+  Tests:    0/0
+  RL Best:  0.0
+  RL Avg:   0.0
+
+  daytona-security-1 [daytona] (sandbox: fcf95363-ddc3-4a...)
+  Config: episodes=None, max_steps=None
+  create_sandbox                0.6s  [OK]
+  sec_metadata_service          6.4s  [OK]
+  sec_privilege_info            0.3s  [OK]
+  sec_container_escape          0.3s  [FAIL]
+  sec_network_scan             20.3s  [OK]
+  sec_filesystem_exposure       0.2s  [OK]
+  sec_resource_limits           0.3s  [OK]
+  sec_egress_filtering          8.3s  [FAIL]
+  sec_env_leak                  0.3s  [OK]
+  destroy_sandbox               0.2s  [OK]
+  ──────────────────────────────────────────────────
+  Total:       37.3s
+  Tests:    0/0
+  RL Best:  0.0
+  RL Avg:   0.0
+
+  Step                            daytona-1  daytona-agent-1  daytona-concurrent-1  daytona-docker-1  daytona-fanout-1    daytona-fs-1  daytona-iteration-1  daytona-network-1  daytona-pause-1  daytona-sec-exploits-1  daytona-security-1
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  create_sandbox                      1.3s               —           0.8s               —               —           4.0s           0.6s           0.6s           0.8s           1.2s           0.6s
+  upload_project                      1.4s               —               —               —               —               —               —               —               —               —               —
+  install_deps                        5.3s               —               —               —               —               —               —               —               —               —               —
+  run_tests                          10.8s               —               —               —               —               —               —               —               —               —               —
+  rl_training                       246.2s               —               —               —               —               —               —               —               —               —               —
+  retrieve_results                    0.5s               —               —               —               —               —               —               —               —               —               —
+  fs_code_generation                      —               —               —               —               —           1.5s               —               —               —               —               —
+  fs_build_compile                        —               —               —               —               —           0.3s               —               —               —               —               —
+  fs_upload_files                         —               —               —               —               —           1.6s               —               —               —               —               —
+  fs_download_files                       —               —               —               —               —           2.7s               —               —               —               —               —
+  fs_pip_package_io                       —               —               —               —               —           5.3s               —               —               —               —               —
+  fs_list_verify                          —               —               —               —               —           0.3s               —               —               —               —               —
+  async_start_task                        —               —               —               —               —               —               —               —           2.5s               —               —
+  async_write_state                       —               —               —               —               —               —               —               —           0.9s               —               —
+  async_pause                             —               —               —               —               —               —               —               —          25.9s               —               —
+  async_resume                            —               —               —               —               —               —               —               —           0.6s               —               —
+  async_verify_state                      —               —               —               —               —               —               —               —           2.0s               —               —
+  async_restart_task                      —               —               —               —               —               —               —               —           0.7s               —               —
+  async_download_verify                   —               —               —               —               —               —               —               —           1.7s               —               —
+  ce_setup_workspace                      —               —           4.9s               —               —               —               —               —               —               —               —
+  ce_sequential_exec                      —               —           2.0s               —               —               —               —               —               —               —               —
+  ce_concurrent_exec                      —               —           0.6s               —               —               —               —               —               —               —               —
+  ce_comparison                           —               —           0.0s               —               —               —               —               —               —               —               —
+  iter_upload_broken                      —               —               —               —               —               —           1.9s               —               —               —               —
+  iter_test_fail                          —               —               —               —               —               —           0.3s               —               —               —               —
+  iter_upload_fix                         —               —               —               —               —               —           0.3s               —               —               —               —
+  iter_test_pass                          —               —               —               —               —               —           0.3s               —               —               —               —
+  iter_add_feature                        —               —               —               —               —               —           0.5s               —               —               —               —
+  iter_final_validation                   —               —               —               —               —               —           0.3s               —               —               —               —
+  fo_create_sandboxes                     —               —               —               —           6.9s               —               —               —               —               —               —
+  fo_upload_code                          —               —               —               —           1.7s               —               —               —               —               —               —
+  fo_run_tasks                            —               —               —               —           0.3s               —               —               —               —               —               —
+  fo_collect_results                      —               —               —               —           1.3s               —               —               —               —               —               —
+  fo_destroy_sandboxes                    —               —               —               —           0.3s               —               —               —               —               —               —
+  fo_create_custom                        —               —               —               —          34.2s               —               —               —               —               —               —
+  agent_setup                             —           4.4s               —               —               —               —               —               —               —               —               —
+  agent_upload_project                    —           0.8s               —               —               —               —               —               —               —               —               —
+  agent_iteration_1                       —          11.4s               —               —               —               —               —               —               —               —               —
+  agent_iteration_2                       —          21.9s               —               —               —               —               —               —               —               —               —
+  agent_iteration_3                       —          20.7s               —               —               —               —               —               —               —               —               —
+  agent_final_result                      —           0.0s!               —               —               —               —               —               —               —               —               —
+  docker_build_image                      —               —               —           0.0s               —               —               —               —               —               —               —
+  docker_create_sandbox                   —               —               —           0.8s               —               —               —               —               —               —               —
+  docker_verify_deps                      —               —               —           0.7s               —               —               —               —               —               —               —
+  docker_run_workload                     —               —               —           0.3s               —               —               —               —               —               —               —
+  docker_stock_boot                       —               —               —           0.1s               —               —               —               —               —               —               —
+  docker_comparison                       —               —               —           0.6s               —               —               —               —               —               —               —
+  net_latency                             —               —               —               —               —               —               —           0.4s               —               —               —
+  net_download                            —               —               —               —               —               —               —           0.4s               —               —               —
+  net_download_large                      —               —               —               —               —               —               —           1.6s               —               —               —
+  net_upload                              —               —               —               —               —               —               —           1.2s               —               —               —
+  net_dns                                 —               —               —               —               —               —               —           0.2s               —               —               —
+  net_pip_install                         —               —               —               —               —               —               —           1.5s               —               —               —
+  sec_metadata_service                    —               —               —               —               —               —               —               —               —               —           6.4s
+  sec_privilege_info                      —               —               —               —               —               —               —               —               —               —           0.3s
+  sec_container_escape                    —               —               —               —               —               —               —               —               —               —           0.3s!
+  sec_network_scan                        —               —               —               —               —               —               —               —               —               —          20.3s
+  sec_filesystem_exposure                 —               —               —               —               —               —               —               —               —               —           0.2s
+  sec_resource_limits                     —               —               —               —               —               —               —               —               —               —           0.3s
+  sec_egress_filtering                    —               —               —               —               —               —               —               —               —               —           8.3s!
+  sec_env_leak                            —               —               —               —               —               —               —               —               —               —           0.3s
+  exploit_devmem_read                     —               —               —               —               —               —               —               —               —           0.5s               —
+  exploit_host_fs_traversal               —               —               —               —               —               —               —               —               —           0.7s!               —
+  exploit_raw_socket_ping                 —               —               —               —               —               —               —               —               —           3.5s!               —
+  exploit_capability_abuse                —               —               —               —               —               —               —               —               —           0.4s!               —
+  exploit_resource_exhaustion               —               —               —               —               —               —               —               —               —           1.7s!               —
+  destroy_sandbox                     0.9s               —           0.2s               —               —           0.3s           0.2s           0.2s           0.3s           0.2s           0.2s
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  TOTAL                             268.3s          59.3s           8.8s           3.2s          44.8s          16.3s           4.6s           6.3s          35.6s           8.7s          37.3s
+
+  Wall-clock time (parallel): 268.3s
+  Sum of all sandbox times:   493.2s
+  Parallel speedup:           1.84x
+
+  AVERAGE PER STEP         
+  ────────────────────────────────────────
+  create_sandbox            avg=   1.2s  min=   0.6s  max=   4.0s
+  upload_project            avg=   1.4s  min=   1.4s  max=   1.4s
+  install_deps              avg=   5.3s  min=   5.3s  max=   5.3s
+  run_tests                 avg=  10.8s  min=  10.8s  max=  10.8s
+  rl_training               avg= 246.2s  min= 246.2s  max= 246.2s
+  retrieve_results          avg=   0.5s  min=   0.5s  max=   0.5s
+  fs_code_generation        avg=   1.5s  min=   1.5s  max=   1.5s
+  fs_build_compile          avg=   0.3s  min=   0.3s  max=   0.3s
+  fs_upload_files           avg=   1.6s  min=   1.6s  max=   1.6s
+  fs_download_files         avg=   2.7s  min=   2.7s  max=   2.7s
+  fs_pip_package_io         avg=   5.3s  min=   5.3s  max=   5.3s
+  fs_list_verify            avg=   0.3s  min=   0.3s  max=   0.3s
+  async_start_task          avg=   2.5s  min=   2.5s  max=   2.5s
+  async_write_state         avg=   0.9s  min=   0.9s  max=   0.9s
+  async_pause               avg=  25.9s  min=  25.9s  max=  25.9s
+  async_resume              avg=   0.6s  min=   0.6s  max=   0.6s
+  async_verify_state        avg=   2.0s  min=   2.0s  max=   2.0s
+  async_restart_task        avg=   0.7s  min=   0.7s  max=   0.7s
+  async_download_verify     avg=   1.7s  min=   1.7s  max=   1.7s
+  ce_setup_workspace        avg=   4.9s  min=   4.9s  max=   4.9s
+  ce_sequential_exec        avg=   2.0s  min=   2.0s  max=   2.0s
+  ce_concurrent_exec        avg=   0.6s  min=   0.6s  max=   0.6s
+  ce_comparison             avg=   0.0s  min=   0.0s  max=   0.0s
+  iter_upload_broken        avg=   1.9s  min=   1.9s  max=   1.9s
+  iter_test_fail            avg=   0.3s  min=   0.3s  max=   0.3s
+  iter_upload_fix           avg=   0.3s  min=   0.3s  max=   0.3s
+  iter_test_pass            avg=   0.3s  min=   0.3s  max=   0.3s
+  iter_add_feature          avg=   0.5s  min=   0.5s  max=   0.5s
+  iter_final_validation     avg=   0.3s  min=   0.3s  max=   0.3s
+  fo_create_sandboxes       avg=   6.9s  min=   6.9s  max=   6.9s
+  fo_upload_code            avg=   1.7s  min=   1.7s  max=   1.7s
+  fo_run_tasks              avg=   0.3s  min=   0.3s  max=   0.3s
+  fo_collect_results        avg=   1.3s  min=   1.3s  max=   1.3s
+  fo_destroy_sandboxes      avg=   0.3s  min=   0.3s  max=   0.3s
+  fo_create_custom          avg=  34.2s  min=  34.2s  max=  34.2s
+  agent_setup               avg=   4.4s  min=   4.4s  max=   4.4s
+  agent_upload_project      avg=   0.8s  min=   0.8s  max=   0.8s
+  agent_iteration_1         avg=  11.4s  min=  11.4s  max=  11.4s
+  agent_iteration_2         avg=  21.9s  min=  21.9s  max=  21.9s
+  agent_iteration_3         avg=  20.7s  min=  20.7s  max=  20.7s
+  docker_build_image        avg=   0.0s  min=   0.0s  max=   0.0s
+  docker_create_sandbox     avg=   0.8s  min=   0.8s  max=   0.8s
+  docker_verify_deps        avg=   0.7s  min=   0.7s  max=   0.7s
+  docker_run_workload       avg=   0.3s  min=   0.3s  max=   0.3s
+  docker_stock_boot         avg=   0.1s  min=   0.1s  max=   0.1s
+  docker_comparison         avg=   0.6s  min=   0.6s  max=   0.6s
+  net_latency               avg=   0.4s  min=   0.4s  max=   0.4s
+  net_download              avg=   0.4s  min=   0.4s  max=   0.4s
+  net_download_large        avg=   1.6s  min=   1.6s  max=   1.6s
+  net_upload                avg=   1.2s  min=   1.2s  max=   1.2s
+  net_dns                   avg=   0.2s  min=   0.2s  max=   0.2s
+  net_pip_install           avg=   1.5s  min=   1.5s  max=   1.5s
+  sec_metadata_service      avg=   6.4s  min=   6.4s  max=   6.4s
+  sec_privilege_info        avg=   0.3s  min=   0.3s  max=   0.3s
+  sec_network_scan          avg=  20.3s  min=  20.3s  max=  20.3s
+  sec_filesystem_exposure   avg=   0.2s  min=   0.2s  max=   0.2s
+  sec_resource_limits       avg=   0.3s  min=   0.3s  max=   0.3s
+  sec_env_leak              avg=   0.3s  min=   0.3s  max=   0.3s
+  exploit_devmem_read       avg=   0.5s  min=   0.5s  max=   0.5s
+  destroy_sandbox           avg=   0.3s  min=   0.2s  max=   0.9s
+
+  BOTTLENECK ANALYSIS:
+      246.2s  rl_training               (daytona-1 [daytona])
+       34.2s  fo_create_custom          (daytona-fanout-1 [daytona])
+       25.9s  async_pause               (daytona-pause-1 [daytona])
+       21.9s  agent_iteration_2         (daytona-agent-1 [daytona])
+       20.7s  agent_iteration_3         (daytona-agent-1 [daytona])
+
+  Full report saved to: rl_output/parallel_profile_report.json
+==========================================================================

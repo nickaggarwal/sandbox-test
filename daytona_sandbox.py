@@ -19,7 +19,7 @@ try:
 except ImportError:
     pass
 
-from daytona import Daytona, DaytonaConfig, CreateSandboxFromImageParams, Image, Resources
+from daytona import Daytona, DaytonaConfig, CreateSandboxBaseParams
 
 
 class DaytonaSandboxRunner:
@@ -36,11 +36,10 @@ class DaytonaSandboxRunner:
         self.sandbox_id = None
 
     def create_sandbox(self):
-        """Create a new Python sandbox via Daytona SDK."""
+        """Create a new Python sandbox via Daytona SDK (pre-warmed pool)."""
         self.sandbox = self.daytona.create(
-            CreateSandboxFromImageParams(
-                image=Image.debian_slim('3.12'),
-                resources=Resources(cpu=4, memory=8, disk=10),
+            CreateSandboxBaseParams(
+                language='python',
                 env_vars={
                     'DJANGO_SETTINGS_MODULE': 'calendly_project.settings',
                     'PYTHONDONTWRITEBYTECODE': '1',
@@ -53,7 +52,7 @@ class DaytonaSandboxRunner:
         print('[Daytona SDK] Created sandbox: {}'.format(self.sandbox_id))
         return {'id': self.sandbox_id}
 
-    def exec(self, command, cwd='/root/app', timeout=300):
+    def exec(self, command, cwd='/home/daytona/app', timeout=300):
         """Execute a shell command in the sandbox.
 
         Note: Daytona has a hard ~60s server-side timeout on process.exec().
@@ -70,7 +69,7 @@ class DaytonaSandboxRunner:
         except Exception as e:
             return {'exit_code': -1, 'result': str(e)}
 
-    def exec_long(self, command, cwd='/root/app', timeout=600,
+    def exec_long(self, command, cwd='/home/daytona/app', timeout=600,
                   poll_interval=5):
         """Execute a long-running command using nohup + polling.
 
@@ -166,7 +165,7 @@ class DaytonaSandboxRunner:
         print('  Archive: {:.1f}KB compressed ({} files)'.format(
             len(tar_bytes) / 1024, len(files_to_upload)))
 
-        remote_base = '/root/{}'.format(remote_dir)
+        remote_base = '/home/daytona/{}'.format(remote_dir)
 
         # Create target directory
         self.exec('mkdir -p {}'.format(remote_base), cwd='/tmp')

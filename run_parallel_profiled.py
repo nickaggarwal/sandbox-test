@@ -135,7 +135,7 @@ def create_runner(provider):
 def get_results_path(provider):
     """Get the remote results file path for a provider."""
     if provider == 'daytona':
-        return '/root/app/rl_output/training_results.json'
+        return '/home/daytona/app/rl_output/training_results.json'
     elif provider == 'blaxel':
         return '/blaxel/app/rl_output/training_results.json'
     elif provider == 'modal':
@@ -1079,7 +1079,7 @@ def _print_report(profiles, total_wall, providers_used):
         'sec_egress_filtering', 'sec_env_leak',
         'exploit_devmem_read', 'exploit_host_fs_traversal',
         'exploit_raw_socket_ping', 'exploit_capability_abuse',
-        'exploit_resource_exhaustion',
+        'exploit_resource_exhaustion', 'exploit_vm_guest_escape',
         'destroy_sandbox',
     ]
     all_step_names = set()
