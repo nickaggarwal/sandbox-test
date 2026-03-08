@@ -610,6 +610,66 @@ def run_profiled_security_benchmark(
     return profile
 
 
+# ── Security Exploits Benchmark Pipeline ──────────────────────────
+
+def run_profiled_security_exploits_benchmark(
+    label,
+    provider='daytona',
+    log_prefix='',
+    stagger_delay=0,
+):
+    """Run the security exploit validation benchmark with full profiling."""
+    if stagger_delay > 0:
+        print(f'{log_prefix}[{label}] Staggering start by {stagger_delay}s...')
+        time.sleep(stagger_delay)
+
+    profile = SandboxProfile(
+        sandbox_label=label,
+        provider=provider,
+        config={'benchmark': 'security-exploits'},
+    )
+    pipeline_start = time.time()
+
+    def log(msg):
+        print(f'{log_prefix}[{label}] {msg}')
+
+    runner = create_runner(provider)
+
+    try:
+        # Create sandbox
+        step = profile.add_step('create_sandbox')
+        log(f'Creating {provider} sandbox...')
+        try:
+            runner.create_sandbox()
+            profile.sandbox_id = runner.sandbox_id or ''
+            profile.finish_step(step, success=True, detail=profile.sandbox_id)
+            log(f'  Sandbox ready: {profile.sandbox_id[:20]}...')
+        except Exception as e:
+            profile.finish_step(step, success=False, detail=str(e))
+            profile.error = f'Create failed: {e}'
+            log(f'  CREATE FAILED: {e}')
+            return profile
+
+        # Run security exploit validation steps
+        from security_exploits import run_security_exploits_benchmark
+        log('Running security exploit validation...')
+        exploit_steps = run_security_exploits_benchmark(runner, provider)
+        profile.steps.extend(exploit_steps)
+
+    finally:
+        step = profile.add_step('destroy_sandbox')
+        log('Destroying sandbox...')
+        try:
+            runner.destroy()
+            profile.finish_step(step, success=True)
+        except Exception as e:
+            profile.finish_step(step, success=False, detail=str(e))
+
+    profile.total_duration_s = time.time() - pipeline_start
+    log(f'DONE in {profile.total_duration_s:.1f}s')
+    return profile
+
+
 # ── Docker Image Benchmark Pipeline ──────────────────────────────
 
 def run_profiled_docker_benchmark(
@@ -891,6 +951,14 @@ def run_parallel(
                     log_prefix=f'[{i+1}/{len(configs)}] ',
                     stagger_delay=i * stagger_s,
                 )
+            elif benchmark_type == 'security-exploits':
+                future = pool.submit(
+                    run_profiled_security_exploits_benchmark,
+                    label=label,
+                    provider=provider,
+                    log_prefix=f'[{i+1}/{len(configs)}] ',
+                    stagger_delay=i * stagger_s,
+                )
             elif benchmark_type == 'agent':
                 future = pool.submit(
                     run_profiled_agent_benchmark,
@@ -1009,6 +1077,9 @@ def _print_report(profiles, total_wall, providers_used):
         'sec_metadata_service', 'sec_privilege_info', 'sec_container_escape',
         'sec_network_scan', 'sec_filesystem_exposure', 'sec_resource_limits',
         'sec_egress_filtering', 'sec_env_leak',
+        'exploit_devmem_read', 'exploit_host_fs_traversal',
+        'exploit_raw_socket_ping', 'exploit_capability_abuse',
+        'exploit_resource_exhaustion',
         'destroy_sandbox',
     ]
     all_step_names = set()
@@ -1172,7 +1243,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--benchmark',
-        choices=['rl', 'fs', 'pause', 'concurrent', 'iteration', 'fanout', 'agent', 'docker', 'network', 'security', 'all'],
+        choices=['rl', 'fs', 'pause', 'concurrent', 'iteration', 'fanout', 'agent', 'docker', 'network', 'security', 'security-exploits', 'all'],
         default='rl',
         help='Benchmark type: "rl" (default), "fs" (filesystem), '
              '"pause" (async task pause/resume), "concurrent" (concurrent exec), '
@@ -1181,6 +1252,7 @@ if __name__ == '__main__':
              '"docker" (custom Docker image), '
              '"network" (network speed), '
              '"security" (isolation & security), '
+             '"security-exploits" (exploit validation PoCs), '
              '"all" (all benchmarks)',
     )
     parser.add_argument(
@@ -1500,6 +1572,33 @@ if __name__ == '__main__':
             configs = security_configs
         else:  # 'all'
             configs = configs + security_configs
+
+    # Add security exploits benchmark configs if requested
+    if args.benchmark in ('security-exploits', 'all'):
+        sec_exploit_configs = []
+        if args.provider in ('both', 'all'):
+            if args.provider == 'all':
+                se_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+            else:
+                se_providers = ['daytona', 'e2b']
+            for prov in se_providers:
+                sec_exploit_configs.append({
+                    'label': f'{prov}-sec-exploits',
+                    'provider': prov,
+                    'benchmark': 'security-exploits',
+                })
+        else:
+            for i in range(args.sandboxes):
+                sec_exploit_configs.append({
+                    'label': f'{args.provider}-sec-exploits-{i+1}',
+                    'provider': args.provider,
+                    'benchmark': 'security-exploits',
+                })
+
+        if args.benchmark == 'security-exploits':
+            configs = sec_exploit_configs
+        else:  # 'all'
+            configs = configs + sec_exploit_configs
 
     # Add network speed benchmark configs if requested
     if args.benchmark in ('network', 'all'):
