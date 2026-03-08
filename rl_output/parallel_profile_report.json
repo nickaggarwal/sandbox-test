@@ -1,77 +1,21 @@
 {
-  "timestamp": "2026-03-07T16:21:21.201485",
-  "wall_clock_s": 30.88,
-  "serial_sum_s": 66.05,
-  "speedup": 2.14,
-  "sandbox_count": 4,
+  "timestamp": "2026-03-07T16:32:07.670862",
+  "wall_clock_s": 5.22,
+  "serial_sum_s": 5.22,
+  "speedup": 1.0,
+  "sandbox_count": 1,
   "providers": [
-    "e2b",
-    "blaxel",
-    "modal",
     "daytona"
   ],
   "profiles": [
     {
-      "sandbox_label": "blaxel-docker",
-      "provider": "blaxel",
-      "sandbox_id": "",
-      "config": {
-        "benchmark": "docker"
-      },
-      "total_duration_s": 12.65,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "docker_build_image",
-          "duration_s": 0.0,
-          "success": true,
-          "detail": "template-based, no runtime build (blaxel)"
-        },
-        {
-          "name": "docker_create_sandbox",
-          "duration_s": 3.74,
-          "success": true,
-          "detail": "sandbox created from default image in 3.74s"
-        },
-        {
-          "name": "docker_verify_deps",
-          "duration_s": 7.73,
-          "success": true,
-          "detail": "runtime pip install needed (7.2s), then verify=OK"
-        },
-        {
-          "name": "docker_run_workload",
-          "duration_s": 0.21,
-          "success": true,
-          "detail": "matrix shape: (200, 200)\ndjango version: 6.0.3\nWORKLOAD_OK"
-        },
-        {
-          "name": "docker_stock_boot",
-          "duration_s": 0.46,
-          "success": true,
-          "detail": "stock image boot: 0.46s"
-        },
-        {
-          "name": "docker_comparison",
-          "duration_s": 0.0,
-          "success": true,
-          "detail": "stock_boot=0.46s, custom_create=3.7s, verify(+pip)=7.7s"
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-docker",
+      "sandbox_label": "daytona-docker-1",
       "provider": "daytona",
       "sandbox_id": "",
       "config": {
         "benchmark": "docker"
       },
-      "total_duration_s": 30.88,
+      "total_duration_s": 5.22,
       "tests_passed": 0,
       "tests_total": 0,
       "rl_best_reward": 0.0,
@@ -80,78 +24,25 @@
       "steps": [
         {
           "name": "docker_build_image",
-          "duration_s": 3.46,
+          "duration_s": 1.9,
           "success": true,
           "detail": "custom image built with 5 deps"
         },
         {
           "name": "docker_create_sandbox",
-          "duration_s": 17.75,
+          "duration_s": 0.77,
           "success": true,
-          "detail": "sandbox created from custom image in 17.75s"
+          "detail": "sandbox created from custom image in 0.77s"
         },
         {
           "name": "docker_verify_deps",
-          "duration_s": 0.79,
+          "duration_s": 0.8,
           "success": true,
           "detail": "pre-baked deps verify=OK, no pip install needed"
         },
         {
           "name": "docker_run_workload",
-          "duration_s": 0.33,
-          "success": true,
-          "detail": "matrix shape: (200, 200)\ndjango version: 6.0.3\nWORKLOAD_OK"
-        },
-        {
-          "name": "docker_stock_boot",
-          "duration_s": 1.53,
-          "success": true,
-          "detail": "stock image boot: 1.53s"
-        },
-        {
-          "name": "docker_comparison",
-          "duration_s": 6.23,
-          "success": true,
-          "detail": "stock_boot=1.53s, baseline(create+pip)=5.5s, custom(create+verify)=18.5s, speedup=0.30x"
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "e2b-docker",
-      "provider": "e2b",
-      "sandbox_id": "",
-      "config": {
-        "benchmark": "docker"
-      },
-      "total_duration_s": 6.47,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "docker_build_image",
-          "duration_s": 0.0,
-          "success": true,
-          "detail": "template-based, no runtime build (e2b)"
-        },
-        {
-          "name": "docker_create_sandbox",
-          "duration_s": 1.46,
-          "success": true,
-          "detail": "sandbox created from default image in 1.46s"
-        },
-        {
-          "name": "docker_verify_deps",
-          "duration_s": 4.42,
-          "success": true,
-          "detail": "runtime pip install needed (3.9s), then verify=OK"
-        },
-        {
-          "name": "docker_run_workload",
-          "duration_s": 0.21,
+          "duration_s": 0.39,
           "success": true,
           "detail": "matrix shape: (200, 200)\ndjango version: 6.0.3\nWORKLOAD_OK"
         },
@@ -163,62 +54,9 @@
         },
         {
           "name": "docker_comparison",
-          "duration_s": 0.0,
+          "duration_s": 0.72,
           "success": true,
-          "detail": "stock_boot=0.15s, custom_create=1.5s, verify(+pip)=4.4s"
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "modal-docker",
-      "provider": "modal",
-      "sandbox_id": "",
-      "config": {
-        "benchmark": "docker"
-      },
-      "total_duration_s": 16.06,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "docker_build_image",
-          "duration_s": 0.2,
-          "success": true,
-          "detail": "custom image built with 5 deps"
-        },
-        {
-          "name": "docker_create_sandbox",
-          "duration_s": 0.9,
-          "success": true,
-          "detail": "sandbox created from custom image in 0.90s"
-        },
-        {
-          "name": "docker_verify_deps",
-          "duration_s": 3.08,
-          "success": true,
-          "detail": "pre-baked deps verify=OK, no pip install needed"
-        },
-        {
-          "name": "docker_run_workload",
-          "duration_s": 0.7,
-          "success": true,
-          "detail": "matrix shape: (200, 200)\ndjango version: 6.0.3\nWORKLOAD_OK"
-        },
-        {
-          "name": "docker_stock_boot",
-          "duration_s": 0.34,
-          "success": true,
-          "detail": "stock image boot: 0.34s"
-        },
-        {
-          "name": "docker_comparison",
-          "duration_s": 10.51,
-          "success": true,
-          "detail": "stock_boot=0.34s, baseline(create+pip)=8.3s, custom(create+verify)=4.0s, speedup=2.09x"
+          "detail": "stock_boot=0.15s, baseline(create+pip)=0.3s, custom(create+verify)=1.6s, speedup=0.18x"
         }
       ],
       "error": ""

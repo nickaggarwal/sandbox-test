@@ -101,13 +101,12 @@ def _create_daytona_sandbox(api_key, image):
 
 
 def _create_daytona_default_sandbox(api_key):
-    """Create a Daytona sandbox with default image (for comparison)."""
-    from daytona import Daytona, DaytonaConfig, CreateSandboxFromImageParams, Image, Resources
+    """Create a Daytona sandbox with pre-warmed default (for comparison)."""
+    from daytona import Daytona, DaytonaConfig, CreateSandboxBaseParams
     daytona = Daytona(DaytonaConfig(api_key=api_key, target='us'))
     sandbox = daytona.create(
-        CreateSandboxFromImageParams(
-            image=Image.debian_slim('3.12'),
-            resources=Resources(cpu=4, memory=8, disk=10),
+        CreateSandboxBaseParams(
+            language='python',
             auto_stop_interval=30,
         ),
         timeout=120,
