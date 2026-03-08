@@ -15,7 +15,15 @@ Provider capabilities:
 NOTE: Like fanout, this benchmark manages its own sandbox lifecycle
 internally (creates and destroys its own runners).
 """
+import os
 import time
+
+# Fix SSL cert verification on macOS
+try:
+    import certifi
+    os.environ.setdefault('SSL_CERT_FILE', certifi.where())
+except ImportError:
+    pass
 
 from run_parallel_profiled import StepProfile
 

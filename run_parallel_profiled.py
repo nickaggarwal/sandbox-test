@@ -16,6 +16,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from datetime import datetime
 
+# Fix SSL cert verification on macOS
+try:
+    import certifi
+    os.environ.setdefault('SSL_CERT_FILE', certifi.where())
+except ImportError:
+    pass
+
 # Load API keys from .env file or environment
 def _load_env():
     env_path = os.path.join(os.path.dirname(__file__), '.env')

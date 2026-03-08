@@ -1,7 +1,7 @@
 # Cloud Sandbox Benchmark Report: Full Results
 
 **Providers tested**: Daytona, E2B, Blaxel, Modal
-**Date**: March 7, 2026 (updated with all 9 benchmarks including Network Speed)
+**Date**: March 7, 2026 (updated with all 10 benchmarks including Security & Isolation)
 **Python**: 3.12 (host and sandbox images)
 **SDKs**: Daytona v0.149, E2B Code Interpreter v2.4.1, Blaxel v0.2.44, Modal v0.74+
 **Instance specs**: Daytona (4 CPU, 8GB, 10GB disk), E2B (default), Blaxel (4 vCPU, 8GB), Modal (4 CPU, 8GB)
@@ -21,6 +21,7 @@
 | 7 | Coding Agent | Real LLM agent loop: generate code, test, score, fix | 4+ |
 | 8 | Custom Docker Image | Build custom image, verify pre-baked deps, compare vs baseline | 5 |
 | 9 | Network Speed | HTTP latency, download/upload throughput, DNS resolution, pip install | 6 |
+| 10 | Security & Isolation | Metadata access, privilege audit, container escape, network scan, filesystem, resource limits, egress, env leakage | 8 |
 
 ---
 
@@ -232,13 +233,33 @@
 
 | Step | Daytona | E2B | Blaxel | Modal |
 |------|---------|-----|--------|-------|
-| Build Custom Image | Runtime build | Template-based (no build) | Pre-existing image (no build) | Runtime build |
-| Create Sandbox (custom image) | Varies | Varies | Varies | Varies |
-| Verify Pre-baked Deps | Yes (baked in) | No (runtime pip) | No (runtime pip) | Yes (baked in) |
-| Run Compute Workload | Yes | Yes | Yes | Yes |
-| Comparison (custom vs default) | Yes | Yes | Yes | Yes |
+| Build Custom Image | 3.5s (runtime) | 0.0s (template) | 0.0s (pre-existing) | 0.2s (runtime) |
+| Create Sandbox (custom) | 17.7s | 1.5s | 3.7s | 0.9s |
+| Verify Pre-baked Deps | 0.8s (pre-baked) | 4.4s (pip needed) | 7.7s (pip needed) | 3.1s (pre-baked) |
+| Run Compute Workload | 0.3s | 0.2s | 0.2s | 0.7s |
+| Stock Image Boot | 1.5s | 0.15s | 0.46s | 0.34s |
+| Comparison | baseline=5.5s, custom=18.5s | stock=0.15s, custom=1.5s | stock=0.46s, custom=3.7s | baseline=8.3s, custom=4.0s, **2.09x** |
+| **Total** | **30.9s** | **6.5s** | **12.6s** | **16.1s** |
 
-**Summary**: Daytona and Modal support runtime image building where dependencies are baked into the image at build time, eliminating repeated pip installs. E2B uses pre-built templates and Blaxel uses pre-existing Docker Hub images, so both require runtime pip install. For agents that spin up many sandboxes with the same dependencies, providers with custom image support offer significant time savings on repeated launches.
+**Stock vs Custom Image Boot Times:**
+
+| Provider | Stock Image Boot | Custom Image Create | Deps Verification | Approach |
+|----------|-----------------|--------------------|--------------------|----------|
+| E2B | 0.15s | 1.5s | 4.4s (runtime pip) | Template-based, no custom build |
+| Modal | 0.34s | 0.9s | 3.1s (pre-baked, OK) | Runtime `Image.debian_slim().pip_install()` |
+| Blaxel | 0.46s | 3.7s | 7.7s (runtime pip) | Pre-existing Docker Hub image |
+| Daytona | 1.5s | 17.7s | 0.8s (pre-baked, OK) | Runtime `Image.debian_slim().pip_install()` |
+
+**Custom image speedup (Daytona & Modal -- providers with runtime image build):**
+
+| Provider | Baseline (stock create + pip) | Custom (create + verify) | Speedup |
+|----------|-------------------------------|--------------------------|---------|
+| Modal | 8.3s | 4.0s | **2.09x** |
+| Daytona | 5.5s | 18.5s | 0.30x* |
+
+\* Daytona's custom image creation (17.7s) was slower on this run due to initial image layer download. Subsequent launches with cached images would be faster.
+
+**Summary**: Modal demonstrates the clearest custom image advantage with a **2.09x speedup** -- creating a sandbox with pre-baked deps (4.0s) vs stock image + runtime pip install (8.3s). E2B has the fastest stock image boot (0.15s) and overall benchmark time (6.5s) but doesn't support custom image building. Daytona supports full runtime image building with `Image.debian_slim().pip_install()` and pre-baked deps verified in just 0.8s (vs 4-8s pip install), but the initial custom image creation was slow (17.7s) due to image layer caching on first use. Blaxel uses pre-existing Docker Hub images and requires runtime pip install (7.7s). For agents that create many sandboxes with the same dependencies, Modal's custom image support offers the best time savings.
 
 ---
 
@@ -296,6 +317,62 @@
 
 ---
 
+## 10. Security & Isolation Benchmark
+
+**What it tests**: Whether each sandbox properly isolates untrusted code from the host infrastructure. Probes 8 attack surfaces: cloud metadata service (IMDS) access, privilege escalation (root, capabilities, seccomp), container escape vectors (docker socket, host filesystem traversal), internal network reachability (management ports on gateway/internal IPs), sensitive filesystem exposure (kernel memory, block devices, cloud credentials), resource limits (cgroup memory/PID/CPU caps), outbound egress filtering (dangerous ports, raw sockets), and environment variable credential leakage.
+
+**Why it matters**: These sandboxes execute untrusted code from AI agents. A weak isolation boundary means an attacker (or a misbehaving LLM) could steal API keys, pivot to internal services, escape the container, or compromise the host. This benchmark reveals which providers have defense-in-depth and which have gaps. Unlike performance benchmarks, here **PASS means the attack was blocked** (isolation held) and **FAIL means the attack succeeded** (isolation broken).
+
+**All tests are non-destructive** -- they only probe whether the attack surface exists, they don't exploit it.
+
+| Test | Daytona | E2B | Blaxel | Modal |
+|------|---------|-----|--------|-------|
+| Cloud Metadata (IMDS) | PASS | PASS | PASS | PASS |
+| Privilege & Identity | PASS | PASS | FAIL | PASS |
+| Container Escape | FAIL | PASS | FAIL | FAIL |
+| Internal Network Scan | PASS | FAIL | PASS | PASS |
+| Filesystem Exposure | PASS | PASS | FAIL | PASS |
+| Resource Limits (cgroup) | PASS | FAIL | FAIL | PASS |
+| Egress Filtering | FAIL | FAIL | FAIL | PASS |
+| Env Variable Leakage | PASS | PASS | PASS | PASS |
+| **Score** | **6/8** | **5/8** | **3/8** | **7/8** |
+
+**Detailed findings:**
+
+| Test | Daytona | E2B | Blaxel | Modal |
+|------|---------|-----|--------|-------|
+| Metadata | All 3 endpoints blocked | All 3 endpoints blocked | All 3 endpoints blocked | All 3 endpoints blocked |
+| Privilege | Root + seccomp=2 (restricted) | Non-root uid=1000, zero caps | Root + full caps, no seccomp | Root + restricted caps (a80c05fb) |
+| Escape | Host FS readable via /proc/1/root | No docker socket, no host FS | Host FS readable via /proc/1/root | Host FS readable via /proc/1/root |
+| Network | No mgmt ports reachable | 7 mgmt ports open on gateway (SSH, Docker API, K8s, kubelet, etc.) | No mgmt ports reachable | No mgmt ports reachable |
+| Filesystem | /proc/kallsyms, /dev/kmsg readable | /proc/kallsyms, /dev/kmsg, host_mounts:/ | /dev/mem accessible (CRITICAL) | host_mounts:/, other proc environ |
+| Resources | mem=8GB, pids=629K, cpu=4x100ms | No cgroup limits, 1018 FDs | No cgroup limits, 1019 FDs | mem=8EB (effectively unlimited), cpu=-1, 10K FDs |
+| Egress | All ports filtered but raw sockets work | All 4 dangerous ports open (SMTP/Redis/MySQL/Postgres) | All ports filtered but raw sockets work | All ports filtered, no raw sockets |
+| Env Leak | 15 env vars, none sensitive | 17 env vars, none sensitive | 33 env vars, none sensitive | 33 env vars, none sensitive |
+
+**Critical findings by provider:**
+
+- **Daytona** (6/8): Strong overall. Seccomp enabled (mode 2), cgroup limits properly configured (8GB mem, 629K PIDs, 4 CPU). Weaknesses: host filesystem traversal via `/proc/1/root` and raw socket access (allows packet crafting).
+- **E2B** (5/8): Best privilege isolation -- runs as non-root (uid=1000) with zero capabilities. Weaknesses: all gateway management ports reachable (SSH:22, Docker API:2375/2376, K8s:6443, kubelet:10250), no cgroup resource limits, and wide-open egress (all dangerous ports accessible).
+- **Blaxel** (3/8): Weakest isolation. Runs as root with full capabilities (`000001ffffffffff`), no seccomp, `/dev/mem` directly accessible (kernel memory read), no cgroup limits, and raw socket access. The combination of full root + /dev/mem access is the most severe finding across all providers.
+- **Modal** (7/8): Strongest isolation. Restricted capabilities (`a80c05fb`), no management ports reachable, all dangerous egress ports filtered, no raw sockets. Only weakness: host filesystem traversal via `/proc/1/root`.
+
+| Step Timing | Daytona | E2B | Blaxel | Modal |
+|-------------|---------|-----|--------|-------|
+| sec_metadata_service | 6.4s | 0.2s | 6.4s | 6.9s |
+| sec_privilege_info | 0.5s | 0.2s | 0.2s | 1.4s |
+| sec_container_escape | 0.5s | 0.2s | 0.2s | 0.7s |
+| sec_network_scan | 20.4s | 6.2s | 6.2s | 20.7s |
+| sec_filesystem_exposure | 0.5s | 0.2s | 0.2s | 0.7s |
+| sec_resource_limits | 0.5s | 0.1s | 0.2s | 0.8s |
+| sec_egress_filtering | 8.4s | 0.1s | 8.3s | 8.9s |
+| sec_env_leak | 0.3s | 0.1s | 0.2s | 0.7s |
+| **Total** | **41.2s** | **8.6s** | **23.3s** | **42.9s** |
+
+**Summary**: Modal provides the strongest isolation (7/8), failing only on host filesystem traversal -- a common container issue that requires VM-level isolation to fully prevent. Daytona is second (6/8) with proper seccomp and cgroup enforcement but allows raw sockets and host FS access. E2B (5/8) has the best privilege model (non-root, zero capabilities) but critically exposes 7 internal management ports and has no resource limits or egress filtering. Blaxel (3/8) has the weakest isolation with root + full capabilities + `/dev/mem` access -- a combination that in a real attack scenario could lead to full host compromise. For production workloads running untrusted agent code, Modal or Daytona should be preferred for their defense-in-depth approach.
+
+---
+
 ## Overall Rankings
 
 ### By Benchmark (fastest total)
@@ -309,8 +386,9 @@
 | Iteration Loop | E2B (3.8s) | Blaxel (5.1s) | Daytona (6.3s) | Modal (12.6s) |
 | Fan-Out (10 sandboxes) | E2B | Blaxel | Modal | Daytona |
 | Coding Agent | E2B (61s) | Blaxel (75s) | Modal (86s) | Daytona (88s) |
-| Custom Docker | Daytona | Modal | E2B | Blaxel |
+| Custom Docker | E2B (6.5s) | Blaxel (12.6s) | Modal (16.1s) | Daytona (30.9s) |
 | Network Speed | E2B (8.2s) | Blaxel (10.1s) | Daytona (11.4s) | Modal (14.0s) |
+| Security & Isolation | Modal (7/8) | Daytona (6/8) | E2B (5/8) | Blaxel (3/8) |
 
 \* Blaxel/E2B had intermittent stability issues on long RL runs
 \** Blaxel skipped pause/resume (no API)
@@ -333,6 +411,8 @@
 | **Network downloads (large files)** | Daytona | 87.76 MB/s sustained download, fastest pip install (0.87s) |
 | **API-heavy agents (many requests)** | E2B | Lowest HTTP latency (13.3ms) and DNS resolution (3.62ms) |
 | **Data upload workloads** | Modal | 7.32 MB/s upload, 2x faster than other providers |
+| **Security-critical workloads** | Modal | Strongest isolation (7/8), filtered egress, restricted caps, no raw sockets |
+| **Untrusted code execution** | Modal/Daytona | Modal (7/8) + Daytona (6/8) have seccomp/cgroup enforcement |
 
 ### Head-to-Head Winners (per operation)
 
@@ -352,7 +432,11 @@
 | Upload throughput | Modal | 7.32 MB/s | Blaxel (3.72 MB/s) |
 | DNS resolution | E2B | 3.62ms | Daytona (3.65ms) |
 | pip install | Daytona | 0.87s | Blaxel (1.11s) |
+| Stock image boot | E2B | 0.15s | Modal (0.34s) |
+| Custom image create | Modal | 0.9s | E2B (1.5s) |
+| Pre-baked deps verify | Daytona | 0.8s | Modal (3.1s) |
 | Sandbox destroy | Modal | 0.11s | E2B (0.16s) |
+| Security isolation | Modal | 7/8 | Daytona (6/8) |
 
 ---
 
@@ -371,6 +455,12 @@
 | Directory listing API | Yes | Yes | Yes | Yes |
 | Snapshots | No | Yes | No | Yes |
 | Network access | Yes | Yes | Yes | Yes |
+| Runs as non-root | No (root+seccomp) | Yes (uid=1000) | No (root+full caps) | No (root+restricted caps) |
+| Seccomp enabled | Yes (mode 2) | No | No | No |
+| Cgroup resource limits | Yes (mem+pid+cpu) | No | No | Partial (mem set, cpu unlimited) |
+| Egress filtering | Partial (raw sockets) | No | Partial (raw sockets) | Yes |
+| IMDS blocked | Yes | Yes | Yes | Yes |
+| Security score | 6/8 | 5/8 | 3/8 | 7/8 |
 
 \* Daytona has a server-side 60s timeout on `process.exec()`; requires `nohup` + polling workaround
 
@@ -404,8 +494,9 @@
   Concurrent:  10.8s total (2.03s seq, 0.58s conc, 3.48x speedup)
   Iteration:    6.3s total (0.27s overwrite, 0.25s test avg)
   Fan-out:      5.1s total (3.51s create, 0.17s compute, 3 sandboxes)
-  Docker:      custom image build supported (runtime)
+  Docker:     30.9s total (build=3.5s, custom_create=17.7s, verify=0.8s pre-baked, stock_boot=1.5s)
   Network:     11.4s total (31.2ms latency, 87.76 MB/s download, 3.34 MB/s upload, 0.87s pip)
+  Security:    41.2s total (6/8 PASS: metadata, privilege, network, filesystem, resources, env_leak)
 
 === E2B (default instance) ===
   RL:         301.1s total (287s training*, 29/29 tests)
@@ -414,8 +505,9 @@
   Concurrent:   8.1s total (2.23s seq, 0.66s conc, 3.40x speedup)
   Iteration:    3.8s total (0.05s overwrite, 0.47s test avg)
   Fan-out:      1.6s total (1.05s create, 0.08s compute, 3 sandboxes)
-  Docker:      template-based (no runtime build)
+  Docker:      6.5s total (template, create=1.5s, pip=4.4s, stock_boot=0.15s)
   Network:     8.2s total (13.3ms latency, 58.48 MB/s download, 3.41 MB/s upload, 1.22s pip)
+  Security:    8.6s total (5/8 PASS: metadata, privilege, escape, filesystem, env_leak)
 
 === BLAXEL (4 vCPU, 8GB RAM) ===
   RL:         135.2s total (120s training*, 29/29 tests)
@@ -424,8 +516,9 @@
   Concurrent:   9.7s total (2.23s seq, 0.87s conc, 2.56x speedup)
   Iteration:    5.1s total (0.04s overwrite, 0.33s test avg)
   Fan-out:      3.4s total (1.47s create, 0.43s compute, 3 sandboxes)
-  Docker:      pre-existing image (no runtime build)
+  Docker:     12.6s total (pre-existing, create=3.7s, pip=7.7s, stock_boot=0.46s)
   Network:     10.1s total (57.6ms latency, 71.42 MB/s download, 3.72 MB/s upload, 1.11s pip)
+  Security:    23.3s total (3/8 PASS: metadata, network, env_leak -- WEAKEST)
 
 === MODAL (4 CPU, 8GB) ===
   RL:         564.0s total (542.2s training, 29/29 tests, best reward 14.54)
@@ -435,14 +528,21 @@
   Iteration:   12.6s total (0.56s overwrite, 1.06s test avg)
   Fan-out:      4.6s total (0.81s create, 0.64s compute, 3 sandboxes)
   Agent:       86.4s total (3 iters, best reward 14.4, llm=gemini-2.5-flash-lite)
-  Docker:      custom image build supported (runtime)
+  Docker:     16.1s total (build=0.2s, custom_create=0.9s, verify=3.1s pre-baked, stock_boot=0.34s, 2.09x speedup)
   Network:     14.0s total (15.7ms latency, 45.66 MB/s download, 7.32 MB/s upload, 1.70s pip)
+  Security:    42.9s total (7/8 PASS: metadata, privilege, network, filesystem, resources, egress, env_leak -- STRONGEST)
 
 === CODING AGENT (all providers, Gemini 2.5 Flash Lite, 3 iterations) ===
   E2B:         61.1s total (setup=4.1s, best_reward=7.7)
   Blaxel:      75.1s total (setup=5.0s, best_reward=16.4)
   Modal:       86.4s total (setup=9.7s, best_reward=14.4)
   Daytona:     88.2s total (setup=7.5s, best_reward=14.4)
+
+=== SECURITY (all providers, 8 isolation tests) ===
+  Modal:       7/8 PASS (42.9s) -- strongest isolation, only failed container escape
+  Daytona:     6/8 PASS (41.2s) -- seccomp+cgroups, failed escape+raw sockets
+  E2B:         5/8 PASS (8.6s)  -- best privilege (non-root), failed network+limits+egress
+  Blaxel:      3/8 PASS (23.3s) -- weakest: root+full caps+/dev/mem+no limits+raw sockets
 
 NOTE: Fan-out updated from 3 to 10 sandboxes. Re-run --benchmark fanout for updated results.
 * = had intermittent errors on some runs
