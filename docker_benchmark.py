@@ -57,7 +57,7 @@ WORKLOAD_SCRIPT = (
 def _get_base_dir(provider):
     """Get the base directory for this benchmark in a given provider."""
     if provider == 'daytona':
-        return '/home/daytona/docker_bench'
+        return '/root/docker_bench'
     elif provider == 'blaxel':
         return '/blaxel/docker_bench'
     elif provider == 'modal':
@@ -101,15 +101,17 @@ def _create_daytona_sandbox(api_key, image):
 
 
 def _create_daytona_default_sandbox(api_key):
-    """Create a Daytona sandbox with pre-warmed default (for comparison)."""
-    from daytona import Daytona, DaytonaConfig, CreateSandboxBaseParams
+    """Create a Daytona sandbox with python:3.12-slim (stock, for comparison)."""
+    from daytona import Daytona, DaytonaConfig, CreateSandboxFromImageParams, Resources
     daytona = Daytona(DaytonaConfig(api_key=api_key, target='us'))
     sandbox = daytona.create(
-        CreateSandboxBaseParams(
+        CreateSandboxFromImageParams(
+            image='python:3.12-slim',
             language='python',
+            resources=Resources(cpu=4, memory=8, disk=10),
             auto_stop_interval=30,
         ),
-        timeout=120,
+        timeout=300,
     )
     return daytona, sandbox
 
@@ -186,7 +188,7 @@ def _create_blaxel_sandbox(api_key, workspace='inferless'):
 
 # ── Exec helpers ──────────────────────────────────────────────────
 
-def _exec_daytona(sandbox, command, cwd='/home/daytona/docker_bench', timeout=300):
+def _exec_daytona(sandbox, command, cwd='/root/docker_bench', timeout=300):
     """Run a command in a Daytona sandbox."""
     try:
         response = sandbox.process.exec(command, cwd=cwd, timeout=timeout)

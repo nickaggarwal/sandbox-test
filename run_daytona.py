@@ -80,7 +80,7 @@ def run_in_sandbox(
         # Retrieve results
         print("\n[*] Retrieving training results...")
         try:
-            results_json = runner.download_file('/home/daytona/app/rl_output/training_results.json')
+            results_json = runner.download_file('/root/app/rl_output/training_results.json')
             results = json.loads(results_json)
 
             os.makedirs('rl_output', exist_ok=True)

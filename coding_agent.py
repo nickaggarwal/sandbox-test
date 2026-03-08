@@ -86,7 +86,7 @@ def create_runner(provider):
 def get_working_dir(provider):
     """Get the remote working directory for a provider."""
     dirs = {
-        'daytona': '/home/daytona/app',
+        'daytona': '/root/app',
         'e2b': '/home/user/app',
         'blaxel': '/blaxel/app',
         'modal': '/root/app',

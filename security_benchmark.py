@@ -887,7 +887,7 @@ def run_security_benchmark(runner, provider):
         list[StepProfile]: Profiling data for each benchmark step.
     """
     if provider == 'daytona':
-        base_dir = '/home/daytona/sec_bench'
+        base_dir = '/root/sec_bench'
     elif provider == 'blaxel':
         base_dir = '/blaxel/sec_bench'
     elif provider == 'modal':

@@ -126,7 +126,7 @@ def _create_runner_with_key(provider, api_key):
 def _get_base_dir(provider):
     """Get the base directory for this benchmark in a given provider."""
     if provider == 'daytona':
-        return '/home/daytona/fanout_bench'
+        return '/root/fanout_bench'
     elif provider == 'blaxel':
         return '/blaxel/fanout_bench'
     elif provider == 'modal':

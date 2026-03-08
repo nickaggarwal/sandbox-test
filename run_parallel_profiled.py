@@ -135,7 +135,7 @@ def create_runner(provider):
 def get_results_path(provider):
     """Get the remote results file path for a provider."""
     if provider == 'daytona':
-        return '/home/daytona/app/rl_output/training_results.json'
+        return '/root/app/rl_output/training_results.json'
     elif provider == 'blaxel':
         return '/blaxel/app/rl_output/training_results.json'
     elif provider == 'modal':

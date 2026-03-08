@@ -29,7 +29,7 @@ def run_async_task_benchmark(runner, provider):
         list[StepProfile]: Profiling data for each benchmark step.
     """
     if provider == 'daytona':
-        base_dir = '/home/daytona/async_bench'
+        base_dir = '/root/async_bench'
     elif provider == 'blaxel':
         base_dir = '/blaxel/async_bench'
     elif provider == 'modal':
