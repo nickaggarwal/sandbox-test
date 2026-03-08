@@ -169,37 +169,26 @@
 
 **Why it matters**: Advanced agents fan out across multiple sandboxes to try different approaches simultaneously, run tests on different configurations, or split large workloads. The fan-out pattern requires fast sandbox creation, efficient parallel I/O, and reliable concurrent operations. Slow sandbox creation is the biggest bottleneck since it's multiplied by N.
 
-**Results (10 sandboxes):**
+**Results (all providers, N sandboxes):**
 
-| Step | Daytona | E2B | Blaxel | Modal |
-|------|---------|-----|--------|-------|
-| Create 10 sandboxes | 1.9s | — | — | — |
-| Upload code to all | 2.1s | — | — | — |
-| Run 10 different tasks | 0.3s | — | — | — |
-| Collect results | 1.1s | — | — | — |
-| Destroy all | 0.3s | — | — | — |
-| Custom image (10 sandboxes) | 3.7s | — | — | — |
-| **Total** | **9.5s** | — | — | — |
+| Step | Daytona (N=10) | E2B (N=3) | Blaxel (N=3) | Modal (N=3) |
+|------|----------------|-----------|--------------|-------------|
+| Create N sandboxes | 1.9s | 1.05s | 1.47s | 0.81s |
+| Upload code to all | 2.1s | 0.27s | 0.88s | 2.34s |
+| Run N different tasks | 0.3s | 0.08s | 0.43s | 0.64s |
+| Collect results | 1.1s | 0.06s | 0.13s | 0.71s |
+| Destroy all | 0.3s | 0.16s | 0.46s | 0.11s |
+| Custom image (N sandboxes) | 3.7s | — | — | — |
+| **Total** | **9.5s** | **1.62s** | **3.37s** | **4.61s** |
 
-| Metric | Daytona |
-|--------|---------|
-| Avg creation per sandbox (stock) | 0.19s |
-| Avg creation per sandbox (custom) | 0.37s |
-| Total I/O (upload + collect) | 3.2s |
-| Total compute (10 tasks) | 0.3s |
+| Metric | Daytona (N=10) | E2B (N=3) | Blaxel (N=3) | Modal (N=3) |
+|--------|----------------|-----------|--------------|-------------|
+| Avg creation per sandbox | 0.19s | 0.35s | 0.49s | 0.27s |
+| Avg upload per sandbox | 0.21s | 0.09s | 0.29s | 0.78s |
+| Avg compute per task | 0.03s | 0.03s | 0.14s | 0.21s |
+| Total I/O (upload + collect) | 3.2s | 0.33s | 1.01s | 3.05s |
 
-**Previous results (3 sandboxes, all providers):**
-
-| Step | Daytona | E2B | Blaxel | Modal |
-|------|---------|-----|--------|-------|
-| Create 3 sandboxes | 3.51s | 1.05s | 1.47s | 0.81s |
-| Upload code to all | 0.77s | 0.27s | 0.88s | 2.34s |
-| Run 3 different tasks | 0.17s | 0.08s | 0.43s | 0.64s |
-| Collect results | 0.36s | 0.06s | 0.13s | 0.71s |
-| Destroy all | 0.29s | 0.16s | 0.46s | 0.11s |
-| **Total** | **5.10s** | **1.62s** | **3.37s** | **4.61s** |
-
-**Summary**: Daytona's pre-warmed pool dramatically improved fan-out performance: 10 sandboxes created in 1.9s (0.19s avg each), down from 1.17s per sandbox with custom images. Custom image fan-out also improved to 0.37s avg. All 10 tasks completed in 0.3s wall time with results collected in 1.1s. In the 3-sandbox comparison, E2B was fastest (1.6s). Run `--benchmark fanout --provider all` for updated multi-provider 10-sandbox results.
+**Summary**: Daytona's pre-warmed pool enables the fastest per-sandbox creation at scale: 10 sandboxes in 1.9s (0.19s avg each). At 3 sandboxes, E2B is fastest total (1.6s) with the lowest I/O overhead (0.33s). Modal has the fastest single-sandbox creation (0.27s avg) but slowest uploads (0.78s avg). Blaxel is balanced but slower on compute (0.14s avg per task). Daytona also supports custom image fan-out (10 sandboxes in 3.7s, 0.37s avg). Run `--benchmark fanout --provider all --num-sandboxes 10` for a full 10-sandbox comparison across all providers.
 
 ---
 
