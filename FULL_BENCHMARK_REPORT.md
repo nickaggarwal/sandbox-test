@@ -20,7 +20,7 @@
 | 6 | Multi-Sandbox Fan-Out | Create N sandboxes, distribute tasks, collect results | 5 |
 | 7 | Coding Agent | Real LLM agent loop: generate code, test, score, fix | 4+ |
 | 8 | Custom Docker Image | Build custom image, verify pre-baked deps, compare vs baseline | 5 |
-| 9 | Network Speed | HTTP latency, download/upload throughput, DNS resolution, pip install | 5 |
+| 9 | Network Speed | HTTP latency, download/upload throughput, DNS resolution, pip install | 6 |
 
 ---
 
@@ -244,7 +244,7 @@
 
 ## 9. Network Speed Benchmark
 
-**What it tests**: Raw network performance from inside each sandbox -- HTTP round-trip latency (5x GET requests to `google.com/robots.txt` with min/avg/max timing), download throughput (~10MB from Cloudflare speed test), upload throughput (~5MB POST to httpbin.org), DNS resolution time for 5 hostnames (`google.com`, `github.com`, `pypi.org`, `cloudflare.com`, `amazonaws.com`), and real-world package install speed (`pip install requests` with cache cleared).
+**What it tests**: Raw network performance from inside each sandbox -- HTTP round-trip latency (5x GET requests to `google.com/robots.txt` with min/avg/max timing), download throughput (~10MB single fetch and ~100MB sustained via 10x10MB from Cloudflare speed test), upload throughput (~5MB POST to httpbin.org), DNS resolution time for 5 hostnames (`google.com`, `github.com`, `pypi.org`, `cloudflare.com`, `amazonaws.com`), and real-world package install speed (`pip install requests` with cache cleared).
 
 **Why it matters**: Agents frequently need to download packages from PyPI, fetch data from APIs, clone git repos, and upload/download artifacts. Network speed inside the sandbox directly impacts how fast agents can install dependencies, pull data, and interact with external services. A sandbox with poor network connectivity creates a bottleneck on every operation that touches the internet.
 
@@ -254,11 +254,45 @@
 |------|-----------------|
 | `net_latency` | HTTP round-trip time (5 samples, min/avg/max in ms) |
 | `net_download` | Download throughput in MB/s (~10MB test file) |
+| `net_download_large` | Sustained download throughput in MB/s (~100MB via 10x10MB) |
 | `net_upload` | Upload throughput in MB/s (~5MB test file) |
 | `net_dns` | DNS resolution time for 5 hostnames (ms) |
 | `net_pip_install` | Real-world `pip install requests` duration (s) |
 
-**Summary**: This benchmark captures the actual network experience agents have when operating inside each provider's sandbox. Results vary based on provider datacenter location, network peering, and egress policies. Unlike filesystem I/O which measures the sandbox-to-host API speed, network benchmarks measure sandbox-to-internet performance -- a different and equally important dimension for agent productivity.
+**Results:**
+
+| Metric | Daytona | E2B | Blaxel | Modal |
+|--------|---------|-----|--------|-------|
+| HTTP Latency (avg) | 31.2ms | 13.3ms | 57.6ms | 15.7ms |
+| Download 10MB | 69.76 MB/s | 54.60 MB/s | 68.98 MB/s | 37.34 MB/s |
+| Download 100MB (sustained) | 87.76 MB/s | 58.48 MB/s | 71.42 MB/s | 45.66 MB/s |
+| Upload 5MB | 3.34 MB/s | 3.41 MB/s | 3.72 MB/s | 7.32 MB/s |
+| DNS Resolution (avg) | 3.65ms | 3.62ms | 10.92ms | 4.48ms |
+| pip install requests | 0.87s | 1.22s | 1.11s | 1.70s |
+
+| Step (wall-clock) | Daytona | E2B | Blaxel | Modal |
+|-------------------|---------|-----|--------|-------|
+| net_latency | 0.8s | 0.3s | 0.7s | 0.9s |
+| net_download | 0.6s | 0.4s | 0.3s | 1.0s |
+| net_download_large | 1.5s | 1.8s | 1.5s | 2.8s |
+| net_upload | 1.9s | 1.7s | 1.6s | 1.4s |
+| net_dns | 0.5s | 0.2s | 0.2s | 0.7s |
+| net_pip_install | 2.0s | 2.1s | 2.6s | 4.3s |
+| **Total** | **11.4s** | **8.2s** | **10.1s** | **14.0s** |
+
+**Head-to-head (network):**
+
+| Operation | Winner | Value | Runner-up |
+|-----------|--------|-------|-----------|
+| HTTP latency | E2B | 13.3ms | Modal (15.7ms) |
+| Download throughput (10MB) | Daytona | 69.76 MB/s | Blaxel (68.98 MB/s) |
+| Sustained download (100MB) | Daytona | 87.76 MB/s | Blaxel (71.42 MB/s) |
+| Upload throughput | Modal | 7.32 MB/s | Blaxel (3.72 MB/s) |
+| DNS resolution | E2B | 3.62ms | Daytona (3.65ms) |
+| pip install | Daytona | 0.87s | Blaxel (1.11s) |
+| Total benchmark time | E2B | 8.2s | Blaxel (10.1s) |
+
+**Summary**: Daytona leads on raw download throughput (87.76 MB/s sustained), making it the best choice for workloads that fetch large datasets or clone large repos. E2B has the lowest HTTP latency (13.3ms) and fastest DNS resolution (3.62ms), giving it the fastest total benchmark time (8.2s) and making it ideal for API-heavy agents that make many small requests. Modal has the best upload throughput (7.32 MB/s, ~2x others) but the slowest download and highest pip install time (1.70s). Blaxel offers balanced performance with good download speeds (71 MB/s) but higher latency (57.6ms) and DNS times (10.9ms) suggesting its sandboxes may be in a different region. All providers have full outbound network access with no egress filtering detected.
 
 ---
 
@@ -276,11 +310,10 @@
 | Fan-Out (10 sandboxes) | E2B | Blaxel | Modal | Daytona |
 | Coding Agent | E2B (61s) | Blaxel (75s) | Modal (86s) | Daytona (88s) |
 | Custom Docker | Daytona | Modal | E2B | Blaxel |
-| Network Speed | Pending | Pending | Pending | Pending |
+| Network Speed | E2B (8.2s) | Blaxel (10.1s) | Daytona (11.4s) | Modal (14.0s) |
 
 \* Blaxel/E2B had intermittent stability issues on long RL runs
 \** Blaxel skipped pause/resume (no API)
-Network Speed results pending -- requires running `--benchmark network --provider all`
 
 ### By Use Case
 
@@ -297,7 +330,9 @@ Network Speed results pending -- requires running `--benchmark network --provide
 | **Custom environments** | Daytona | Full Docker image control, configurable CPU/RAM/disk |
 | **Fastest sandbox creation** | Modal | 0.27s avg per sandbox (fastest cold start) |
 | **LLM coding agent loop** | E2B | 61s total, fastest setup (4.1s) and upload (0.3s) |
-| **Network-heavy workloads** | Pending | Run `--benchmark network` to measure latency, throughput, DNS |
+| **Network downloads (large files)** | Daytona | 87.76 MB/s sustained download, fastest pip install (0.87s) |
+| **API-heavy agents (many requests)** | E2B | Lowest HTTP latency (13.3ms) and DNS resolution (3.62ms) |
+| **Data upload workloads** | Modal | 7.32 MB/s upload, 2x faster than other providers |
 
 ### Head-to-Head Winners (per operation)
 
@@ -312,6 +347,11 @@ Network Speed results pending -- requires running `--benchmark network --provide
 | Resume latency | E2B | 0.2s | Daytona (0.7s) |
 | Large file I/O (1MB) | Blaxel | 0.2s | E2B (0.6s) |
 | 10-sandbox fan-out | E2B | -- | Blaxel |
+| HTTP latency | E2B | 13.3ms | Modal (15.7ms) |
+| Download throughput | Daytona | 87.76 MB/s | Blaxel (71.42 MB/s) |
+| Upload throughput | Modal | 7.32 MB/s | Blaxel (3.72 MB/s) |
+| DNS resolution | E2B | 3.62ms | Daytona (3.65ms) |
+| pip install | Daytona | 0.87s | Blaxel (1.11s) |
 | Sandbox destroy | Modal | 0.11s | E2B (0.16s) |
 
 ---
@@ -365,7 +405,7 @@ Network Speed results pending -- requires running `--benchmark network --provide
   Iteration:    6.3s total (0.27s overwrite, 0.25s test avg)
   Fan-out:      5.1s total (3.51s create, 0.17s compute, 3 sandboxes)
   Docker:      custom image build supported (runtime)
-  Network:     pending (run --benchmark network)
+  Network:     11.4s total (31.2ms latency, 87.76 MB/s download, 3.34 MB/s upload, 0.87s pip)
 
 === E2B (default instance) ===
   RL:         301.1s total (287s training*, 29/29 tests)
@@ -375,7 +415,7 @@ Network Speed results pending -- requires running `--benchmark network --provide
   Iteration:    3.8s total (0.05s overwrite, 0.47s test avg)
   Fan-out:      1.6s total (1.05s create, 0.08s compute, 3 sandboxes)
   Docker:      template-based (no runtime build)
-  Network:     pending (run --benchmark network)
+  Network:     8.2s total (13.3ms latency, 58.48 MB/s download, 3.41 MB/s upload, 1.22s pip)
 
 === BLAXEL (4 vCPU, 8GB RAM) ===
   RL:         135.2s total (120s training*, 29/29 tests)
@@ -385,7 +425,7 @@ Network Speed results pending -- requires running `--benchmark network --provide
   Iteration:    5.1s total (0.04s overwrite, 0.33s test avg)
   Fan-out:      3.4s total (1.47s create, 0.43s compute, 3 sandboxes)
   Docker:      pre-existing image (no runtime build)
-  Network:     pending (run --benchmark network)
+  Network:     10.1s total (57.6ms latency, 71.42 MB/s download, 3.72 MB/s upload, 1.11s pip)
 
 === MODAL (4 CPU, 8GB) ===
   RL:         564.0s total (542.2s training, 29/29 tests, best reward 14.54)
@@ -396,7 +436,7 @@ Network Speed results pending -- requires running `--benchmark network --provide
   Fan-out:      4.6s total (0.81s create, 0.64s compute, 3 sandboxes)
   Agent:       86.4s total (3 iters, best reward 14.4, llm=gemini-2.5-flash-lite)
   Docker:      custom image build supported (runtime)
-  Network:     pending (run --benchmark network)
+  Network:     14.0s total (15.7ms latency, 45.66 MB/s download, 7.32 MB/s upload, 1.70s pip)
 
 === CODING AGENT (all providers, Gemini 2.5 Flash Lite, 3 iterations) ===
   E2B:         61.1s total (setup=4.1s, best_reward=7.7)
@@ -405,6 +445,5 @@ Network Speed results pending -- requires running `--benchmark network --provide
   Daytona:     88.2s total (setup=7.5s, best_reward=14.4)
 
 NOTE: Fan-out updated from 3 to 10 sandboxes. Re-run --benchmark fanout for updated results.
-NOTE: Network Speed and Docker benchmarks added. Run --benchmark network / --benchmark docker for results.
 * = had intermittent errors on some runs
 ```
