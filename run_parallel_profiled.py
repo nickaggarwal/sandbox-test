@@ -543,6 +543,66 @@ def run_profiled_network_benchmark(
     return profile
 
 
+# ── Security & Isolation Benchmark Pipeline ──────────────────────
+
+def run_profiled_security_benchmark(
+    label,
+    provider='daytona',
+    log_prefix='',
+    stagger_delay=0,
+):
+    """Run the security & isolation benchmark pipeline with full profiling."""
+    if stagger_delay > 0:
+        print(f'{log_prefix}[{label}] Staggering start by {stagger_delay}s...')
+        time.sleep(stagger_delay)
+
+    profile = SandboxProfile(
+        sandbox_label=label,
+        provider=provider,
+        config={'benchmark': 'security'},
+    )
+    pipeline_start = time.time()
+
+    def log(msg):
+        print(f'{log_prefix}[{label}] {msg}')
+
+    runner = create_runner(provider)
+
+    try:
+        # Create sandbox
+        step = profile.add_step('create_sandbox')
+        log(f'Creating {provider} sandbox...')
+        try:
+            runner.create_sandbox()
+            profile.sandbox_id = runner.sandbox_id or ''
+            profile.finish_step(step, success=True, detail=profile.sandbox_id)
+            log(f'  Sandbox ready: {profile.sandbox_id[:20]}...')
+        except Exception as e:
+            profile.finish_step(step, success=False, detail=str(e))
+            profile.error = f'Create failed: {e}'
+            log(f'  CREATE FAILED: {e}')
+            return profile
+
+        # Run security benchmark steps
+        from security_benchmark import run_security_benchmark
+        log('Running security & isolation benchmark...')
+        sec_steps = run_security_benchmark(runner, provider)
+        profile.steps.extend(sec_steps)
+
+    finally:
+        step = profile.add_step('destroy_sandbox')
+        log('Destroying sandbox...')
+        try:
+            runner.destroy()
+            profile.finish_step(step, success=True)
+        except Exception as e:
+            profile.finish_step(step, success=False, detail=str(e))
+
+    profile.total_duration_s = time.time() - pipeline_start
+    log(f'DONE in {profile.total_duration_s:.1f}s')
+    return profile
+
+
 # ── Docker Image Benchmark Pipeline ──────────────────────────────
 
 def run_profiled_docker_benchmark(
@@ -816,6 +876,14 @@ def run_parallel(
                     log_prefix=f'[{i+1}/{len(configs)}] ',
                     stagger_delay=i * stagger_s,
                 )
+            elif benchmark_type == 'security':
+                future = pool.submit(
+                    run_profiled_security_benchmark,
+                    label=label,
+                    provider=provider,
+                    log_prefix=f'[{i+1}/{len(configs)}] ',
+                    stagger_delay=i * stagger_s,
+                )
             elif benchmark_type == 'agent':
                 future = pool.submit(
                     run_profiled_agent_benchmark,
@@ -929,8 +997,11 @@ def _print_report(profiles, total_wall, providers_used):
         'docker_build_image', 'docker_create_sandbox',
         'docker_verify_deps', 'docker_run_workload',
         'docker_stock_boot', 'docker_comparison',
-        'net_latency', 'net_download', 'net_upload',
-        'net_dns', 'net_pip_install',
+        'net_latency', 'net_download', 'net_download_large',
+        'net_upload', 'net_dns', 'net_pip_install',
+        'sec_metadata_service', 'sec_privilege_info', 'sec_container_escape',
+        'sec_network_scan', 'sec_filesystem_exposure', 'sec_resource_limits',
+        'sec_egress_filtering', 'sec_env_leak',
         'destroy_sandbox',
     ]
     all_step_names = set()
@@ -1094,7 +1165,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--benchmark',
-        choices=['rl', 'fs', 'pause', 'concurrent', 'iteration', 'fanout', 'agent', 'docker', 'network', 'all'],
+        choices=['rl', 'fs', 'pause', 'concurrent', 'iteration', 'fanout', 'agent', 'docker', 'network', 'security', 'all'],
         default='rl',
         help='Benchmark type: "rl" (default), "fs" (filesystem), '
              '"pause" (async task pause/resume), "concurrent" (concurrent exec), '
@@ -1102,6 +1173,7 @@ if __name__ == '__main__':
              '"agent" (LLM coding agent loop), '
              '"docker" (custom Docker image), '
              '"network" (network speed), '
+             '"security" (isolation & security), '
              '"all" (all benchmarks)',
     )
     parser.add_argument(
@@ -1394,6 +1466,33 @@ if __name__ == '__main__':
             configs = docker_configs
         else:  # 'all'
             configs = configs + docker_configs
+
+    # Add security benchmark configs if requested
+    if args.benchmark in ('security', 'all'):
+        security_configs = []
+        if args.provider in ('both', 'all'):
+            if args.provider == 'all':
+                sec_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+            else:
+                sec_providers = ['daytona', 'e2b']
+            for prov in sec_providers:
+                security_configs.append({
+                    'label': f'{prov}-security',
+                    'provider': prov,
+                    'benchmark': 'security',
+                })
+        else:
+            for i in range(args.sandboxes):
+                security_configs.append({
+                    'label': f'{args.provider}-security-{i+1}',
+                    'provider': args.provider,
+                    'benchmark': 'security',
+                })
+
+        if args.benchmark == 'security':
+            configs = security_configs
+        else:  # 'all'
+            configs = configs + security_configs
 
     # Add network speed benchmark configs if requested
     if args.benchmark in ('network', 'all'):

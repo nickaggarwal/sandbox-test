@@ -1,275 +1,71 @@
 {
-  "timestamp": "2026-03-07T14:36:39.711093",
-  "wall_clock_s": 15.64,
-  "serial_sum_s": 27.87,
-  "speedup": 1.78,
+  "timestamp": "2026-03-07T16:14:43.193834",
+  "wall_clock_s": 3.01,
+  "serial_sum_s": 0.0,
+  "speedup": 0.0,
   "sandbox_count": 4,
   "providers": [
-    "modal",
-    "daytona",
     "blaxel",
-    "e2b"
+    "e2b",
+    "daytona",
+    "modal"
   ],
   "profiles": [
     {
-      "sandbox_label": "blaxel-iteration",
+      "sandbox_label": "blaxel-security",
       "provider": "blaxel",
-      "sandbox_id": "rl-test-bdda39be",
-      "config": {
-        "benchmark": "iteration_loop"
-      },
-      "total_duration_s": 5.12,
+      "sandbox_id": "",
+      "config": {},
+      "total_duration_s": 0.0,
       "tests_passed": 0,
       "tests_total": 0,
       "rl_best_reward": 0.0,
       "rl_final_avg": 0.0,
       "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.42,
-          "success": true,
-          "detail": "rl-test-bdda39be"
-        },
-        {
-          "name": "iter_upload_broken",
-          "duration_s": 2.93,
-          "success": true,
-          "detail": "2 files uploaded, 1466B"
-        },
-        {
-          "name": "iter_test_fail",
-          "duration_s": 0.39,
-          "success": true,
-          "detail": "3 failures, 0 errors, exit=1, exec=0.39s"
-        },
-        {
-          "name": "iter_upload_fix",
-          "duration_s": 0.04,
-          "success": true,
-          "detail": "802B written, overwrite in 0.041s"
-        },
-        {
-          "name": "iter_test_pass",
-          "duration_s": 0.29,
-          "success": true,
-          "detail": "6 tests passed, exec=0.29s"
-        },
-        {
-          "name": "iter_add_feature",
-          "duration_s": 0.14,
-          "success": true,
-          "detail": "2 files updated, 2009B, iteration 2"
-        },
-        {
-          "name": "iter_final_validation",
-          "duration_s": 0.3,
-          "success": true,
-          "detail": "9/9 tests passed, final validation OK"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.11,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
+      "steps": [],
+      "error": "No module named 'blaxel'"
     },
     {
-      "sandbox_label": "daytona-iteration",
+      "sandbox_label": "daytona-security",
       "provider": "daytona",
-      "sandbox_id": "0de500fe-1993-4398-ac11-34de66254bf5",
-      "config": {
-        "benchmark": "iteration_loop"
-      },
-      "total_duration_s": 6.3,
+      "sandbox_id": "",
+      "config": {},
+      "total_duration_s": 0.0,
       "tests_passed": 0,
       "tests_total": 0,
       "rl_best_reward": 0.0,
       "rl_final_avg": 0.0,
       "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.61,
-          "success": true,
-          "detail": "0de500fe-1993-4398-ac11-34de66254bf5"
-        },
-        {
-          "name": "iter_upload_broken",
-          "duration_s": 1.92,
-          "success": true,
-          "detail": "2 files uploaded, 1466B"
-        },
-        {
-          "name": "iter_test_fail",
-          "duration_s": 0.29,
-          "success": true,
-          "detail": "3 failures, 0 errors, exit=1, exec=0.29s"
-        },
-        {
-          "name": "iter_upload_fix",
-          "duration_s": 0.26,
-          "success": true,
-          "detail": "802B written, overwrite in 0.265s"
-        },
-        {
-          "name": "iter_test_pass",
-          "duration_s": 0.25,
-          "success": true,
-          "detail": "6 tests passed, exec=0.25s"
-        },
-        {
-          "name": "iter_add_feature",
-          "duration_s": 0.51,
-          "success": true,
-          "detail": "2 files updated, 2009B, iteration 2"
-        },
-        {
-          "name": "iter_final_validation",
-          "duration_s": 0.25,
-          "success": true,
-          "detail": "9/9 tests passed, final validation OK"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.17,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
+      "steps": [],
+      "error": "No module named 'daytona'"
     },
     {
-      "sandbox_label": "e2b-iteration",
+      "sandbox_label": "e2b-security",
       "provider": "e2b",
-      "sandbox_id": "ignm936lpv40nkrwcn6hv",
-      "config": {
-        "benchmark": "iteration_loop"
-      },
-      "total_duration_s": 3.82,
+      "sandbox_id": "",
+      "config": {},
+      "total_duration_s": 0.0,
       "tests_passed": 0,
       "tests_total": 0,
       "rl_best_reward": 0.0,
       "rl_final_avg": 0.0,
       "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.2,
-          "success": true,
-          "detail": "ignm936lpv40nkrwcn6hv"
-        },
-        {
-          "name": "iter_upload_broken",
-          "duration_s": 1.16,
-          "success": true,
-          "detail": "2 files uploaded, 1466B"
-        },
-        {
-          "name": "iter_test_fail",
-          "duration_s": 0.53,
-          "success": true,
-          "detail": "3 failures, 0 errors, exit=1, exec=0.53s"
-        },
-        {
-          "name": "iter_upload_fix",
-          "duration_s": 0.05,
-          "success": true,
-          "detail": "802B written, overwrite in 0.048s"
-        },
-        {
-          "name": "iter_test_pass",
-          "duration_s": 0.45,
-          "success": true,
-          "detail": "6 tests passed, exec=0.45s"
-        },
-        {
-          "name": "iter_add_feature",
-          "duration_s": 0.09,
-          "success": true,
-          "detail": "2 files updated, 2009B, iteration 2"
-        },
-        {
-          "name": "iter_final_validation",
-          "duration_s": 0.44,
-          "success": true,
-          "detail": "9/9 tests passed, final validation OK"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.11,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
+      "steps": [],
+      "error": "No module named 'e2b_code_interpreter'"
     },
     {
-      "sandbox_label": "modal-iteration",
+      "sandbox_label": "modal-security",
       "provider": "modal",
-      "sandbox_id": "sb-ectn1VH7seU0gzcphZn6En",
-      "config": {
-        "benchmark": "iteration_loop"
-      },
-      "total_duration_s": 12.63,
+      "sandbox_id": "",
+      "config": {},
+      "total_duration_s": 0.0,
       "tests_passed": 0,
       "tests_total": 0,
       "rl_best_reward": 0.0,
       "rl_final_avg": 0.0,
       "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.32,
-          "success": true,
-          "detail": "sb-ectn1VH7seU0gzcphZn6En"
-        },
-        {
-          "name": "iter_upload_broken",
-          "duration_s": 5.23,
-          "success": true,
-          "detail": "2 files uploaded, 1466B"
-        },
-        {
-          "name": "iter_test_fail",
-          "duration_s": 1.43,
-          "success": true,
-          "detail": "3 failures, 0 errors, exit=1, exec=1.43s"
-        },
-        {
-          "name": "iter_upload_fix",
-          "duration_s": 0.56,
-          "success": true,
-          "detail": "802B written, overwrite in 0.562s"
-        },
-        {
-          "name": "iter_test_pass",
-          "duration_s": 0.82,
-          "success": true,
-          "detail": "6 tests passed, exec=0.82s"
-        },
-        {
-          "name": "iter_add_feature",
-          "duration_s": 1.19,
-          "success": true,
-          "detail": "2 files updated, 2009B, iteration 2"
-        },
-        {
-          "name": "iter_final_validation",
-          "duration_s": 0.92,
-          "success": true,
-          "detail": "9/9 tests passed, final validation OK"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.11,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
+      "steps": [],
+      "error": "No module named 'modal'"
     }
   ]
 }

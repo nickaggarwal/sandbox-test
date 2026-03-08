@@ -129,14 +129,17 @@ def _get_base_dir(provider):
 
 # ── Custom Image Helpers ───────────────────────────────────────────
 
+CUSTOM_DEPS = ['django', 'djangorestframework', 'pytest', 'flake8', 'numpy']
+
+
 def _build_custom_image(provider):
     """Build a custom image with pre-installed deps for fan-out."""
     if provider == 'daytona':
         from daytona import Image
-        return Image.debian_slim('3.12').pip_install('numpy')
+        return Image.debian_slim('3.12').pip_install(*CUSTOM_DEPS)
     elif provider == 'modal':
         import modal
-        return modal.Image.debian_slim(python_version='3.12').pip_install('numpy')
+        return modal.Image.debian_slim(python_version='3.12').pip_install(*CUSTOM_DEPS)
     return None
 
 

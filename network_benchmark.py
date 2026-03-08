@@ -14,7 +14,7 @@ from run_parallel_profiled import StepProfile
 
 # ── Helper: write a Python script and run it ───────────────────────
 
-def _run_script(runner, base_dir, filename, script):
+def _run_script(runner, base_dir, filename, script, timeout=120):
     """Write a Python script to the sandbox and execute it."""
     import base64
     encoded = base64.b64encode(script.encode('utf-8')).decode()
@@ -26,7 +26,8 @@ def _run_script(runner, base_dir, filename, script):
         "f.write(data); f.close()\""
     ).format(encoded, base_dir, filename)
     runner.exec(write_cmd, cwd=base_dir)
-    return runner.exec('python3 {}/{}'.format(base_dir, filename), cwd=base_dir)
+    return runner.exec('python3 {}/{}'.format(base_dir, filename),
+                       cwd=base_dir, timeout=timeout)
 
 
 # ── Benchmark Steps ─────────────────────────────────────────────────
@@ -134,6 +135,75 @@ def _step_net_download(runner, base_dir):
                 step.ended_at = time.time()
                 step.duration_s = step.ended_at - step.started_at
                 step.success = data['size_mb'] > 0
+                step.detail = '{size_mb}MB in {time_s}s ({speed_mbps} MB/s)'.format(**data)
+        else:
+            step.ended_at = time.time()
+            step.duration_s = step.ended_at - step.started_at
+            step.success = False
+            step.detail = 'download failed: {}'.format(output[:200])
+    except Exception as e:
+        step.ended_at = time.time()
+        step.duration_s = step.ended_at - step.started_at
+        step.success = False
+        step.detail = str(e)[:200]
+
+    return step
+
+
+DOWNLOAD_LARGE_SCRIPT = """\
+import urllib.request
+import json
+import time
+
+# Sustained ~100MB download: 10x 10MB fetches from Cloudflare
+url = 'https://speed.cloudflare.com/__down?bytes=10000000'
+total_bytes = 0
+t0 = time.time()
+try:
+    for i in range(10):
+        req = urllib.request.Request(url, headers={
+            'User-Agent': 'Mozilla/5.0 (compatible; SandboxBenchmark/1.0)'
+        })
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            while True:
+                chunk = resp.read(1024 * 1024)
+                if not chunk:
+                    break
+                total_bytes += len(chunk)
+    elapsed = time.time() - t0
+    speed_mbps = (total_bytes / (1024 * 1024)) / elapsed if elapsed > 0 else 0
+    print(json.dumps({
+        'size_mb': round(total_bytes / (1024 * 1024), 1),
+        'time_s': round(elapsed, 2),
+        'speed_mbps': round(speed_mbps, 2)
+    }))
+except Exception as e:
+    elapsed = time.time() - t0
+    print(json.dumps({'error': str(e)[:200], 'partial_mb': round(total_bytes / (1024*1024), 1)}))
+"""
+
+
+def _step_net_download_large(runner, base_dir):
+    """Measure download throughput with a ~100MB file."""
+    step = StepProfile(name='net_download_large', started_at=time.time())
+
+    try:
+        result = _run_script(runner, base_dir, 'net_download_lg.py',
+                             DOWNLOAD_LARGE_SCRIPT, timeout=120)
+
+        import json
+        output = result['result'].strip()
+        if result['exit_code'] == 0 and output:
+            data = json.loads(output)
+            if 'error' in data:
+                step.ended_at = time.time()
+                step.duration_s = step.ended_at - step.started_at
+                step.success = False
+                step.detail = 'download error: {}'.format(data['error'])
+            else:
+                step.ended_at = time.time()
+                step.duration_s = step.ended_at - step.started_at
+                step.success = data['size_mb'] > 90
                 step.detail = '{size_mb}MB in {time_s}s ({speed_mbps} MB/s)'.format(**data)
         else:
             step.ended_at = time.time()
@@ -363,23 +433,27 @@ def run_network_benchmark(runner, provider):
 
     steps = []
 
-    print('    [NET] Step 1/5: HTTP latency...')
+    print('    [NET] Step 1/6: HTTP latency...')
     steps.append(_step_net_latency(runner, base_dir))
     print('    [NET]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
 
-    print('    [NET] Step 2/5: Download throughput...')
+    print('    [NET] Step 2/6: Download throughput (10MB)...')
     steps.append(_step_net_download(runner, base_dir))
     print('    [NET]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
 
-    print('    [NET] Step 3/5: Upload throughput...')
+    print('    [NET] Step 3/6: Download throughput (100MB)...')
+    steps.append(_step_net_download_large(runner, base_dir))
+    print('    [NET]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
+
+    print('    [NET] Step 4/6: Upload throughput (5MB)...')
     steps.append(_step_net_upload(runner, base_dir))
     print('    [NET]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
 
-    print('    [NET] Step 4/5: DNS resolution...')
+    print('    [NET] Step 5/6: DNS resolution...')
     steps.append(_step_net_dns(runner, base_dir))
     print('    [NET]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
 
-    print('    [NET] Step 5/5: pip install (real-world)...')
+    print('    [NET] Step 6/6: pip install (real-world)...')
     steps.append(_step_net_pip_install(runner, base_dir))
     print('    [NET]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
 
