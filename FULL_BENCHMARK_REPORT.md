@@ -169,26 +169,39 @@
 
 **Why it matters**: Advanced agents fan out across multiple sandboxes to try different approaches simultaneously, run tests on different configurations, or split large workloads. The fan-out pattern requires fast sandbox creation, efficient parallel I/O, and reliable concurrent operations. Slow sandbox creation is the biggest bottleneck since it's multiplied by N.
 
-**Results (all providers, N sandboxes):**
+**Results (10 sandboxes, all providers):**
 
-| Step | Daytona (N=10) | E2B (N=3) | Blaxel (N=3) | Modal (N=3) |
-|------|----------------|-----------|--------------|-------------|
-| Create N sandboxes | 1.9s | 1.05s | 1.47s | 0.81s |
-| Upload code to all | 2.1s | 0.27s | 0.88s | 2.34s |
-| Run N different tasks | 0.3s | 0.08s | 0.43s | 0.64s |
-| Collect results | 1.1s | 0.06s | 0.13s | 0.71s |
-| Destroy all | 0.3s | 0.16s | 0.46s | 0.11s |
-| Custom image (N sandboxes) | 3.7s | — | — | — |
-| **Total** | **9.5s** | **1.62s** | **3.37s** | **4.61s** |
+| Step | Daytona | E2B | Blaxel | Modal |
+|------|---------|-----|--------|-------|
+| Create 10 sandboxes | 5.0s | 2.4s | 3.9s | 0.9s |
+| Upload code to all | 1.7s | 0.2s | 3.3s | 7.5s |
+| Run 10 different tasks | 0.3s | 0.1s | 1.6s | 0.6s |
+| Collect results | 1.0s | 0.1s | 0.5s | 0.7s |
+| Destroy all | 0.3s | 0.2s | 1.3s | 0.1s |
+| Custom image (10 sandboxes) | 2.0s | — | — | 0.6s |
+| **Total** | **10.3s** | **3.0s** | **10.6s** | **10.4s** |
 
-| Metric | Daytona (N=10) | E2B (N=3) | Blaxel (N=3) | Modal (N=3) |
-|--------|----------------|-----------|--------------|-------------|
-| Avg creation per sandbox | 0.19s | 0.35s | 0.49s | 0.27s |
-| Avg upload per sandbox | 0.21s | 0.09s | 0.29s | 0.78s |
-| Avg compute per task | 0.03s | 0.03s | 0.14s | 0.21s |
-| Total I/O (upload + collect) | 3.2s | 0.33s | 1.01s | 3.05s |
+| Metric | Daytona | E2B | Blaxel | Modal |
+|--------|---------|-----|--------|-------|
+| Avg creation per sandbox | 0.50s | 0.24s | 0.39s | 0.09s |
+| Avg upload per sandbox | 0.17s | 0.02s | 0.33s | 0.75s |
+| Avg compute per task | 0.03s | 0.01s | 0.16s | 0.06s |
+| Total I/O (upload + collect) | 2.7s | 0.3s | 3.8s | 8.2s |
+| Custom image avg per sandbox | 0.20s | — | — | 0.06s |
 
-**Summary**: Daytona's pre-warmed pool enables the fastest per-sandbox creation at scale: 10 sandboxes in 1.9s (0.19s avg each). At 3 sandboxes, E2B is fastest total (1.6s) with the lowest I/O overhead (0.33s). Modal has the fastest single-sandbox creation (0.27s avg) but slowest uploads (0.78s avg). Blaxel is balanced but slower on compute (0.14s avg per task). Daytona also supports custom image fan-out (10 sandboxes in 3.7s, 0.37s avg). Run `--benchmark fanout --provider all --num-sandboxes 10` for a full 10-sandbox comparison across all providers.
+**Head-to-head (fan-out, 10 sandboxes):**
+
+| Operation | Winner | Value | Runner-up |
+|-----------|--------|-------|-----------|
+| Sandbox creation (10x) | Modal | 0.9s (0.09s each) | E2B (2.4s) |
+| Code upload (10x) | E2B | 0.2s (0.02s each) | Daytona (1.7s) |
+| Task execution (10x) | E2B | 0.1s | Daytona (0.3s) |
+| Result collection (10x) | E2B | 0.1s | Blaxel (0.5s) |
+| Sandbox destroy (10x) | Modal | 0.1s | E2B (0.2s) |
+| Custom image (10x) | Modal | 0.6s (0.06s each) | Daytona (2.0s) |
+| Total pipeline | E2B | 3.0s | Daytona (10.3s) |
+
+**Summary**: E2B dominates the 10-sandbox fan-out at 3.0s total -- 3.4x faster than the next provider. Its file I/O is the key advantage: uploading to 10 sandboxes in 0.2s and collecting results in 0.1s. Modal has the fastest sandbox creation (0.9s for 10, 0.09s each) and custom image fan-out (0.6s), but its slow file uploads (7.5s) drag total to 10.4s. Daytona is competitive on compute (0.3s) and custom images (2.0s) but slower on creation at scale (5.0s). Blaxel is slowest overall (10.6s) due to high upload and compute times.
 
 ---
 
@@ -389,7 +402,7 @@
 | Pause/Resume | E2B (15.4s) | Modal (22.7s) | Daytona (29.5s) | Blaxel (4.4s)** |
 | Concurrent Exec | E2B (8.1s) | Blaxel (9.7s) | Daytona (13.9s) | Modal (15.6s) |
 | Iteration Loop | E2B (3.8s) | Blaxel (5.1s) | Daytona (9.2s) | Modal (12.6s) |
-| Fan-Out (10 sandboxes) | Daytona (9.5s) | — | — | — |
+| Fan-Out (10 sandboxes) | E2B (3.0s) | Daytona (10.3s) | Modal (10.4s) | Blaxel (10.6s) |
 | Coding Agent | E2B (61s) | Daytona (62s) | Blaxel (75s) | Modal (86s) |
 | Custom Docker | E2B (6.1s) | Blaxel (11.2s) | Modal (14.7s) | Daytona (25.0s) |
 | Network Speed | Daytona (6.0s) | E2B (8.8s) | Blaxel (10.6s) | Modal (22.8s) |
@@ -406,13 +419,13 @@
 | **Long RL/ML training** | Daytona | Most reliable for 5+ min compute, no timeout limits with exec_long() |
 | **Coding agent iteration** | E2B | Fastest edit-test loop (3.8s), 0.05s file overwrites |
 | **Parallel tool execution** | E2B | Fastest concurrent exec (0.66s for 4 cmds), 3.40x speedup |
-| **Multi-sandbox fan-out** | Daytona | 10 sandboxes in 1.9s (0.19s each) via pre-warmed pool |
+| **Multi-sandbox fan-out** | E2B | 3.0s total for 10 sandboxes, fastest I/O (0.3s upload+collect) |
 | **Pause/resume workflows** | E2B | Sub-second native pause (0.9s), instant resume (0.2s) |
 | **Filesystem-heavy agents** | E2B | 8x faster per-file I/O than Daytona |
 | **Large file processing** | Blaxel | 0.2s for 1MB round-trip (fastest of all) |
 | **Short compute bursts** | Blaxel | Fastest test execution (0.29-0.39s per run) |
 | **Custom environments** | Modal | Fastest custom image create (0.8s) with pre-baked deps |
-| **Fastest sandbox creation** | Daytona | 0.19s avg per sandbox (pre-warmed pool) |
+| **Fastest sandbox creation** | Modal | 0.09s avg per sandbox (10-sandbox fan-out) |
 | **LLM coding agent loop** | E2B/Daytona | Tied at ~61s total, Daytona fastest setup (2.5s) |
 | **Network performance** | Daytona | 75 MB/s download, fastest DNS (2.38ms) and pip (0.55s) |
 | **API-heavy agents (many requests)** | E2B | Lowest HTTP latency (17.6ms) and fast DNS resolution (3.1ms) |
@@ -423,7 +436,7 @@
 
 | Operation | Winner | Time | Runner-up |
 |-----------|--------|------|-----------|
-| Sandbox creation (stock) | Daytona | 0.19s | E2B (0.35s) |
+| Sandbox creation (stock) | Modal | 0.09s | E2B (0.24s) |
 | File upload (per file) | E2B/Blaxel | 0.05s | Daytona (0.3s) |
 | File download (per file) | E2B | 0.06s | Blaxel (0.08s) |
 | Test execution | Blaxel | 0.29s | E2B (0.47s) |
@@ -431,7 +444,9 @@
 | Pause latency | E2B | 0.9s | Modal (1.5s) |
 | Resume latency | E2B | 0.2s | Daytona (0.7s) |
 | Large file I/O (1MB) | Blaxel | 0.2s | E2B (0.6s) |
-| 10-sandbox fan-out (stock) | Daytona | 1.9s | — |
+| 10-sandbox fan-out (total) | E2B | 3.0s | Daytona (10.3s) |
+| 10-sandbox creation | Modal | 0.9s (0.09s each) | E2B (2.4s) |
+| 10-sandbox fan-out (custom) | Modal | 0.6s | Daytona (2.0s) |
 | HTTP latency | E2B | 17.6ms | Modal (24.6ms) |
 | Download throughput (10MB) | Daytona | 75.08 MB/s | Modal (74.32 MB/s) |
 | Download throughput (sustained) | Modal | 84.91 MB/s | Daytona (83.2 MB/s) |
@@ -503,7 +518,7 @@
   Pause:       29.5s total (19.2s pause, 0.7s resume, state=OK)
   Concurrent:  13.9s total (4.54s seq, 3.23s conc, 1.41x speedup)
   Iteration:    9.2s total (0.3s overwrite, 1.6s test avg)
-  Fan-out:      9.5s total (1.9s create 10 sandboxes, 0.3s compute, 3.7s custom image)
+  Fan-out:     10.3s total (5.0s create 10 sandboxes, 0.3s compute, 2.0s custom image)
   Agent:       61.9s total (3 iters, best reward 13.6, llm=gemini-2.5-flash-lite)
   Docker:     25.0s total (build=0.0s, custom_create=20.3s, verify=0.7s pre-baked, stock_boot=0.17s)
   Network:     6.0s total (28.9ms latency, 83.2 MB/s download, upload=502, 0.55s pip)
@@ -515,7 +530,7 @@
   Pause:       15.4s total (0.9s pause, 0.2s resume, state=OK)
   Concurrent:   8.1s total (2.23s seq, 0.66s conc, 3.40x speedup)
   Iteration:    3.8s total (0.05s overwrite, 0.47s test avg)
-  Fan-out:      1.6s total (1.05s create, 0.08s compute, 3 sandboxes)
+  Fan-out:      3.0s total (2.4s create 10 sandboxes, 0.1s compute, 0.2s upload)
   Docker:      6.1s total (template, create=1.4s, pip=4.1s, stock_boot=0.14s)
   Network:     8.8s total (17.6ms latency, 53.93 MB/s download, 2.87 MB/s upload, 1.46s pip)
   Security:    8.6s total (5/8 PASS: metadata, privilege, escape, filesystem, env_leak)
@@ -526,7 +541,7 @@
   Pause:        4.4s total (no pause API, state=OK without pause)
   Concurrent:   9.7s total (2.23s seq, 0.87s conc, 2.56x speedup)
   Iteration:    5.1s total (0.04s overwrite, 0.33s test avg)
-  Fan-out:      3.4s total (1.47s create, 0.43s compute, 3 sandboxes)
+  Fan-out:     10.6s total (3.9s create 10 sandboxes, 1.6s compute, 3.3s upload)
   Docker:     11.2s total (pre-existing, create=3.0s, pip=7.4s, stock_boot=0.33s)
   Network:     10.6s total (58.6ms latency, 66.70 MB/s download, 3.22 MB/s upload, 1.13s pip)
   Security:    23.3s total (3/8 PASS: metadata, network, env_leak -- WEAKEST)
@@ -537,7 +552,7 @@
   Pause:       22.7s total (1.5s pause, 0.1s resume, state=OK)
   Concurrent:  15.6s total (3.38s seq, 0.67s conc, 5.06x speedup)
   Iteration:   12.6s total (0.56s overwrite, 1.06s test avg)
-  Fan-out:      4.6s total (0.81s create, 0.64s compute, 3 sandboxes)
+  Fan-out:     10.4s total (0.9s create 10 sandboxes, 0.6s compute, 7.5s upload, 0.6s custom)
   Agent:       86.4s total (3 iters, best reward 14.4, llm=gemini-2.5-flash-lite)
   Docker:     14.7s total (build=0.2s, custom_create=0.8s, verify=2.9s pre-baked, stock_boot=0.31s, 1.81x speedup)
   Network:     22.8s total (24.6ms latency, 84.91 MB/s download, 0.74 MB/s upload, 1.63s pip)

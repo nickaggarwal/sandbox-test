@@ -1,258 +1,24 @@
 {
-  "timestamp": "2026-03-07T17:24:15.955009",
-  "wall_clock_s": 182.53,
-  "serial_sum_s": 398.96,
-  "speedup": 2.19,
-  "sandbox_count": 11,
+  "timestamp": "2026-03-07T18:05:03.437401",
+  "wall_clock_s": 21.36,
+  "serial_sum_s": 34.33,
+  "speedup": 1.61,
+  "sandbox_count": 4,
   "providers": [
-    "daytona"
+    "blaxel",
+    "modal",
+    "daytona",
+    "e2b"
   ],
   "profiles": [
     {
-      "sandbox_label": "daytona-1",
-      "provider": "daytona",
-      "sandbox_id": "fb9af0f8-5a67-480a-a6cb-19b98bb6a69b",
-      "config": {
-        "episodes": 30,
-        "max_steps": 15
-      },
-      "total_duration_s": 182.5,
-      "tests_passed": 29,
-      "tests_total": 29,
-      "rl_best_reward": 15.100000000000007,
-      "rl_final_avg": 10.810000000000002,
-      "rl_best_actions": [
-        "refactor_modularity",
-        "add_availability_masking",
-        "add_dst_handling",
-        "add_booking_creation",
-        "noop",
-        "refactor_modularity",
-        "refactor_modularity",
-        "add_daily_limit",
-        "improve_readability",
-        "add_booking_creation",
-        "fix_syntax",
-        "complete_implementation"
-      ],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.94,
-          "success": true,
-          "detail": "fb9af0f8-5a67-480a-a6cb-19b98bb6a69b"
-        },
-        {
-          "name": "upload_project",
-          "duration_s": 1.22,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "install_deps",
-          "duration_s": 2.06,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "run_tests",
-          "duration_s": 5.53,
-          "success": true,
-          "detail": "----------------------\nRan 29 tests in 4.069s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n OK\nSystem check identified no issues (0 silenced)."
-        },
-        {
-          "name": "rl_training",
-          "duration_s": 170.2,
-          "success": true,
-          "detail": "            5\n  add_dst_handling                  5\n  add_availability_masking          4\n  add_availability_override         3\n  add_daily_limit                   3\n  add_conflict_detection            1\n\nResults saved to: rl_output/training_results.json\nWeights saved to: rl_output/agent_weights.npz"
-        },
-        {
-          "name": "retrieve_results",
-          "duration_s": 0.44,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.18,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-agent-1",
-      "provider": "daytona",
-      "sandbox_id": "",
-      "config": {
-        "benchmark": "coding_agent",
-        "llm_backend": "gemini",
-        "llm_model": "default",
-        "max_iterations": 3,
-        "reward_threshold": 25.0,
-        "bootstrap_app": false
-      },
-      "total_duration_s": 61.89,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "agent_setup",
-          "duration_s": 2.46,
-          "success": true,
-          "detail": "sandbox=7d4addb9-2912-4918-8aa7-4afa179c90ca, provider=daytona, llm=gemini/gemini-2.5-flash-lite"
-        },
-        {
-          "name": "agent_upload_project",
-          "duration_s": 0.86,
-          "success": true,
-          "detail": "uploaded from ."
-        },
-        {
-          "name": "agent_iteration_1",
-          "duration_s": 10.78,
-          "success": true,
-          "detail": "tests=PASS, reward=13.6, best=13.6, llm=5.8s, upload=0.4s, test=4.6s, blocks=1"
-        },
-        {
-          "name": "agent_iteration_2",
-          "duration_s": 30.55,
-          "success": true,
-          "detail": "tests=FAIL, reward=9.7, best=13.6, llm=25.5s, upload=0.5s, test=4.5s, blocks=1"
-        },
-        {
-          "name": "agent_iteration_3",
-          "duration_s": 17.02,
-          "success": true,
-          "detail": "tests=FAIL, reward=9.7, best=13.6, llm=12.1s, upload=0.5s, test=4.5s, blocks=1"
-        },
-        {
-          "name": "agent_final_result",
-          "duration_s": 0.0,
-          "success": true,
-          "detail": "iterations=3, best_reward=13.6, threshold=25.0, llm=gemini/gemini-2.5-flash-lite"
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-concurrent-1",
-      "provider": "daytona",
-      "sandbox_id": "82082ce3-65b7-4a00-82ac-cd2846d55199",
-      "config": {
-        "benchmark": "concurrent_exec"
-      },
-      "total_duration_s": 13.86,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.65,
-          "success": true,
-          "detail": "82082ce3-65b7-4a00-82ac-cd2846d55199"
-        },
-        {
-          "name": "ce_setup_workspace",
-          "duration_s": 4.88,
-          "success": true,
-          "detail": "5/5 files, pip OK"
-        },
-        {
-          "name": "ce_sequential_exec",
-          "duration_s": 4.54,
-          "success": true,
-          "detail": "4 sequential: 4.54s (flake8=1.16s, pytest=1.58s, mypy=0.99s, black=0.82s)"
-        },
-        {
-          "name": "ce_concurrent_exec",
-          "duration_s": 3.23,
-          "success": true,
-          "detail": "4 concurrent: 3.23s (mypy=0.89s, flake8=2.07s, black=2.29s, pytest=3.23s)"
-        },
-        {
-          "name": "ce_comparison",
-          "duration_s": 0.0,
-          "success": true,
-          "detail": "speedup=1.41x, seq=4.54s, conc=3.23s, parallel=yes"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.17,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-docker-1",
-      "provider": "daytona",
-      "sandbox_id": "",
-      "config": {
-        "benchmark": "docker"
-      },
-      "total_duration_s": 24.99,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "docker_build_image",
-          "duration_s": 0.0,
-          "success": true,
-          "detail": "custom image built with 5 deps"
-        },
-        {
-          "name": "docker_create_sandbox",
-          "duration_s": 20.29,
-          "success": true,
-          "detail": "sandbox created from custom image in 20.29s"
-        },
-        {
-          "name": "docker_verify_deps",
-          "duration_s": 0.72,
-          "success": true,
-          "detail": "pre-baked deps verify=OK, no pip install needed"
-        },
-        {
-          "name": "docker_run_workload",
-          "duration_s": 0.36,
-          "success": true,
-          "detail": "matrix shape: (200, 200)\ndjango version: 6.0.3\nWORKLOAD_OK"
-        },
-        {
-          "name": "docker_stock_boot",
-          "duration_s": 0.17,
-          "success": true,
-          "detail": "stock image boot: 0.17s"
-        },
-        {
-          "name": "docker_comparison",
-          "duration_s": 2.81,
-          "success": true,
-          "detail": "stock_boot=0.17s, baseline(create+pip)=1.9s, custom(create+verify)=21.0s, speedup=0.09x"
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-fanout-1",
-      "provider": "daytona",
+      "sandbox_label": "blaxel-fanout",
+      "provider": "blaxel",
       "sandbox_id": "",
       "config": {
         "benchmark": "fanout"
       },
-      "total_duration_s": 9.46,
+      "total_duration_s": 10.63,
       "tests_passed": 0,
       "tests_total": 0,
       "rl_best_reward": 0.0,
@@ -261,51 +27,98 @@
       "steps": [
         {
           "name": "fo_create_sandboxes",
-          "duration_s": 1.89,
+          "duration_s": 3.92,
           "success": true,
-          "detail": "10 sandboxes in 1.89s (avg 0.19s each)"
+          "detail": "10 sandboxes in 3.92s (avg 0.39s each)"
         },
         {
           "name": "fo_upload_code",
-          "duration_s": 2.1,
+          "duration_s": 3.35,
           "success": true,
-          "detail": "10 sandboxes loaded, 1364B each, wall=2.10s"
+          "detail": "10 sandboxes loaded, 1364B each, wall=3.35s"
+        },
+        {
+          "name": "fo_run_tasks",
+          "duration_s": 1.57,
+          "success": true,
+          "detail": "10 tasks done, wall=1.57s, times=[0.15s, 0.29s, 0.44s, 0.64s, 0.79s, 0.95s, 1.10s, 1.29s, 1.43s, 1.57s]"
+        },
+        {
+          "name": "fo_collect_results",
+          "duration_s": 0.48,
+          "success": true,
+          "detail": "10 results collected, wall=0.48s, valid=True"
+        },
+        {
+          "name": "fo_destroy_sandboxes",
+          "duration_s": 1.3,
+          "success": true,
+          "detail": "10 sandboxes destroyed in 1.30s"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "daytona-fanout",
+      "provider": "daytona",
+      "sandbox_id": "",
+      "config": {
+        "benchmark": "fanout"
+      },
+      "total_duration_s": 10.35,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "fo_create_sandboxes",
+          "duration_s": 5.0,
+          "success": true,
+          "detail": "10 sandboxes in 5.00s (avg 0.50s each)"
+        },
+        {
+          "name": "fo_upload_code",
+          "duration_s": 1.68,
+          "success": true,
+          "detail": "10 sandboxes loaded, 1364B each, wall=1.68s"
         },
         {
           "name": "fo_run_tasks",
           "duration_s": 0.32,
           "success": true,
-          "detail": "10 tasks done, wall=0.32s, times=[0.12s, 0.13s, 0.14s, 0.14s, 0.14s, 0.13s, 0.14s, 0.19s, 0.20s, 0.32s]"
+          "detail": "10 tasks done, wall=0.32s, times=[0.10s, 0.11s, 0.13s, 0.12s, 0.14s, 0.13s, 0.14s, 0.16s, 0.17s, 0.31s]"
         },
         {
           "name": "fo_collect_results",
-          "duration_s": 1.08,
+          "duration_s": 1.02,
           "success": true,
-          "detail": "10 results collected, wall=1.08s, valid=True"
+          "detail": "10 results collected, wall=1.02s, valid=True"
         },
         {
           "name": "fo_destroy_sandboxes",
-          "duration_s": 0.32,
+          "duration_s": 0.31,
           "success": true,
-          "detail": "10 sandboxes destroyed in 0.32s"
+          "detail": "10 sandboxes destroyed in 0.31s"
         },
         {
           "name": "fo_create_custom",
-          "duration_s": 3.7,
+          "duration_s": 2.0,
           "success": true,
-          "detail": "10 sandboxes in 3.70s (avg 0.37s each)"
+          "detail": "10 sandboxes in 2.00s (avg 0.20s each)"
         }
       ],
       "error": ""
     },
     {
-      "sandbox_label": "daytona-fs-1",
-      "provider": "daytona",
-      "sandbox_id": "975c3ef1-6325-47dc-9076-79b2d50a3904",
+      "sandbox_label": "e2b-fanout",
+      "provider": "e2b",
+      "sandbox_id": "",
       "config": {
-        "benchmark": "filesystem"
+        "benchmark": "fanout"
       },
-      "total_duration_s": 12.88,
+      "total_duration_s": 2.98,
       "tests_passed": 0,
       "tests_total": 0,
       "rl_best_reward": 0.0,
@@ -313,129 +126,46 @@
       "rl_best_actions": [],
       "steps": [
         {
-          "name": "create_sandbox",
-          "duration_s": 0.74,
+          "name": "fo_create_sandboxes",
+          "duration_s": 2.39,
           "success": true,
-          "detail": "975c3ef1-6325-47dc-9076-79b2d50a3904"
+          "detail": "10 sandboxes in 2.39s (avg 0.24s each)"
         },
         {
-          "name": "fs_code_generation",
-          "duration_s": 1.47,
-          "success": true,
-          "detail": "10 files, 78KB total"
-        },
-        {
-          "name": "fs_build_compile",
-          "duration_s": 0.27,
-          "success": true,
-          "detail": "10 .pyc files generated"
-        },
-        {
-          "name": "fs_upload_files",
-          "duration_s": 1.63,
-          "success": true,
-          "detail": "5/5 files, 32KB"
-        },
-        {
-          "name": "fs_download_files",
-          "duration_s": 2.85,
-          "success": true,
-          "detail": "9 files, 46KB"
-        },
-        {
-          "name": "fs_pip_package_io",
-          "duration_s": 5.1,
-          "success": true,
-          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
-        },
-        {
-          "name": "fs_list_verify",
-          "duration_s": 0.28,
-          "success": true,
-          "detail": "31 files total, native: 20 entries"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.16,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-iteration-1",
-      "provider": "daytona",
-      "sandbox_id": "68929cd3-5f1c-4bd4-bc4b-1fd45492f849",
-      "config": {
-        "benchmark": "iteration_loop"
-      },
-      "total_duration_s": 9.2,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.9,
-          "success": true,
-          "detail": "68929cd3-5f1c-4bd4-bc4b-1fd45492f849"
-        },
-        {
-          "name": "iter_upload_broken",
-          "duration_s": 1.95,
-          "success": true,
-          "detail": "2 files uploaded, 1466B"
-        },
-        {
-          "name": "iter_test_fail",
-          "duration_s": 1.72,
-          "success": true,
-          "detail": "3 failures, 0 errors, exit=1, exec=1.72s"
-        },
-        {
-          "name": "iter_upload_fix",
-          "duration_s": 0.31,
-          "success": true,
-          "detail": "802B written, overwrite in 0.307s"
-        },
-        {
-          "name": "iter_test_pass",
-          "duration_s": 1.57,
-          "success": true,
-          "detail": "6 tests passed, exec=1.57s"
-        },
-        {
-          "name": "iter_add_feature",
-          "duration_s": 0.63,
-          "success": true,
-          "detail": "2 files updated, 2009B, iteration 2"
-        },
-        {
-          "name": "iter_final_validation",
-          "duration_s": 1.59,
-          "success": true,
-          "detail": "9/9 tests passed, final validation OK"
-        },
-        {
-          "name": "destroy_sandbox",
+          "name": "fo_upload_code",
           "duration_s": 0.17,
           "success": true,
-          "detail": ""
+          "detail": "10 sandboxes loaded, 1364B each, wall=0.17s"
+        },
+        {
+          "name": "fo_run_tasks",
+          "duration_s": 0.12,
+          "success": true,
+          "detail": "10 tasks done, wall=0.12s, times=[0.08s, 0.08s, 0.08s, 0.08s, 0.09s, 0.08s, 0.08s, 0.09s, 0.11s, 0.12s]"
+        },
+        {
+          "name": "fo_collect_results",
+          "duration_s": 0.06,
+          "success": true,
+          "detail": "10 results collected, wall=0.06s, valid=True"
+        },
+        {
+          "name": "fo_destroy_sandboxes",
+          "duration_s": 0.23,
+          "success": true,
+          "detail": "10 sandboxes destroyed in 0.23s"
         }
       ],
       "error": ""
     },
     {
-      "sandbox_label": "daytona-network-1",
-      "provider": "daytona",
-      "sandbox_id": "f855a8cc-2da7-472d-a24c-6d3a498cbe49",
+      "sandbox_label": "modal-fanout",
+      "provider": "modal",
+      "sandbox_id": "",
       "config": {
-        "benchmark": "network"
+        "benchmark": "fanout"
       },
-      "total_duration_s": 6.01,
+      "total_duration_s": 10.38,
       "tests_passed": 0,
       "tests_total": 0,
       "rl_best_reward": 0.0,
@@ -443,265 +173,40 @@
       "rl_best_actions": [],
       "steps": [
         {
-          "name": "create_sandbox",
-          "duration_s": 0.88,
+          "name": "fo_create_sandboxes",
+          "duration_s": 0.94,
           "success": true,
-          "detail": "f855a8cc-2da7-472d-a24c-6d3a498cbe49"
+          "detail": "10 sandboxes in 0.94s (avg 0.09s each)"
         },
         {
-          "name": "net_latency",
-          "duration_s": 0.46,
+          "name": "fo_upload_code",
+          "duration_s": 7.47,
           "success": true,
-          "detail": "min=26.9ms avg=28.9ms max=30.7ms (5 samples)"
+          "detail": "10 sandboxes loaded, 1364B each, wall=7.47s"
         },
         {
-          "name": "net_download",
-          "duration_s": 0.44,
+          "name": "fo_run_tasks",
+          "duration_s": 0.6,
           "success": true,
-          "detail": "9.5MB in 0.13s (75.08 MB/s)"
+          "detail": "10 tasks done, wall=0.60s, times=[0.31s, 0.36s, 0.37s, 0.37s, 0.38s, 0.39s, 0.40s, 0.41s, 0.45s, 0.60s]"
         },
         {
-          "name": "net_download_large",
-          "duration_s": 1.47,
+          "name": "fo_collect_results",
+          "duration_s": 0.66,
           "success": true,
-          "detail": "95.4MB in 1.15s (83.2 MB/s)"
+          "detail": "10 results collected, wall=0.66s, valid=True"
         },
         {
-          "name": "net_upload",
-          "duration_s": 0.47,
-          "success": false,
-          "detail": "upload error: HTTP Error 502: Bad Gateway"
-        },
-        {
-          "name": "net_dns",
-          "duration_s": 0.28,
+          "name": "fo_destroy_sandboxes",
+          "duration_s": 0.12,
           "success": true,
-          "detail": "5/5 resolved, min=1.54ms avg=2.38ms max=3.78ms"
+          "detail": "10 sandboxes destroyed in 0.12s"
         },
         {
-          "name": "net_pip_install",
-          "duration_s": 1.49,
+          "name": "fo_create_custom",
+          "duration_s": 0.58,
           "success": true,
-          "detail": "pip install requests: 0.55s (exit=0)"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.17,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-pause-1",
-      "provider": "daytona",
-      "sandbox_id": "99a66e91-5347-4a2d-8065-0178012295ca",
-      "config": {
-        "benchmark": "pause_resume"
-      },
-      "total_duration_s": 29.46,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.69,
-          "success": true,
-          "detail": "99a66e91-5347-4a2d-8065-0178012295ca"
-        },
-        {
-          "name": "async_start_task",
-          "duration_s": 2.52,
-          "success": true,
-          "detail": "bg task started, progress: {\"step\": 5, \"total\": 20, \"pct\": 25.0, \"ts\": 1772932880.8524923}"
-        },
-        {
-          "name": "async_write_state",
-          "duration_s": 0.9,
-          "success": true,
-          "detail": "3/3 files, 10KB"
-        },
-        {
-          "name": "async_pause",
-          "duration_s": 19.19,
-          "success": true,
-          "detail": "paused in 19.188s"
-        },
-        {
-          "name": "async_resume",
-          "duration_s": 0.68,
-          "success": true,
-          "detail": "resumed in 0.684s"
-        },
-        {
-          "name": "async_verify_state",
-          "duration_s": 2.19,
-          "success": true,
-          "detail": "5/5 files, json=OK, bin=OK"
-        },
-        {
-          "name": "async_restart_task",
-          "duration_s": 0.76,
-          "success": true,
-          "detail": "compute OK, fib50 in 0.008s"
-        },
-        {
-          "name": "async_download_verify",
-          "duration_s": 1.75,
-          "success": true,
-          "detail": "6/6 files, 10KB total"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.41,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-sec-exploits-1",
-      "provider": "daytona",
-      "sandbox_id": "ed3b337a-b9e4-4bb2-9d37-a31354d0000b",
-      "config": {
-        "benchmark": "security-exploits"
-      },
-      "total_duration_s": 10.12,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 1.41,
-          "success": true,
-          "detail": "ed3b337a-b9e4-4bb2-9d37-a31354d0000b"
-        },
-        {
-          "name": "exploit_devmem_read",
-          "duration_s": 0.37,
-          "success": true,
-          "detail": "blocked: PermissionError: [Errno 13] Permission denied: '/dev/mem'"
-        },
-        {
-          "name": "exploit_host_fs_traversal",
-          "duration_s": 0.51,
-          "success": false,
-          "detail": "EXPLOITED: 6/9 files readable via /proc/1/root; host_passwd=root:x:0:0:root:/root:/bin/bash; host_hostname=ed3b337a-b9e4-4bb2-9d37-a31354d0000b; host_os_release=PRETTY_NAME=\"Debian GNU/Linux 13 (trixie)\"; host_kernel_version=Linux version 6.8.0-71-generic (buildd@lcy02-amd64-053) (x86_64-linux-gnu-g"
-        },
-        {
-          "name": "exploit_raw_socket_ping",
-          "duration_s": 0.36,
-          "success": true,
-          "detail": "blocked: PermissionError: [Errno 1] Operation not permitted"
-        },
-        {
-          "name": "exploit_capability_abuse",
-          "duration_s": 0.39,
-          "success": false,
-          "detail": "EXPLOITED: 0/41 caps effective (CapEff=0000000000000000), 1 dangerous ops: ptrace_proc1_maps"
-        },
-        {
-          "name": "exploit_resource_exhaustion",
-          "duration_s": 2.74,
-          "success": false,
-          "detail": "EXPLOITED: no effective resource limits; mem=520MB; fds=10000; pids=100; memory_cgroup=1073741824; pids_cgroup=618679"
-        },
-        {
-          "name": "exploit_vm_guest_escape",
-          "duration_s": 3.4,
-          "success": true,
-          "detail": "no VM guest escape vectors found"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.17,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-security-1",
-      "provider": "daytona",
-      "sandbox_id": "251a3948-36c7-4861-aa86-343b84d0553f",
-      "config": {
-        "benchmark": "security"
-      },
-      "total_duration_s": 38.59,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.95,
-          "success": true,
-          "detail": "251a3948-36c7-4861-aa86-343b84d0553f"
-        },
-        {
-          "name": "sec_metadata_service",
-          "duration_s": 6.38,
-          "success": true,
-          "detail": "all metadata endpoints blocked"
-        },
-        {
-          "name": "sec_privilege_info",
-          "duration_s": 0.36,
-          "success": true,
-          "detail": "non-root uid=1001, caps=0000000000000000, seccomp=0"
-        },
-        {
-          "name": "sec_container_escape",
-          "duration_s": 0.34,
-          "success": false,
-          "detail": "CRITICAL: host_fs_readable:hostname=251a3948-36c7-4861-aa86-343b84d0553f"
-        },
-        {
-          "name": "sec_network_scan",
-          "duration_s": 20.36,
-          "success": true,
-          "detail": "no mgmt ports reachable; gw=1.0.20.172"
-        },
-        {
-          "name": "sec_filesystem_exposure",
-          "duration_s": 0.34,
-          "success": true,
-          "detail": "accessible: /proc/kallsyms, other_proc_environ"
-        },
-        {
-          "name": "sec_resource_limits",
-          "duration_s": 0.34,
-          "success": true,
-          "detail": "limits configured: mem=1073741824; pids=309043; cpu=100000 100000; fds_opened=1021; nofile=1024/524288"
-        },
-        {
-          "name": "sec_egress_filtering",
-          "duration_s": 8.35,
-          "success": true,
-          "detail": "SMTP=filtered; Redis=filtered; MySQL=filtered; Postgres=filtered; raw_socket=False; ipv6=False"
-        },
-        {
-          "name": "sec_env_leak",
-          "duration_s": 0.61,
-          "success": true,
-          "detail": "no sensitive env vars leaked (total=20)"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.17,
-          "success": true,
-          "detail": ""
+          "detail": "10 sandboxes in 0.58s (avg 0.06s each)"
         }
       ],
       "error": ""
