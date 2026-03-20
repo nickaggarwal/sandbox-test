@@ -1,7 +1,7 @@
 # Cloud Sandbox Benchmark Report: Full Results
 
 **Providers tested**: Daytona, E2B, Blaxel, Modal, Runloop
-**Date**: March 20, 2026 (updated with Runloop provider + all 9 benchmarks)
+**Date**: March 20, 2026 (updated with Runloop provider across all 9 benchmarks)
 **Python**: 3.12 (host and sandbox images)
 **SDKs**: Daytona v0.148, E2B Code Interpreter v2.4.1, Blaxel v0.2.44, Modal v0.74+, Runloop API Client (latest)
 **Instance specs**: Daytona (python:3.12-slim, 4 CPU, 8GB RAM, 10GB disk), E2B (default), Blaxel (4 vCPU, 8GB), Modal (4 CPU, 8GB), Runloop (default devbox)
@@ -34,20 +34,19 @@
 
 | Step | Daytona | E2B | Blaxel | Modal | Runloop |
 |------|---------|-----|--------|-------|---------|
-| Create Sandbox | 0.9s | 0.2s | 0.4s | 0.3s | ~2.1s |
-| Upload Project | 1.8s | 0.4s | 0.5s | 2.9s | — |
-| Install Deps | 5.6s | 5.5s | 6.6s | 7.2s | — |
-| Run Tests (29) | 6.1s | 7.7s | 6.7s | 9.7s | — |
-| RL Training | 147.8s† | 287s* | 120s** | 542.2s | — |
-| Retrieve Results | 0.5s | ~1s | ~1s | 1.3s | — |
-| **Total** | **164.7s**† | **301.1s** | **135.2s** | **564.0s** | **—** |
+| Create Sandbox | 0.9s | 0.2s | 0.4s | 0.3s | 1.7s |
+| Upload Project | 1.8s | 0.4s | 0.5s | 2.9s | 2.1s |
+| Install Deps | 5.6s | 5.5s | 6.6s | 7.2s | 7.3s |
+| Run Tests (29) | 6.1s | 7.7s | 6.7s | 9.7s | 9.7s |
+| RL Training | 147.8s† | 287s* | 120s** | 542.2s | 338.4s† |
+| Retrieve Results | 0.5s | ~1s | ~1s | 1.3s | 0.1s |
+| **Total** | **164.7s**† | **301.1s** | **135.2s** | **564.0s** | **359.7s**† |
 
 \* E2B hit connection timeouts on some long runs
 \** Blaxel hit timeout/HTML error on some runs
-† Daytona ran 30 episodes / 15 max-steps; others ran 50/25
-— Runloop not yet tested for RL compute benchmark
+† Daytona and Runloop ran 30 episodes / 15 max-steps; others ran 50/25
 
-**Summary**: Daytona with python:3.12-slim achieves fast boot (0.9s) and the fastest RL training at 147.8s (30 ep/15 steps) with 29/29 tests and best reward 15.1, benefiting from 4 CPU allocation. Modal completed the full RL pipeline reliably (29/29 tests, best reward 14.54) but was the slowest at 564s total. E2B was faster but experienced connection drops on runs exceeding 5 minutes. Blaxel posted the fastest raw times when it worked, but had stability issues on long-running compute.
+**Summary**: Daytona with python:3.12-slim achieves fast boot (0.9s) and the fastest RL training at 147.8s (30 ep/15 steps) with 29/29 tests and best reward 15.1, benefiting from 4 CPU allocation. Runloop completed the full pipeline reliably (29/29 tests, best reward 15.1, avg 10.81) at 359.7s total -- RL training took 338.4s (30 ep/15 steps), placing it between E2B and Modal. Modal completed the full RL pipeline reliably (29/29 tests, best reward 14.54) but was the slowest at 564s total. E2B was faster but experienced connection drops on runs exceeding 5 minutes. Blaxel posted the fastest raw times when it worked, but had stability issues on long-running compute. Note: Runloop devboxes lack `libsqlite3.so.0` by default; the benchmark downloads the library from Debian repos and uses `LD_LIBRARY_PATH` to make Django/SQLite work.
 
 ---
 
@@ -217,32 +216,30 @@
 
 | Step | E2B | Blaxel | Modal | Daytona | Runloop |
 |------|-----|--------|-------|---------|---------|
-| Setup (sandbox + pip install) | 3.8s | 4.6s | 7.8s | 4.1s | — |
-| Upload Project (38 files) | 0.3s | 0.4s | 1.9s | 0.8s | — |
-| Iteration 1 (LLM + test) | 7.1s | 13.0s | 19.3s | 13.1s | — |
-| Iteration 2 (LLM + test) | 30.7s | 33.0s | 28.6s | 33.7s | — |
-| Iteration 3 (LLM + test) | 19.1s | 23.9s | 28.6s | 27.0s | — |
-| **Total** | **61.1s** | **75.1s** | **86.4s** | **79.0s** | **—** |
+| Setup (sandbox + pip install) | 3.8s | 4.6s | 7.8s | 4.1s | 5.9s |
+| Upload Project (38 files) | 0.3s | 0.4s | 1.9s | 0.8s | 1.9s |
+| Iteration 1 (LLM + test) | 7.1s | 13.0s | 19.3s | 13.1s | 11.3s |
+| Iteration 2 (LLM + test) | 30.7s | 33.0s | 28.6s | 33.7s | 20.3s |
+| Iteration 3 (LLM + test) | 19.1s | 23.9s | 28.6s | 27.0s | 18.8s |
+| **Total** | **61.1s** | **75.1s** | **86.4s** | **79.0s** | **58.2s** |
 
-— Runloop not yet tested for coding agent benchmark
-
-| Metric | E2B | Blaxel | Modal | Daytona |
-|--------|-----|--------|-------|---------|
-| Best reward | 7.7 | 16.4 | 14.4 | 15.6 |
-| Sandbox overhead (setup+upload) | 4.1s | 5.0s | 9.7s | 4.9s |
-| Avg iteration time | 19.0s | 23.3s | 25.5s | 24.6s |
+| Metric | E2B | Blaxel | Modal | Daytona | Runloop |
+|--------|-----|--------|-------|---------|---------|
+| Best reward | 7.7 | 16.4 | 14.4 | 15.6 | 8.8 |
+| Sandbox overhead (setup+upload) | 4.1s | 5.0s | 9.7s | 4.9s | 7.8s |
+| Avg iteration time | 19.0s | 23.3s | 25.5s | 24.6s | 16.8s |
 
 **Iteration Loop (synthetic) vs Coding Agent (LLM) comparison:**
 
 | | Iteration Loop | Coding Agent |
 |---|---|---|
 | **E2B** | 3.8s (6 steps) | 61.1s (3 LLM iterations) |
-| **Daytona** | 6.3s | 79.0s |
+| **Runloop** | 9.9s | 58.2s |
 | **Blaxel** | 5.1s | 75.1s |
+| **Daytona** | 6.3s | 79.0s |
 | **Modal** | 12.6s | 86.4s |
-| **Runloop** | 9.9s | — |
 
-**Summary**: E2B leads on total agent loop time (61.1s). Iteration times are dominated by LLM latency (5-34s per call), making the sandbox speed difference less impactful than in synthetic benchmarks. The best reward scores varied across providers (7.7 to 16.4) due to non-deterministic LLM outputs, not sandbox differences. For real agent workloads, sandbox choice matters most for setup overhead; once running, LLM API latency is the bottleneck.
+**Summary**: Runloop edges out E2B as the fastest total agent loop (58.2s vs 61.1s), driven by faster LLM iteration times (16.8s avg vs 19.0s). E2B has the lowest sandbox overhead (4.1s setup+upload) but Runloop's iteration speed compensates. Iteration times are dominated by LLM latency (5-34s per call), making the sandbox speed difference less impactful than in synthetic benchmarks. The best reward scores varied across providers (7.7 to 16.4) due to non-deterministic LLM outputs, not sandbox differences. For real agent workloads, sandbox choice matters most for setup overhead; once running, LLM API latency is the bottleneck.
 
 ---
 
@@ -343,20 +340,20 @@
 
 | Benchmark | 1st | 2nd | 3rd | 4th | 5th |
 |-----------|-----|-----|-----|-----|-----|
-| RL Compute | Blaxel (135s)* | Daytona (165s)† | E2B (301s)* | Modal (564s) | Runloop (—) |
+| RL Compute | Blaxel (135s)* | Daytona (165s)† | E2B (301s)* | Runloop (360s)† | Modal (564s) |
 | Filesystem I/O | E2B (2.8s) | Blaxel (3.7s) | Daytona (14.7s) | Runloop (25.0s) | Modal (30.8s) |
 | Pause/Resume | E2B (15.4s) | Runloop (20.3s)*** | Modal (22.7s) | Daytona (32.5s) | Blaxel (4.4s)** |
 | Concurrent Exec | E2B (8.1s) | Blaxel (9.7s) | Daytona (10.3s) | Modal (15.6s) | Runloop (16.1s) |
 | Iteration Loop | E2B (3.8s) | Blaxel (5.1s) | Daytona (6.3s) | Runloop (9.9s) | Modal (12.6s) |
 | Fan-Out (10 sandboxes) | E2B (3.0s) | Runloop (6.2s) | Daytona (7.0s) | Modal (10.4s) | Blaxel (10.6s) |
-| Coding Agent | E2B (61s) | Blaxel (75s) | Daytona (79s) | Modal (86s) | Runloop (—) |
+| Coding Agent | Runloop (58s) | E2B (61s) | Blaxel (75s) | Daytona (79s) | Modal (86s) |
 | Custom Docker | E2B (6.1s) | Daytona (10.5s) | Blaxel (11.2s) | Runloop (11.9s) | Modal (14.7s) |
 | Network Speed | Daytona (7.6s) | E2B (8.8s) | Blaxel (10.6s) | Runloop (14.1s) | Modal (22.8s) |
 
 \* Blaxel/E2B had intermittent stability issues on long RL runs
 \** Blaxel skipped pause/resume (no API)
 \*** Runloop pause/resume requires account capability (skipped, other steps OK)
-† Daytona ran 30ep/15steps; others ran 50ep/25steps
+† Daytona and Runloop ran 30ep/15steps; others ran 50ep/25steps
 
 ### By Use Case
 
@@ -372,7 +369,7 @@
 | **Short compute bursts** | Blaxel | Fastest test execution (0.29-0.39s per run) |
 | **Custom environments** | Daytona | 3.88x speedup with custom images, fastest of all providers |
 | **Fastest sandbox creation** | Modal | 0.09s avg per sandbox (10-sandbox fan-out) |
-| **LLM coding agent loop** | E2B | 61.1s total, fastest agent loop |
+| **LLM coding agent loop** | Runloop | 58.2s total, fastest agent loop (16.8s avg iteration) |
 | **Sustained downloads** | Runloop | 134.84 MB/s sustained download (fastest of all providers) |
 | **DNS resolution** | Runloop | 1.78ms avg (fastest of all providers) |
 | **Network upload** | Runloop | 5.50 MB/s upload throughput (fastest of all providers) |
@@ -446,6 +443,8 @@
 | `file.write()` uses `file_path` not `path` | Runloop | `file.write(file_path=..., contents=...)` for text; `file.upload(path=..., file=...)` for binary |
 | Pause/resume capability gated | Runloop | Requires `ACCOUNT_CAPABILITY_DEVBOX_SUSPEND_AND_RESUME` on account |
 | No custom image build API | Runloop | Use default devbox; deps must be installed at runtime via pip |
+| Missing `libsqlite3.so.0` in devbox | Runloop | Download `.deb` from Debian repo, extract to `~/.local/lib/`, use `LD_LIBRARY_PATH` |
+| No root/sudo access in devbox | Runloop | Cannot `apt-get install`; use pip or download prebuilt binaries |
 
 ---
 
@@ -495,19 +494,20 @@
   Network:     22.8s total (24.6ms latency, 84.91 MB/s download, 0.74 MB/s upload, 1.63s pip)
 
 === CODING AGENT (all providers, Gemini 2.5 Flash Lite, 3 iterations) ===
+  Runloop:     58.2s total (setup=7.8s, best_reward=8.8, avg_iter=16.8s)
   E2B:         61.1s total (setup=4.1s, best_reward=7.7)
   Daytona:     79.0s total (setup=4.9s, best_reward=15.6)
   Blaxel:      75.1s total (setup=5.0s, best_reward=16.4)
   Modal:       86.4s total (setup=9.7s, best_reward=14.4)
 
 === RUNLOOP (default devbox) ===
-  RL:         — (not yet tested)
+  RL:         359.7s total (338.4s training 30ep/15steps, 29/29 tests, best=15.1, avg=10.81)
   FS:          25.0s total (5.3s codegen, 2.3s download, 12.0s large IO) [10 sandboxes avg, 2 runs]
   Pause:       20.3s total (pause/resume N/A - capability gated, state=OK)
   Concurrent:  16.1s total (3.74s seq, 2.39s conc, 1.57x speedup)
   Iteration:    9.9s total (0.24s overwrite, 0.73s test avg)
   Fan-out:      6.2s total (4.0s create 10 sandboxes, 0.6s compute, 1.0s upload)
-  Agent:       — (not yet tested)
+  Agent:       58.2s total (3 iters, best reward 8.8 avg, llm=gemini-2.5-flash-lite)
   Docker:     11.9s total (no custom build, create=1.8s, pip=7.9s, stock_boot=1.45s)
   Network:     14.1s total (61.4ms latency, 134.84 MB/s download, 5.50 MB/s upload, 1.85s pip)
 

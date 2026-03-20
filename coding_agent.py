@@ -79,6 +79,9 @@ def create_runner(provider):
     elif provider == 'modal':
         from modal_sandbox import ModalSandboxRunner
         return ModalSandboxRunner()
+    elif provider == 'runloop':
+        from runloop_sandbox import RunloopSandboxRunner
+        return RunloopSandboxRunner(api_key=os.environ.get('RUNLOOP_API_KEY', ''))
     else:
         raise ValueError('Unknown provider: {}'.format(provider))
 
@@ -90,6 +93,7 @@ def get_working_dir(provider):
         'e2b': '/home/user/app',
         'blaxel': '/blaxel/app',
         'modal': '/root/app',
+        'runloop': '/home/user/app',
     }
     return dirs.get(provider, '/root/app')
 
@@ -708,7 +712,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--provider',
-        choices=['daytona', 'e2b', 'blaxel', 'modal'],
+        choices=['daytona', 'e2b', 'blaxel', 'modal', 'runloop'],
         default='e2b',
     )
     parser.add_argument(

@@ -44,7 +44,10 @@ class RunloopSandboxRunner:
     def exec(self, command, cwd='/home/user/app', timeout=300):
         """Execute a shell command in the Runloop devbox."""
         try:
-            full_cmd = 'cd {} && {}'.format(cwd, command)
+            full_cmd = (
+                'export LD_LIBRARY_PATH=/home/user/.local/lib:'
+                '$LD_LIBRARY_PATH && cd {} && {}'
+            ).format(cwd, command)
             result = self.devbox.cmd.exec(full_cmd)
             exit_code = result.exit_code
             stdout = result.stdout() or ''
@@ -113,12 +116,21 @@ class RunloopSandboxRunner:
     def setup_environment(self):
         """Install dependencies and run migrations."""
         commands = [
+            # Runloop devboxes lack libsqlite3.so.0 and user has no root access;
+            # download the .deb from Debian and extract to a user-writable path,
+            # then use LD_LIBRARY_PATH for all subsequent commands.
+            'curl -sL http://ftp.debian.org/debian/pool/main/s/sqlite3/'
+            'libsqlite3-0_3.40.1-2+deb12u2_amd64.deb -o /tmp/sqlite3.deb '
+            '&& dpkg-deb -x /tmp/sqlite3.deb /tmp/sqlite3_extract '
+            '&& mkdir -p /home/user/.local/lib '
+            '&& cp /tmp/sqlite3_extract/usr/lib/x86_64-linux-gnu/libsqlite3.so.0* '
+            '/home/user/.local/lib/',
             'pip install django djangorestframework pytz gymnasium numpy',
             'python manage.py migrate --run-syncdb',
         ]
         results = []
         for cmd in commands:
-            print('[Runloop] Running: {}'.format(cmd))
+            print('[Runloop] Running: {}'.format(cmd[:80]))
             result = self.exec(cmd, cwd='/home/user/app', timeout=180)
             results.append(result)
             print('  Exit code: {}'.format(result['exit_code']))
