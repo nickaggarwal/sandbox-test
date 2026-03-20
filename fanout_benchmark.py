@@ -119,6 +119,9 @@ def _create_runner_with_key(provider, api_key):
     elif provider == 'modal':
         from modal_sandbox import ModalSandboxRunner
         return ModalSandboxRunner()
+    elif provider == 'runloop':
+        from runloop_sandbox import RunloopSandboxRunner
+        return RunloopSandboxRunner(api_key=api_key)
     else:
         raise ValueError('Unknown provider: {}'.format(provider))
 

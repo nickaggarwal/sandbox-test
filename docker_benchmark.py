@@ -186,6 +186,34 @@ def _create_blaxel_sandbox(api_key, workspace='inferless'):
     return sandbox, loop, name
 
 
+# ── Runloop Default Sandbox ───────────────────────────────────────
+
+def _create_runloop_sandbox(api_key):
+    """Create a Runloop devbox (no custom image build)."""
+    import time as _time
+    from runloop_api_client import RunloopSDK
+    sdk = RunloopSDK(bearer_token=api_key)
+    devbox = sdk.devbox.create(
+        name='docker-bench-{}'.format(int(_time.time() * 1000) % 1000000),
+    )
+    return sdk, devbox
+
+
+def _exec_runloop(devbox, command, cwd='/home/user/docker_bench', timeout=300):
+    """Run a command in a Runloop devbox."""
+    try:
+        full_cmd = 'cd {} && {}'.format(cwd, command)
+        result = devbox.cmd.exec(full_cmd)
+        stdout = result.stdout() or ''
+        stderr = result.stderr() or ''
+        output = stdout
+        if stderr:
+            output = output + '\n' + stderr if output else stderr
+        return {'exit_code': result.exit_code, 'result': output}
+    except Exception as e:
+        return {'exit_code': -1, 'result': str(e)}
+
+
 # ── Exec helpers ──────────────────────────────────────────────────
 
 def _exec_daytona(sandbox, command, cwd='/root/docker_bench', timeout=300):
@@ -312,6 +340,10 @@ def _step_create_sandbox(provider, api_key, image):
             sandbox, loop, name = _create_blaxel_sandbox(api_key)
             sandbox_ctx = ('blaxel', loop, sandbox, name)
 
+        elif provider == 'runloop':
+            sdk, devbox = _create_runloop_sandbox(api_key)
+            sandbox_ctx = ('runloop', sdk, devbox)
+
         step.ended_at = time.time()
         step.duration_s = step.ended_at - step.started_at
         step.success = True
@@ -344,6 +376,9 @@ def _run_exec(provider, sandbox_ctx, command, cwd=None):
     elif provider == 'blaxel':
         _, loop, sandbox = sandbox_ctx[:3]
         return _exec_blaxel(sandbox, loop, command, cwd=cwd)
+    elif provider == 'runloop':
+        _, _, devbox = sandbox_ctx
+        return _exec_runloop(devbox, command, cwd=cwd)
 
 
 def _step_verify_deps(provider, sandbox_ctx):
@@ -441,6 +476,9 @@ def _step_stock_boot(provider, api_key):
         elif provider == 'blaxel':
             sandbox, loop, name = _create_blaxel_sandbox(api_key)
             baseline_sandbox_ctx = ('blaxel', loop, sandbox, name)
+        elif provider == 'runloop':
+            sdk, devbox = _create_runloop_sandbox(api_key)
+            baseline_sandbox_ctx = ('runloop', sdk, devbox)
 
         step.ended_at = time.time()
         step.duration_s = step.ended_at - step.started_at
@@ -548,6 +586,9 @@ def _destroy_sandbox(provider, sandbox_ctx):
         elif provider == 'blaxel':
             _, loop, sandbox = sandbox_ctx[:3]
             loop.run_until_complete(sandbox.delete())
+        elif provider == 'runloop':
+            _, _, devbox = sandbox_ctx
+            devbox.shutdown()
     except Exception as e:
         print('    [DOCKER] Cleanup error: {}'.format(e))
 

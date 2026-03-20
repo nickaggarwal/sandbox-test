@@ -39,6 +39,7 @@ _load_env()
 DAYTONA_API_KEY = os.environ.get('DAYTONA_API_KEY', '')
 E2B_API_KEY = os.environ.get('E2B_API_KEY', '')
 BLAXEL_API_KEY = os.environ.get('BLAXEL_API_KEY', '')
+RUNLOOP_API_KEY = os.environ.get('RUNLOOP_API_KEY', '')
 
 
 # ── Profiling Timer ─────────────────────────────────────────────────
@@ -128,6 +129,9 @@ def create_runner(provider):
     elif provider == 'modal':
         from modal_sandbox import ModalSandboxRunner
         return ModalSandboxRunner()
+    elif provider == 'runloop':
+        from runloop_sandbox import RunloopSandboxRunner
+        return RunloopSandboxRunner(api_key=RUNLOOP_API_KEY)
     else:
         raise ValueError(f'Unknown provider: {provider}')
 
@@ -140,6 +144,8 @@ def get_results_path(provider):
         return '/blaxel/app/rl_output/training_results.json'
     elif provider == 'modal':
         return '/root/app/rl_output/training_results.json'
+    elif provider == 'runloop':
+        return '/home/user/app/rl_output/training_results.json'
     return '/home/user/app/rl_output/training_results.json'
 
 
@@ -416,6 +422,7 @@ def run_profiled_fanout_benchmark(
         'daytona': DAYTONA_API_KEY,
         'e2b': E2B_API_KEY,
         'blaxel': BLAXEL_API_KEY,
+        'runloop': RUNLOOP_API_KEY,
     }.get(provider)
 
     from fanout_benchmark import run_fanout_benchmark
@@ -703,6 +710,7 @@ def run_profiled_docker_benchmark(
         'daytona': DAYTONA_API_KEY,
         'e2b': E2B_API_KEY,
         'blaxel': BLAXEL_API_KEY,
+        'runloop': RUNLOOP_API_KEY,
     }.get(provider)
 
     from docker_benchmark import run_docker_benchmark
@@ -1214,7 +1222,7 @@ def _build_report(profiles, total_wall):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Run parallel profiled sandboxes (Daytona, E2B, Blaxel, or Modal)'
+        description='Run parallel profiled sandboxes (Daytona, E2B, Blaxel, Modal, or Runloop)'
     )
     parser.add_argument(
         '--sandboxes', type=int, default=3,
@@ -1229,9 +1237,9 @@ if __name__ == '__main__':
     parser.add_argument('--project-dir', default='.')
     parser.add_argument(
         '--provider',
-        choices=['daytona', 'e2b', 'blaxel', 'modal', 'both', 'all'],
+        choices=['daytona', 'e2b', 'blaxel', 'modal', 'runloop', 'both', 'all'],
         default='daytona',
-        help='Sandbox provider ("both" for Daytona+E2B, "all" for all four)',
+        help='Sandbox provider ("both" for Daytona+E2B, "all" for all five)',
     )
     parser.add_argument(
         '--stagger', type=float, default=2.0,
@@ -1288,7 +1296,7 @@ if __name__ == '__main__':
 
     if args.provider in ('both', 'all'):
         if args.provider == 'all':
-            providers = ['daytona', 'e2b', 'blaxel', 'modal']
+            providers = ['daytona', 'e2b', 'blaxel', 'modal', 'runloop']
         else:
             providers = ['daytona', 'e2b']
         n_each = max(1, args.sandboxes // len(providers))
@@ -1350,7 +1358,7 @@ if __name__ == '__main__':
         fs_configs = []
         if args.provider in ('both', 'all'):
             if args.provider == 'all':
-                fs_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+                fs_providers = ['daytona', 'e2b', 'blaxel', 'modal', 'runloop']
             else:
                 fs_providers = ['daytona', 'e2b']
             for prov in fs_providers:
@@ -1377,7 +1385,7 @@ if __name__ == '__main__':
         pause_configs = []
         if args.provider in ('both', 'all'):
             if args.provider == 'all':
-                pause_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+                pause_providers = ['daytona', 'e2b', 'blaxel', 'modal', 'runloop']
             else:
                 pause_providers = ['daytona', 'e2b']
             for prov in pause_providers:
@@ -1404,7 +1412,7 @@ if __name__ == '__main__':
         concurrent_configs = []
         if args.provider in ('both', 'all'):
             if args.provider == 'all':
-                cc_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+                cc_providers = ['daytona', 'e2b', 'blaxel', 'modal', 'runloop']
             else:
                 cc_providers = ['daytona', 'e2b']
             for prov in cc_providers:
@@ -1431,7 +1439,7 @@ if __name__ == '__main__':
         iteration_configs = []
         if args.provider in ('both', 'all'):
             if args.provider == 'all':
-                iter_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+                iter_providers = ['daytona', 'e2b', 'blaxel', 'modal', 'runloop']
             else:
                 iter_providers = ['daytona', 'e2b']
             for prov in iter_providers:
@@ -1458,7 +1466,7 @@ if __name__ == '__main__':
         fanout_configs = []
         if args.provider in ('both', 'all'):
             if args.provider == 'all':
-                fo_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+                fo_providers = ['daytona', 'e2b', 'blaxel', 'modal', 'runloop']
             else:
                 fo_providers = ['daytona', 'e2b']
             for prov in fo_providers:
@@ -1485,7 +1493,7 @@ if __name__ == '__main__':
         agent_configs = []
         if args.provider in ('both', 'all'):
             if args.provider == 'all':
-                agent_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+                agent_providers = ['daytona', 'e2b', 'blaxel', 'modal', 'runloop']
             else:
                 agent_providers = ['daytona', 'e2b']
             for prov in agent_providers:
@@ -1524,7 +1532,7 @@ if __name__ == '__main__':
         docker_configs = []
         if args.provider in ('both', 'all'):
             if args.provider == 'all':
-                docker_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+                docker_providers = ['daytona', 'e2b', 'blaxel', 'modal', 'runloop']
             else:
                 docker_providers = ['daytona', 'e2b']
             for prov in docker_providers:
@@ -1551,7 +1559,7 @@ if __name__ == '__main__':
         security_configs = []
         if args.provider in ('both', 'all'):
             if args.provider == 'all':
-                sec_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+                sec_providers = ['daytona', 'e2b', 'blaxel', 'modal', 'runloop']
             else:
                 sec_providers = ['daytona', 'e2b']
             for prov in sec_providers:
@@ -1578,7 +1586,7 @@ if __name__ == '__main__':
         sec_exploit_configs = []
         if args.provider in ('both', 'all'):
             if args.provider == 'all':
-                se_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+                se_providers = ['daytona', 'e2b', 'blaxel', 'modal', 'runloop']
             else:
                 se_providers = ['daytona', 'e2b']
             for prov in se_providers:
@@ -1605,7 +1613,7 @@ if __name__ == '__main__':
         network_configs = []
         if args.provider in ('both', 'all'):
             if args.provider == 'all':
-                net_providers = ['daytona', 'e2b', 'blaxel', 'modal']
+                net_providers = ['daytona', 'e2b', 'blaxel', 'modal', 'runloop']
             else:
                 net_providers = ['daytona', 'e2b']
             for prov in net_providers:

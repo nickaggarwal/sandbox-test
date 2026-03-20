@@ -1,311 +1,21 @@
 {
-  "timestamp": "2026-03-07T18:19:20.655552",
-  "wall_clock_s": 167.34,
-  "serial_sum_s": 383.15,
-  "speedup": 2.29,
-  "sandbox_count": 11,
+  "timestamp": "2026-03-20T15:13:33.543066",
+  "wall_clock_s": 33.97,
+  "serial_sum_s": 263.65,
+  "speedup": 7.76,
+  "sandbox_count": 10,
   "providers": [
-    "daytona"
+    "runloop"
   ],
   "profiles": [
     {
-      "sandbox_label": "daytona-1",
-      "provider": "daytona",
-      "sandbox_id": "bf1aa0c6-e7fb-4140-9987-ec26cdffdec5",
-      "config": {
-        "episodes": 30,
-        "max_steps": 15
-      },
-      "total_duration_s": 164.67,
-      "tests_passed": 29,
-      "tests_total": 29,
-      "rl_best_reward": 15.100000000000007,
-      "rl_final_avg": 10.810000000000002,
-      "rl_best_actions": [
-        "refactor_modularity",
-        "add_availability_masking",
-        "add_dst_handling",
-        "add_booking_creation",
-        "noop",
-        "refactor_modularity",
-        "refactor_modularity",
-        "add_daily_limit",
-        "improve_readability",
-        "add_booking_creation",
-        "fix_syntax",
-        "complete_implementation"
-      ],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.86,
-          "success": true,
-          "detail": "bf1aa0c6-e7fb-4140-9987-ec26cdffdec5"
-        },
-        {
-          "name": "upload_project",
-          "duration_s": 1.78,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "install_deps",
-          "duration_s": 5.62,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "run_tests",
-          "duration_s": 6.14,
-          "success": true,
-          "detail": "----------------------\nRan 29 tests in 3.601s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n OK\nSystem check identified no issues (0 silenced)."
-        },
-        {
-          "name": "rl_training",
-          "duration_s": 147.76,
-          "success": true,
-          "detail": "            5\n  add_dst_handling                  5\n  add_availability_masking          4\n  add_availability_override         3\n  add_daily_limit                   3\n  add_conflict_detection            1\n\nResults saved to: rl_output/training_results.json\nWeights saved to: rl_output/agent_weights.npz"
-        },
-        {
-          "name": "retrieve_results",
-          "duration_s": 0.49,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.17,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-agent-1",
-      "provider": "daytona",
-      "sandbox_id": "",
-      "config": {
-        "benchmark": "coding_agent",
-        "llm_backend": "gemini",
-        "llm_model": "default",
-        "max_iterations": 3,
-        "reward_threshold": 25.0,
-        "bootstrap_app": false
-      },
-      "total_duration_s": 78.95,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "agent_setup",
-          "duration_s": 4.1,
-          "success": true,
-          "detail": "sandbox=4a2c337c-181e-4cf0-acfc-6814b8439358, provider=daytona, llm=gemini/gemini-2.5-flash-lite"
-        },
-        {
-          "name": "agent_upload_project",
-          "duration_s": 0.82,
-          "success": true,
-          "detail": "uploaded from ."
-        },
-        {
-          "name": "agent_iteration_1",
-          "duration_s": 13.14,
-          "success": true,
-          "detail": "tests=PASS, reward=15.6, best=15.6, llm=7.4s, upload=1.1s, test=4.6s, blocks=3"
-        },
-        {
-          "name": "agent_iteration_2",
-          "duration_s": 33.71,
-          "success": true,
-          "detail": "tests=PASS, reward=15.6, best=15.6, llm=29.3s, upload=0.0s, test=4.4s, blocks=0"
-        },
-        {
-          "name": "agent_iteration_3",
-          "duration_s": 26.99,
-          "success": true,
-          "detail": "tests=FAIL, reward=9.1, best=15.6, llm=24.8s, upload=1.5s, test=0.7s, blocks=4"
-        },
-        {
-          "name": "agent_final_result",
-          "duration_s": 0.0,
-          "success": true,
-          "detail": "iterations=3, best_reward=15.6, threshold=25.0, llm=gemini/gemini-2.5-flash-lite"
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-concurrent-1",
-      "provider": "daytona",
-      "sandbox_id": "afab9926-f616-4d25-a07d-4c428f59aab3",
-      "config": {
-        "benchmark": "concurrent_exec"
-      },
-      "total_duration_s": 10.25,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.74,
-          "success": true,
-          "detail": "afab9926-f616-4d25-a07d-4c428f59aab3"
-        },
-        {
-          "name": "ce_setup_workspace",
-          "duration_s": 5.53,
-          "success": true,
-          "detail": "5/5 files, pip OK"
-        },
-        {
-          "name": "ce_sequential_exec",
-          "duration_s": 2.69,
-          "success": true,
-          "detail": "4 sequential: 2.69s (flake8=0.49s, pytest=0.48s, mypy=1.16s, black=0.56s)"
-        },
-        {
-          "name": "ce_concurrent_exec",
-          "duration_s": 0.8,
-          "success": true,
-          "detail": "4 concurrent: 0.80s (flake8=0.50s, mypy=0.69s, pytest=0.73s, black=0.80s)"
-        },
-        {
-          "name": "ce_comparison",
-          "duration_s": 0.0,
-          "success": true,
-          "detail": "speedup=3.36x, seq=2.69s, conc=0.80s, parallel=yes"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.18,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-docker-1",
-      "provider": "daytona",
-      "sandbox_id": "",
-      "config": {
-        "benchmark": "docker"
-      },
-      "total_duration_s": 10.48,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "docker_build_image",
-          "duration_s": 0.0,
-          "success": true,
-          "detail": "custom image built with 5 deps"
-        },
-        {
-          "name": "docker_create_sandbox",
-          "duration_s": 0.91,
-          "success": true,
-          "detail": "sandbox created from custom image in 0.91s"
-        },
-        {
-          "name": "docker_verify_deps",
-          "duration_s": 0.73,
-          "success": true,
-          "detail": "pre-baked deps verify=OK, no pip install needed"
-        },
-        {
-          "name": "docker_run_workload",
-          "duration_s": 0.32,
-          "success": true,
-          "detail": "matrix shape: (200, 200)\ndjango version: 6.0.3\nWORKLOAD_OK"
-        },
-        {
-          "name": "docker_stock_boot",
-          "duration_s": 0.78,
-          "success": true,
-          "detail": "stock image boot: 0.78s"
-        },
-        {
-          "name": "docker_comparison",
-          "duration_s": 7.08,
-          "success": true,
-          "detail": "stock_boot=0.78s, baseline(create+pip)=6.3s, custom(create+verify)=1.6s, speedup=3.88x"
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-fanout-1",
-      "provider": "daytona",
-      "sandbox_id": "",
-      "config": {
-        "benchmark": "fanout"
-      },
-      "total_duration_s": 7.03,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "fo_create_sandboxes",
-          "duration_s": 1.72,
-          "success": true,
-          "detail": "10 sandboxes in 1.72s (avg 0.17s each)"
-        },
-        {
-          "name": "fo_upload_code",
-          "duration_s": 1.92,
-          "success": true,
-          "detail": "10 sandboxes loaded, 1364B each, wall=1.92s"
-        },
-        {
-          "name": "fo_run_tasks",
-          "duration_s": 0.34,
-          "success": true,
-          "detail": "10 tasks done, wall=0.34s, times=[0.14s, 0.14s, 0.14s, 0.16s, 0.15s, 0.17s, 0.18s, 0.18s, 0.19s, 0.34s]"
-        },
-        {
-          "name": "fo_collect_results",
-          "duration_s": 1.17,
-          "success": true,
-          "detail": "10 results collected, wall=1.17s, valid=True"
-        },
-        {
-          "name": "fo_destroy_sandboxes",
-          "duration_s": 0.3,
-          "success": true,
-          "detail": "10 sandboxes destroyed in 0.30s"
-        },
-        {
-          "name": "fo_create_custom",
-          "duration_s": 1.55,
-          "success": true,
-          "detail": "10 sandboxes in 1.55s (avg 0.15s each)"
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-fs-1",
-      "provider": "daytona",
-      "sandbox_id": "55a279bf-1efb-41e9-aafe-568b355559bb",
+      "sandbox_label": "runloop-fs-1",
+      "provider": "runloop",
+      "sandbox_id": "dbx_32lRl83ZFrnWAoHgssJJC",
       "config": {
         "benchmark": "filesystem"
       },
-      "total_duration_s": 14.69,
+      "total_duration_s": 25.36,
       "tests_passed": 0,
       "tests_total": 0,
       "rl_best_reward": 0.0,
@@ -314,43 +24,303 @@
       "steps": [
         {
           "name": "create_sandbox",
-          "duration_s": 0.77,
+          "duration_s": 1.94,
           "success": true,
-          "detail": "55a279bf-1efb-41e9-aafe-568b355559bb"
+          "detail": "dbx_32lRl83ZFrnWAoHgssJJC"
         },
         {
           "name": "fs_code_generation",
-          "duration_s": 1.81,
+          "duration_s": 5.27,
           "success": true,
           "detail": "10 files, 78KB total"
         },
         {
           "name": "fs_build_compile",
-          "duration_s": 0.37,
+          "duration_s": 0.96,
           "success": true,
           "detail": "10 .pyc files generated"
         },
         {
           "name": "fs_upload_files",
-          "duration_s": 1.53,
+          "duration_s": 1.93,
           "success": true,
           "detail": "5/5 files, 32KB"
         },
         {
           "name": "fs_download_files",
-          "duration_s": 2.62,
+          "duration_s": 2.98,
           "success": true,
-          "detail": "9 files, 44KB"
+          "detail": "9 files, 84KB"
         },
         {
           "name": "fs_pip_package_io",
-          "duration_s": 6.79,
+          "duration_s": 10.41,
           "success": true,
           "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
         },
         {
           "name": "fs_list_verify",
-          "duration_s": 0.31,
+          "duration_s": 1.01,
+          "success": true,
+          "detail": "31 files total, native: 20 entries"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.15,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "runloop-fs-10",
+      "provider": "runloop",
+      "sandbox_id": "dbx_32lRlLIG0Bzavn285Lx3t",
+      "config": {
+        "benchmark": "filesystem"
+      },
+      "total_duration_s": 24.73,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 1.48,
+          "success": true,
+          "detail": "dbx_32lRlLIG0Bzavn285Lx3t"
+        },
+        {
+          "name": "fs_code_generation",
+          "duration_s": 5.12,
+          "success": true,
+          "detail": "10 files, 78KB total"
+        },
+        {
+          "name": "fs_build_compile",
+          "duration_s": 0.67,
+          "success": true,
+          "detail": "10 .pyc files generated"
+        },
+        {
+          "name": "fs_upload_files",
+          "duration_s": 1.59,
+          "success": true,
+          "detail": "5/5 files, 32KB"
+        },
+        {
+          "name": "fs_download_files",
+          "duration_s": 2.25,
+          "success": true,
+          "detail": "9 files, 84KB"
+        },
+        {
+          "name": "fs_pip_package_io",
+          "duration_s": 11.96,
+          "success": true,
+          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
+        },
+        {
+          "name": "fs_list_verify",
+          "duration_s": 0.76,
+          "success": true,
+          "detail": "31 files total, native: 20 entries"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.21,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "runloop-fs-2",
+      "provider": "runloop",
+      "sandbox_id": "dbx_32lRl9H7Dscu5Y5q2lYzl",
+      "config": {
+        "benchmark": "filesystem"
+      },
+      "total_duration_s": 26.17,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 3.2,
+          "success": true,
+          "detail": "dbx_32lRl9H7Dscu5Y5q2lYzl"
+        },
+        {
+          "name": "fs_code_generation",
+          "duration_s": 5.92,
+          "success": true,
+          "detail": "10 files, 78KB total"
+        },
+        {
+          "name": "fs_build_compile",
+          "duration_s": 1.25,
+          "success": true,
+          "detail": "10 .pyc files generated"
+        },
+        {
+          "name": "fs_upload_files",
+          "duration_s": 1.99,
+          "success": true,
+          "detail": "5/5 files, 32KB"
+        },
+        {
+          "name": "fs_download_files",
+          "duration_s": 2.92,
+          "success": true,
+          "detail": "9 files, 84KB"
+        },
+        {
+          "name": "fs_pip_package_io",
+          "duration_s": 8.73,
+          "success": true,
+          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
+        },
+        {
+          "name": "fs_list_verify",
+          "duration_s": 1.2,
+          "success": true,
+          "detail": "31 files total, native: 20 entries"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.28,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "runloop-fs-3",
+      "provider": "runloop",
+      "sandbox_id": "dbx_32lRlACEovJGqh7f9Ov3z",
+      "config": {
+        "benchmark": "filesystem"
+      },
+      "total_duration_s": 29.12,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 2.25,
+          "success": true,
+          "detail": "dbx_32lRlACEovJGqh7f9Ov3z"
+        },
+        {
+          "name": "fs_code_generation",
+          "duration_s": 7.39,
+          "success": true,
+          "detail": "10 files, 78KB total"
+        },
+        {
+          "name": "fs_build_compile",
+          "duration_s": 1.17,
+          "success": true,
+          "detail": "10 .pyc files generated"
+        },
+        {
+          "name": "fs_upload_files",
+          "duration_s": 2.23,
+          "success": true,
+          "detail": "5/5 files, 32KB"
+        },
+        {
+          "name": "fs_download_files",
+          "duration_s": 2.21,
+          "success": true,
+          "detail": "9 files, 84KB"
+        },
+        {
+          "name": "fs_pip_package_io",
+          "duration_s": 11.78,
+          "success": true,
+          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
+        },
+        {
+          "name": "fs_list_verify",
+          "duration_s": 1.18,
+          "success": true,
+          "detail": "31 files total, native: 20 entries"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.26,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "runloop-fs-4",
+      "provider": "runloop",
+      "sandbox_id": "dbx_32lRlCDUzcLlZTfAKcqA1",
+      "config": {
+        "benchmark": "filesystem"
+      },
+      "total_duration_s": 28.61,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 1.8,
+          "success": true,
+          "detail": "dbx_32lRlCDUzcLlZTfAKcqA1"
+        },
+        {
+          "name": "fs_code_generation",
+          "duration_s": 5.26,
+          "success": true,
+          "detail": "10 files, 78KB total"
+        },
+        {
+          "name": "fs_build_compile",
+          "duration_s": 1.25,
+          "success": true,
+          "detail": "10 .pyc files generated"
+        },
+        {
+          "name": "fs_upload_files",
+          "duration_s": 1.99,
+          "success": true,
+          "detail": "5/5 files, 32KB"
+        },
+        {
+          "name": "fs_download_files",
+          "duration_s": 2.58,
+          "success": true,
+          "detail": "9 files, 84KB"
+        },
+        {
+          "name": "fs_pip_package_io",
+          "duration_s": 13.64,
+          "success": true,
+          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
+        },
+        {
+          "name": "fs_list_verify",
+          "duration_s": 1.18,
           "success": true,
           "detail": "31 files total, native: 20 entries"
         },
@@ -364,13 +334,13 @@
       "error": ""
     },
     {
-      "sandbox_label": "daytona-iteration-1",
-      "provider": "daytona",
-      "sandbox_id": "e31c5a63-6ac8-4f0e-b7c0-8c18d1234404",
+      "sandbox_label": "runloop-fs-5",
+      "provider": "runloop",
+      "sandbox_id": "dbx_32lRlDezJEIIzvf0xpIwk",
       "config": {
-        "benchmark": "iteration_loop"
+        "benchmark": "filesystem"
       },
-      "total_duration_s": 6.28,
+      "total_duration_s": 25.7,
       "tests_passed": 0,
       "tests_total": 0,
       "rl_best_reward": 0.0,
@@ -379,128 +349,63 @@
       "steps": [
         {
           "name": "create_sandbox",
-          "duration_s": 0.74,
+          "duration_s": 1.73,
           "success": true,
-          "detail": "e31c5a63-6ac8-4f0e-b7c0-8c18d1234404"
+          "detail": "dbx_32lRlDezJEIIzvf0xpIwk"
         },
         {
-          "name": "iter_upload_broken",
-          "duration_s": 2.64,
+          "name": "fs_code_generation",
+          "duration_s": 5.88,
           "success": true,
-          "detail": "2 files uploaded, 1466B"
+          "detail": "10 files, 78KB total"
         },
         {
-          "name": "iter_test_fail",
-          "duration_s": 0.53,
+          "name": "fs_build_compile",
+          "duration_s": 1.17,
           "success": true,
-          "detail": "3 failures, 0 errors, exit=1, exec=0.53s"
+          "detail": "10 .pyc files generated"
         },
         {
-          "name": "iter_upload_fix",
-          "duration_s": 0.29,
+          "name": "fs_upload_files",
+          "duration_s": 2.14,
           "success": true,
-          "detail": "802B written, overwrite in 0.290s"
+          "detail": "5/5 files, 32KB"
         },
         {
-          "name": "iter_test_pass",
-          "duration_s": 0.51,
+          "name": "fs_download_files",
+          "duration_s": 2.21,
           "success": true,
-          "detail": "6 tests passed, exec=0.51s"
+          "detail": "9 files, 84KB"
         },
         {
-          "name": "iter_add_feature",
-          "duration_s": 0.58,
+          "name": "fs_pip_package_io",
+          "duration_s": 10.72,
           "success": true,
-          "detail": "2 files updated, 2009B, iteration 2"
+          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
         },
         {
-          "name": "iter_final_validation",
-          "duration_s": 0.51,
+          "name": "fs_list_verify",
+          "duration_s": 1.1,
           "success": true,
-          "detail": "9/9 tests passed, final validation OK"
+          "detail": "31 files total, native: 20 entries"
         },
         {
           "name": "destroy_sandbox",
-          "duration_s": 0.17,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-network-1",
-      "provider": "daytona",
-      "sandbox_id": "c06b9ec6-cece-4b49-a6a1-3ef7dab9a9d6",
-      "config": {
-        "benchmark": "network"
-      },
-      "total_duration_s": 9.12,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.94,
-          "success": true,
-          "detail": "c06b9ec6-cece-4b49-a6a1-3ef7dab9a9d6"
-        },
-        {
-          "name": "net_latency",
-          "duration_s": 0.57,
-          "success": true,
-          "detail": "min=26.7ms avg=29.8ms max=38.8ms (5 samples)"
-        },
-        {
-          "name": "net_download",
-          "duration_s": 0.52,
-          "success": true,
-          "detail": "9.5MB in 0.12s (80.68 MB/s)"
-        },
-        {
-          "name": "net_download_large",
-          "duration_s": 1.35,
-          "success": true,
-          "detail": "95.4MB in 0.89s (107.12 MB/s)"
-        },
-        {
-          "name": "net_upload",
-          "duration_s": 1.65,
-          "success": true,
-          "detail": "5.0MB in 1.22s (4.09 MB/s)"
-        },
-        {
-          "name": "net_dns",
           "duration_s": 0.31,
           "success": true,
-          "detail": "5/5 resolved, min=1.75ms avg=2.68ms max=5.6ms"
-        },
-        {
-          "name": "net_pip_install",
-          "duration_s": 3.16,
-          "success": true,
-          "detail": "pip install requests: 1.29s (exit=0)"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.3,
-          "success": true,
           "detail": ""
         }
       ],
       "error": ""
     },
     {
-      "sandbox_label": "daytona-pause-1",
-      "provider": "daytona",
-      "sandbox_id": "b5fb8c51-3697-4334-a9e7-4656021a925d",
+      "sandbox_label": "runloop-fs-6",
+      "provider": "runloop",
+      "sandbox_id": "dbx_32lRlF7FvMLIcgYnXxfcb",
       "config": {
-        "benchmark": "pause_resume"
+        "benchmark": "filesystem"
       },
-      "total_duration_s": 32.45,
+      "total_duration_s": 25.28,
       "tests_passed": 0,
       "tests_total": 0,
       "rl_best_reward": 0.0,
@@ -509,197 +414,244 @@
       "steps": [
         {
           "name": "create_sandbox",
+          "duration_s": 1.83,
+          "success": true,
+          "detail": "dbx_32lRlF7FvMLIcgYnXxfcb"
+        },
+        {
+          "name": "fs_code_generation",
+          "duration_s": 5.34,
+          "success": true,
+          "detail": "10 files, 78KB total"
+        },
+        {
+          "name": "fs_build_compile",
+          "duration_s": 0.95,
+          "success": true,
+          "detail": "10 .pyc files generated"
+        },
+        {
+          "name": "fs_upload_files",
+          "duration_s": 1.9,
+          "success": true,
+          "detail": "5/5 files, 32KB"
+        },
+        {
+          "name": "fs_download_files",
+          "duration_s": 2.21,
+          "success": true,
+          "detail": "9 files, 84KB"
+        },
+        {
+          "name": "fs_pip_package_io",
+          "duration_s": 10.93,
+          "success": true,
+          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
+        },
+        {
+          "name": "fs_list_verify",
+          "duration_s": 1.18,
+          "success": true,
+          "detail": "31 files total, native: 20 entries"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.26,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "runloop-fs-7",
+      "provider": "runloop",
+      "sandbox_id": "dbx_32lRlGqHoKN6WfLAyQmlm",
+      "config": {
+        "benchmark": "filesystem"
+      },
+      "total_duration_s": 26.45,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 2.24,
+          "success": true,
+          "detail": "dbx_32lRlGqHoKN6WfLAyQmlm"
+        },
+        {
+          "name": "fs_code_generation",
+          "duration_s": 5.85,
+          "success": true,
+          "detail": "10 files, 78KB total"
+        },
+        {
+          "name": "fs_build_compile",
           "duration_s": 0.93,
           "success": true,
-          "detail": "b5fb8c51-3697-4334-a9e7-4656021a925d"
+          "detail": "10 .pyc files generated"
         },
         {
-          "name": "async_start_task",
-          "duration_s": 2.54,
+          "name": "fs_upload_files",
+          "duration_s": 1.37,
           "success": true,
-          "detail": "bg task started, progress: {\"step\": 5, \"total\": 20, \"pct\": 25.0, \"ts\": 1772936201.0193906}"
+          "detail": "5/5 files, 32KB"
         },
         {
-          "name": "async_write_state",
+          "name": "fs_download_files",
+          "duration_s": 2.5,
+          "success": true,
+          "detail": "9 files, 84KB"
+        },
+        {
+          "name": "fs_pip_package_io",
+          "duration_s": 12.36,
+          "success": true,
+          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
+        },
+        {
+          "name": "fs_list_verify",
+          "duration_s": 0.73,
+          "success": true,
+          "detail": "31 files total, native: 20 entries"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.14,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "runloop-fs-8",
+      "provider": "runloop",
+      "sandbox_id": "dbx_32lRlHzRqKtaLsdPRoONN",
+      "config": {
+        "benchmark": "filesystem"
+      },
+      "total_duration_s": 26.26,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 1.56,
+          "success": true,
+          "detail": "dbx_32lRlHzRqKtaLsdPRoONN"
+        },
+        {
+          "name": "fs_code_generation",
+          "duration_s": 6.48,
+          "success": true,
+          "detail": "10 files, 78KB total"
+        },
+        {
+          "name": "fs_build_compile",
+          "duration_s": 0.93,
+          "success": true,
+          "detail": "10 .pyc files generated"
+        },
+        {
+          "name": "fs_upload_files",
+          "duration_s": 1.63,
+          "success": true,
+          "detail": "5/5 files, 32KB"
+        },
+        {
+          "name": "fs_download_files",
+          "duration_s": 2.53,
+          "success": true,
+          "detail": "9 files, 84KB"
+        },
+        {
+          "name": "fs_pip_package_io",
+          "duration_s": 11.52,
+          "success": true,
+          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
+        },
+        {
+          "name": "fs_list_verify",
+          "duration_s": 0.78,
+          "success": true,
+          "detail": "31 files total, native: 20 entries"
+        },
+        {
+          "name": "destroy_sandbox",
+          "duration_s": 0.16,
+          "success": true,
+          "detail": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "sandbox_label": "runloop-fs-9",
+      "provider": "runloop",
+      "sandbox_id": "dbx_32lRlJYjSsJF6U37UfUOS",
+      "config": {
+        "benchmark": "filesystem"
+      },
+      "total_duration_s": 25.97,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
+      "steps": [
+        {
+          "name": "create_sandbox",
+          "duration_s": 1.4,
+          "success": true,
+          "detail": "dbx_32lRlJYjSsJF6U37UfUOS"
+        },
+        {
+          "name": "fs_code_generation",
+          "duration_s": 6.06,
+          "success": true,
+          "detail": "10 files, 78KB total"
+        },
+        {
+          "name": "fs_build_compile",
           "duration_s": 0.86,
           "success": true,
-          "detail": "3/3 files, 10KB"
+          "detail": "10 .pyc files generated"
         },
         {
-          "name": "async_pause",
-          "duration_s": 22.28,
+          "name": "fs_upload_files",
+          "duration_s": 2.1,
           "success": true,
-          "detail": "paused in 22.276s"
+          "detail": "5/5 files, 32KB"
         },
         {
-          "name": "async_resume",
-          "duration_s": 0.7,
+          "name": "fs_download_files",
+          "duration_s": 2.42,
           "success": true,
-          "detail": "resumed in 0.702s"
+          "detail": "9 files, 84KB"
         },
         {
-          "name": "async_verify_state",
-          "duration_s": 2.15,
+          "name": "fs_pip_package_io",
+          "duration_s": 11.76,
           "success": true,
-          "detail": "5/5 files, json=OK, bin=OK"
+          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
         },
         {
-          "name": "async_restart_task",
-          "duration_s": 0.74,
+          "name": "fs_list_verify",
+          "duration_s": 0.58,
           "success": true,
-          "detail": "compute OK, fib50 in 0.007s"
-        },
-        {
-          "name": "async_download_verify",
-          "duration_s": 1.74,
-          "success": true,
-          "detail": "6/6 files, 10KB total"
+          "detail": "31 files total, native: 20 entries"
         },
         {
           "name": "destroy_sandbox",
-          "duration_s": 0.18,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-sec-exploits-1",
-      "provider": "daytona",
-      "sandbox_id": "65f1f9d7-2ee1-4376-9bb9-fa159b4e2af8",
-      "config": {
-        "benchmark": "security-exploits"
-      },
-      "total_duration_s": 11.06,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.76,
-          "success": true,
-          "detail": "65f1f9d7-2ee1-4376-9bb9-fa159b4e2af8"
-        },
-        {
-          "name": "exploit_devmem_read",
-          "duration_s": 0.31,
-          "success": true,
-          "detail": "blocked: PermissionError: [Errno 13] Permission denied: '/dev/mem'"
-        },
-        {
-          "name": "exploit_host_fs_traversal",
-          "duration_s": 0.3,
-          "success": false,
-          "detail": "EXPLOITED: 7/9 files readable via /proc/1/root; host_passwd=root:x:0:0:root:/root:/bin/bash; host_hostname=65f1f9d7-2ee1-4376-9bb9-fa159b4e2af8; host_os_release=PRETTY_NAME=\"Debian GNU/Linux 13 (trixie)\"; host_kernel_version=Linux version 6.8.0-100-generic (buildd@lcy02-amd64-061) (x86_64-linux-gnu-"
-        },
-        {
-          "name": "exploit_raw_socket_ping",
-          "duration_s": 3.36,
-          "success": false,
-          "detail": "EXPLOITED: raw ICMP socket created, 1/2 targets replied: dns_google(8.8.8.8)=0.83ms"
-        },
-        {
-          "name": "exploit_capability_abuse",
-          "duration_s": 0.38,
-          "success": false,
-          "detail": "EXPLOITED: 41/41 caps effective (CapEff=000001ffffffffff), 5 dangerous ops: ptrace_proc1_mem, ptrace_proc1_maps, sys_admin_mount, dac_read_shadow, net_raw_cap"
-        },
-        {
-          "name": "exploit_resource_exhaustion",
-          "duration_s": 1.74,
-          "success": false,
-          "detail": "EXPLOITED: no effective resource limits; mem=520MB; fds=1021; pids=100; memory_cgroup=8589934592; pids_cgroup=463666"
-        },
-        {
-          "name": "exploit_vm_guest_escape",
-          "duration_s": 3.42,
-          "success": true,
-          "detail": "no VM guest escape vectors found"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.17,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "daytona-security-1",
-      "provider": "daytona",
-      "sandbox_id": "9a3a7f88-048e-4787-abd9-749a7f93e3b7",
-      "config": {
-        "benchmark": "security"
-      },
-      "total_duration_s": 38.16,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.77,
-          "success": true,
-          "detail": "9a3a7f88-048e-4787-abd9-749a7f93e3b7"
-        },
-        {
-          "name": "sec_metadata_service",
-          "duration_s": 6.46,
-          "success": true,
-          "detail": "all metadata endpoints blocked"
-        },
-        {
-          "name": "sec_privilege_info",
-          "duration_s": 0.38,
-          "success": true,
-          "detail": "root but restricted: caps=000001ffffffffff, seccomp=2, shadow=True"
-        },
-        {
-          "name": "sec_container_escape",
-          "duration_s": 0.35,
-          "success": false,
-          "detail": "CRITICAL: host_fs_readable:hostname=9a3a7f88-048e-4787-abd9-749a7f93e3b7"
-        },
-        {
-          "name": "sec_network_scan",
-          "duration_s": 20.37,
-          "success": true,
-          "detail": "no mgmt ports reachable; gw=1.0.20.172"
-        },
-        {
-          "name": "sec_filesystem_exposure",
-          "duration_s": 0.31,
-          "success": true,
-          "detail": "accessible: /proc/kallsyms, /dev/kmsg, other_proc_environ"
-        },
-        {
-          "name": "sec_resource_limits",
-          "duration_s": 0.35,
-          "success": true,
-          "detail": "limits configured: mem=8589934592; pids=463666; cpu=400000 100000; fds_opened=1021; nofile=1024/524288"
-        },
-        {
-          "name": "sec_egress_filtering",
-          "duration_s": 8.33,
-          "success": false,
-          "detail": "weak egress filtering: SMTP=filtered; Redis=filtered; MySQL=filtered; Postgres=filtered; raw_socket=True; ipv6=False"
-        },
-        {
-          "name": "sec_env_leak",
-          "duration_s": 0.35,
-          "success": true,
-          "detail": "no sensitive env vars leaked (total=15)"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.17,
+          "duration_s": 0.14,
           "success": true,
           "detail": ""
         }
