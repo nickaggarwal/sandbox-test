@@ -7,7 +7,9 @@ Returns a list of StepProfile objects compatible with the parallel profiler.
 """
 import base64
 import json
+import os
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from run_parallel_profiled import StepProfile
 
@@ -254,7 +256,7 @@ def _step_pip_package_io(runner, base_dir):
     restore_dir = '{}/pip_restored'.format(base_dir)
     runner.exec('mkdir -p {} {}'.format(pkg_dir, restore_dir), cwd='/tmp')
 
-    packages = ['requests', 'pydantic', 'jinja2']
+    packages = ['numpy', 'pandas', 'scipy']
     pkg_details = []
 
     try:
@@ -404,6 +406,308 @@ def _step_list_verify(runner, base_dir):
     return step
 
 
+def _step_overwrite_speed(runner, base_dir):
+    """Measure rapid consecutive overwrites of the same file."""
+    step = StepProfile(name='fs_overwrite_speed', started_at=time.time())
+
+    target_path = '{}/overwrite_test.py'.format(base_dir)
+    num_overwrites = 20
+    latencies = []
+
+    try:
+        for i in range(num_overwrites):
+            content = '# Overwrite iteration {}\n'.format(i)
+            content += 'def process(data):\n'
+            content += '    """Iteration {} of processing."""\n'.format(i)
+            content += '    result = []\n'
+            content += '    for item in data:\n'
+            content += '        result.append(item * {})\n'.format(i + 1)
+            content += '    return result\n'
+            content += '\n' * (i % 5)  # slight size variation
+            content_bytes = content.encode('utf-8')
+
+            t0 = time.time()
+            runner.upload_file_native(content_bytes, target_path)
+            latency = time.time() - t0
+            latencies.append(latency)
+
+        min_lat = min(latencies)
+        avg_lat = sum(latencies) / len(latencies)
+        max_lat = max(latencies)
+
+        step.ended_at = time.time()
+        step.duration_s = step.ended_at - step.started_at
+        step.success = len(latencies) == num_overwrites
+        step.detail = '{} overwrites: min={:.3f}s avg={:.3f}s max={:.3f}s'.format(
+            num_overwrites, min_lat, avg_lat, max_lat)
+    except Exception as e:
+        step.ended_at = time.time()
+        step.duration_s = step.ended_at - step.started_at
+        step.success = False
+        step.detail = str(e)[:200]
+
+    return step
+
+
+def _step_large_file_scaling(runner, base_dir):
+    """Upload/download at 1MB, 5MB, 10MB, 25MB and report throughput."""
+    step = StepProfile(name='fs_large_file_scaling', started_at=time.time())
+
+    sizes_mb = [1, 5, 10, 25]
+    results = []
+
+    try:
+        runner.exec('mkdir -p {}/large_files'.format(base_dir), cwd='/tmp')
+
+        for size_mb in sizes_mb:
+            size_bytes = size_mb * 1024 * 1024
+            # Generate deterministic data (repeating pattern)
+            pattern = 'X' * 1024  # 1KB pattern
+            data = (pattern * (size_bytes // 1024)).encode('utf-8')[:size_bytes]
+
+            remote_path = '{}/large_files/test_{}mb.bin'.format(base_dir, size_mb)
+
+            # Upload
+            t0 = time.time()
+            runner.upload_file_native(data, remote_path)
+            upload_s = time.time() - t0
+            upload_mbps = size_mb / upload_s if upload_s > 0 else 0
+
+            # Download
+            t0 = time.time()
+            downloaded = runner.download_file_native(remote_path)
+            download_s = time.time() - t0
+            download_mbps = size_mb / download_s if download_s > 0 else 0
+
+            ok = downloaded is not None and len(downloaded) == size_bytes
+            results.append({
+                'size_mb': size_mb,
+                'upload_mbps': round(upload_mbps, 1),
+                'download_mbps': round(download_mbps, 1),
+                'ok': ok,
+            })
+
+        step.ended_at = time.time()
+        step.duration_s = step.ended_at - step.started_at
+        step.success = all(r['ok'] for r in results)
+        detail_parts = []
+        for r in results:
+            detail_parts.append('{}MB: up={:.1f}MB/s down={:.1f}MB/s'.format(
+                r['size_mb'], r['upload_mbps'], r['download_mbps']))
+        step.detail = '; '.join(detail_parts)
+    except Exception as e:
+        step.ended_at = time.time()
+        step.duration_s = step.ended_at - step.started_at
+        step.success = False
+        step.detail = str(e)[:200]
+
+    return step
+
+
+def _step_concurrent_io(runner, base_dir):
+    """Upload/download 10 files concurrently and compare to sequential estimate."""
+    step = StepProfile(name='fs_concurrent_io', started_at=time.time())
+
+    num_files = 10
+    file_size = 1024  # 1KB each
+
+    try:
+        runner.exec('mkdir -p {}/concurrent_test'.format(base_dir), cwd='/tmp')
+
+        # Generate test files
+        files = {}
+        for i in range(num_files):
+            name = 'concurrent_{}.txt'.format(i)
+            content = 'File {} content: {}\n'.format(i, 'A' * (file_size - 30))
+            files[name] = content.encode('utf-8')
+
+        # Concurrent upload
+        upload_times = []
+
+        def upload_one(name_content):
+            name, content = name_content
+            remote = '{}/concurrent_test/{}'.format(base_dir, name)
+            t0 = time.time()
+            runner.upload_file_native(content, remote)
+            return time.time() - t0
+
+        t_upload_start = time.time()
+        with ThreadPoolExecutor(max_workers=5) as pool:
+            futures = [pool.submit(upload_one, item) for item in files.items()]
+            for f in as_completed(futures):
+                upload_times.append(f.result())
+        concurrent_upload_s = time.time() - t_upload_start
+        sequential_upload_est = sum(upload_times)
+
+        # Concurrent download
+        download_times = []
+        downloaded_sizes = []
+
+        def download_one(name):
+            remote = '{}/concurrent_test/{}'.format(base_dir, name)
+            t0 = time.time()
+            content = runner.download_file_native(remote)
+            elapsed = time.time() - t0
+            return elapsed, len(content) if content else 0
+
+        t_download_start = time.time()
+        with ThreadPoolExecutor(max_workers=5) as pool:
+            futures = [pool.submit(download_one, name) for name in files.keys()]
+            for f in as_completed(futures):
+                elapsed, size = f.result()
+                download_times.append(elapsed)
+                downloaded_sizes.append(size)
+        concurrent_download_s = time.time() - t_download_start
+        sequential_download_est = sum(download_times)
+
+        step.ended_at = time.time()
+        step.duration_s = step.ended_at - step.started_at
+        step.success = len(downloaded_sizes) == num_files and all(s > 0 for s in downloaded_sizes)
+        step.detail = (
+            '{} files: upload wall={:.2f}s (seq_est={:.2f}s), '
+            'download wall={:.2f}s (seq_est={:.2f}s)'.format(
+                num_files, concurrent_upload_s, sequential_upload_est,
+                concurrent_download_s, sequential_download_est))
+    except Exception as e:
+        step.ended_at = time.time()
+        step.duration_s = step.ended_at - step.started_at
+        step.success = False
+        step.detail = str(e)[:200]
+
+    return step
+
+
+def _step_binary_integrity(runner, base_dir):
+    """Upload 5MB of random bytes, download back, verify byte-for-byte equality."""
+    step = StepProfile(name='fs_binary_integrity', started_at=time.time())
+
+    size_bytes = 5 * 1024 * 1024  # 5MB
+
+    try:
+        # Generate random bytes
+        original_data = os.urandom(size_bytes)
+        remote_path = '{}/binary_test.bin'.format(base_dir)
+
+        # Upload
+        t_up = time.time()
+        runner.upload_file_native(original_data, remote_path)
+        upload_s = time.time() - t_up
+
+        # Download
+        t_down = time.time()
+        downloaded_data = runner.download_file_native(remote_path)
+        download_s = time.time() - t_down
+
+        # Verify
+        if downloaded_data is None:
+            integrity_ok = False
+            mismatch_detail = 'download returned None'
+        elif len(downloaded_data) != len(original_data):
+            integrity_ok = False
+            mismatch_detail = 'size mismatch: sent {} got {}'.format(
+                len(original_data), len(downloaded_data))
+        elif downloaded_data == original_data:
+            integrity_ok = True
+            mismatch_detail = 'OK'
+        else:
+            integrity_ok = False
+            # Find first mismatch position
+            for pos in range(min(len(original_data), len(downloaded_data))):
+                if original_data[pos] != downloaded_data[pos]:
+                    mismatch_detail = 'first mismatch at byte {}'.format(pos)
+                    break
+
+        step.ended_at = time.time()
+        step.duration_s = step.ended_at - step.started_at
+        step.success = integrity_ok
+        step.detail = '5MB binary: upload={:.2f}s download={:.2f}s integrity={}'.format(
+            upload_s, download_s, mismatch_detail)
+    except Exception as e:
+        step.ended_at = time.time()
+        step.duration_s = step.ended_at - step.started_at
+        step.success = False
+        step.detail = str(e)[:200]
+
+    return step
+
+
+def _step_deep_tree(runner, base_dir):
+    """Create a 3-level directory tree with ~30 files, download from various depths."""
+    step = StepProfile(name='fs_deep_tree', started_at=time.time())
+
+    tree_base = '{}/deep_tree'.format(base_dir)
+
+    try:
+        # Create directory tree and files via exec
+        dirs = [
+            '{}/level1_a'.format(tree_base),
+            '{}/level1_a/level2_a'.format(tree_base),
+            '{}/level1_a/level2_a/level3_a'.format(tree_base),
+            '{}/level1_a/level2_b'.format(tree_base),
+            '{}/level1_a/level2_b/level3_b'.format(tree_base),
+            '{}/level1_b'.format(tree_base),
+            '{}/level1_b/level2_c'.format(tree_base),
+            '{}/level1_b/level2_c/level3_c'.format(tree_base),
+            '{}/level1_b/level2_d'.format(tree_base),
+            '{}/level1_c'.format(tree_base),
+        ]
+        runner.exec('mkdir -p {}'.format(' '.join(dirs)), cwd='/tmp')
+
+        # Create files at various depths
+        file_paths = []
+        create_cmds = []
+        file_idx = 0
+        for d in dirs:
+            for j in range(3):
+                fname = 'file_{}_{}.txt'.format(file_idx, j)
+                fpath = '{}/{}'.format(d, fname)
+                file_paths.append(fpath)
+                create_cmds.append(
+                    "echo 'Content of {} at depth in {}' > {}".format(
+                        fname, d.split('deep_tree/')[-1] if 'deep_tree/' in d else d,
+                        fpath))
+            file_idx += 1
+
+        # Execute file creation in batches
+        batch_size = 10
+        for i in range(0, len(create_cmds), batch_size):
+            batch = ' && '.join(create_cmds[i:i + batch_size])
+            runner.exec(batch, cwd='/tmp')
+
+        # Verify file count
+        count_result = runner.exec(
+            'find {} -type f | wc -l'.format(tree_base), cwd='/tmp')
+        total_files = count_result['result'].strip()
+
+        # Download files from various depths via native API
+        downloaded = 0
+        total_bytes = 0
+        # Sample files from different depths
+        sample_indices = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27]
+        for idx in sample_indices:
+            if idx < len(file_paths):
+                try:
+                    content = runner.download_file_native(file_paths[idx])
+                    if content and len(content) > 0:
+                        downloaded += 1
+                        total_bytes += len(content)
+                except Exception:
+                    pass
+
+        step.ended_at = time.time()
+        step.duration_s = step.ended_at - step.started_at
+        step.success = downloaded >= 8  # allow some tolerance
+        step.detail = '{} files created, {}/{} downloaded ({}B), 3-level tree'.format(
+            total_files, downloaded, len(sample_indices), total_bytes)
+    except Exception as e:
+        step.ended_at = time.time()
+        step.duration_s = step.ended_at - step.started_at
+        step.success = False
+        step.detail = str(e)[:200]
+
+    return step
+
+
 # ── Main Benchmark Function ────────────────────────────────────────
 
 def run_filesystem_benchmark(runner, provider):
@@ -429,28 +733,48 @@ def run_filesystem_benchmark(runner, provider):
 
     steps = []
 
-    print('    [FS] Step 1/6: Code generation...')
+    print('    [FS] Step 1/11: Code generation...')
     steps.append(_step_code_generation(runner, base_dir))
     print('    [FS]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
 
-    print('    [FS] Step 2/6: Build/compile...')
+    print('    [FS] Step 2/11: Build/compile...')
     steps.append(_step_build_compile(runner, base_dir))
     print('    [FS]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
 
-    print('    [FS] Step 3/6: Native file upload...')
+    print('    [FS] Step 3/11: Native file upload...')
     steps.append(_step_upload_files(runner, base_dir))
     print('    [FS]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
 
-    print('    [FS] Step 4/6: Native file download...')
+    print('    [FS] Step 4/11: Native file download...')
     steps.append(_step_download_files(runner, base_dir))
     print('    [FS]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
 
-    print('    [FS] Step 5/6: Pip package store & retrieve...')
+    print('    [FS] Step 5/11: Pip package store & retrieve...')
     steps.append(_step_pip_package_io(runner, base_dir))
     print('    [FS]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
 
-    print('    [FS] Step 6/6: List & verify...')
+    print('    [FS] Step 6/11: List & verify...')
     steps.append(_step_list_verify(runner, base_dir))
+    print('    [FS]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
+
+    print('    [FS] Step 7/11: Rapid file overwrites...')
+    steps.append(_step_overwrite_speed(runner, base_dir))
+    print('    [FS]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
+
+    print('    [FS] Step 8/11: Large file scaling...')
+    steps.append(_step_large_file_scaling(runner, base_dir))
+    print('    [FS]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
+
+    print('    [FS] Step 9/11: Concurrent I/O...')
+    steps.append(_step_concurrent_io(runner, base_dir))
+    print('    [FS]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
+
+    print('    [FS] Step 10/11: Binary integrity...')
+    steps.append(_step_binary_integrity(runner, base_dir))
+    print('    [FS]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
+
+    print('    [FS] Step 11/11: Deep directory tree...')
+    steps.append(_step_deep_tree(runner, base_dir))
     print('    [FS]   {:.1f}s - {}'.format(steps[-1].duration_s, steps[-1].detail))
 
     return steps

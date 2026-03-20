@@ -182,7 +182,7 @@ class BlaxelSandboxRunner:
 
     def download_file_native(self, remote_path):
         """Download a single file using Blaxel native FS API. Returns bytes."""
-        content = self._run(self.sandbox.fs.read(remote_path))
+        content = self._run(self.sandbox.fs.read_binary(remote_path))
         if isinstance(content, str):
             return content.encode('utf-8')
         return content

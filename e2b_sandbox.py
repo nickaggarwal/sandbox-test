@@ -26,7 +26,7 @@ class E2BSandboxRunner:
     def create_sandbox(self):
         """Create a new E2B Python sandbox."""
         self.sandbox = Sandbox.create(
-            timeout=300,
+            timeout=900,
             envs={
                 'DJANGO_SETTINGS_MODULE': 'calendly_project.settings',
                 'PYTHONDONTWRITEBYTECODE': '1',

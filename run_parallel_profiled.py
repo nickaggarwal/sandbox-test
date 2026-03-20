@@ -1056,6 +1056,8 @@ def _print_report(profiles, total_wall, providers_used):
         'run_tests', 'rl_training', 'retrieve_results',
         'fs_code_generation', 'fs_build_compile', 'fs_upload_files',
         'fs_download_files', 'fs_pip_package_io', 'fs_list_verify',
+        'fs_overwrite_speed', 'fs_large_file_scaling', 'fs_concurrent_io',
+        'fs_binary_integrity', 'fs_deep_tree',
         'async_start_task', 'async_write_state', 'async_pause',
         'async_resume', 'async_verify_state', 'async_restart_task',
         'async_download_verify',

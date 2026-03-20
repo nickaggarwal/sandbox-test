@@ -178,12 +178,23 @@ class ModalSandboxRunner:
 
     def download_file_native(self, remote_path):
         """Download a single file using Modal FS API. Returns bytes."""
-        f = self.sandbox.open(remote_path, "rb")
-        content = f.read()
-        f.close()
-        if isinstance(content, str):
-            return content.encode('utf-8')
-        return content
+        try:
+            f = self.sandbox.open(remote_path, "rb")
+            content = f.read()
+            f.close()
+            if content and len(content) > 0:
+                if isinstance(content, str):
+                    return content.encode('utf-8')
+                return content
+        except Exception:
+            pass
+        # Fallback: use exec + base64 for files that sandbox.open can't read
+        import base64
+        result = self.exec(
+            'base64 < {}'.format(remote_path), cwd='/tmp', timeout=30)
+        if result['exit_code'] == 0 and result['result'].strip():
+            return base64.b64decode(result['result'].strip())
+        return b''
 
     def list_files_native(self, remote_path):
         """List files in a directory using Modal FS API."""
