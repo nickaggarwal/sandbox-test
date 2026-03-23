@@ -62,6 +62,8 @@ def _get_base_dir(provider):
         return '/blaxel/docker_bench'
     elif provider == 'modal':
         return '/root/docker_bench'
+    elif provider == 'tensorlake':
+        return '/root/docker_bench'
     else:
         return '/home/user/docker_bench'
 
@@ -214,6 +216,49 @@ def _exec_runloop(devbox, command, cwd='/home/user/docker_bench', timeout=300):
         return {'exit_code': -1, 'result': str(e)}
 
 
+# ── TensorLake Default Sandbox ────────────────────────────────────
+
+def _create_tensorlake_sandbox(api_key, image='python:3.12-slim'):
+    """Create a TensorLake sandbox."""
+    import time as _time
+    from tensorlake.sandbox import SandboxClient
+    client = SandboxClient(api_key=api_key)
+    resp = client.create(
+        image=image,
+        cpus=4.0,
+        memory_mb=8192,
+        ephemeral_disk_mb=10240,
+        timeout_secs=600,
+    )
+    # Wait for running
+    for _ in range(60):
+        info = client.get(resp.sandbox_id)
+        if str(info.status) == 'SandboxStatus.RUNNING':
+            break
+        _time.sleep(0.5)
+    sandbox = client.connect(resp.sandbox_id)
+    return client, resp.sandbox_id, sandbox
+
+
+def _exec_tensorlake(sandbox, command, cwd='/root/docker_bench', timeout=300):
+    """Run a command in a TensorLake sandbox."""
+    try:
+        result = sandbox.run(
+            'bash',
+            args=['-c', 'export PIP_BREAK_SYSTEM_PACKAGES=1 && cd {} && {}'.format(cwd, command)],
+            working_dir='/',
+            timeout=float(timeout),
+        )
+        stdout = result.stdout or ''
+        stderr = result.stderr or ''
+        output = stdout
+        if stderr:
+            output = output + '\n' + stderr if output else stderr
+        return {'exit_code': result.exit_code, 'result': output}
+    except Exception as e:
+        return {'exit_code': -1, 'result': str(e)}
+
+
 # ── Exec helpers ──────────────────────────────────────────────────
 
 def _exec_daytona(sandbox, command, cwd='/root/docker_bench', timeout=300):
@@ -344,6 +389,10 @@ def _step_create_sandbox(provider, api_key, image):
             sdk, devbox = _create_runloop_sandbox(api_key)
             sandbox_ctx = ('runloop', sdk, devbox)
 
+        elif provider == 'tensorlake':
+            client, sid, sandbox = _create_tensorlake_sandbox(api_key)
+            sandbox_ctx = ('tensorlake', client, sid, sandbox)
+
         step.ended_at = time.time()
         step.duration_s = step.ended_at - step.started_at
         step.success = True
@@ -379,6 +428,9 @@ def _run_exec(provider, sandbox_ctx, command, cwd=None):
     elif provider == 'runloop':
         _, _, devbox = sandbox_ctx
         return _exec_runloop(devbox, command, cwd=cwd)
+    elif provider == 'tensorlake':
+        _, _, _, sandbox = sandbox_ctx
+        return _exec_tensorlake(sandbox, command, cwd=cwd)
 
 
 def _step_verify_deps(provider, sandbox_ctx):
@@ -479,6 +531,9 @@ def _step_stock_boot(provider, api_key):
         elif provider == 'runloop':
             sdk, devbox = _create_runloop_sandbox(api_key)
             baseline_sandbox_ctx = ('runloop', sdk, devbox)
+        elif provider == 'tensorlake':
+            client, sid, sandbox = _create_tensorlake_sandbox(api_key)
+            baseline_sandbox_ctx = ('tensorlake', client, sid, sandbox)
 
         step.ended_at = time.time()
         step.duration_s = step.ended_at - step.started_at
@@ -589,6 +644,10 @@ def _destroy_sandbox(provider, sandbox_ctx):
         elif provider == 'runloop':
             _, _, devbox = sandbox_ctx
             devbox.shutdown()
+        elif provider == 'tensorlake':
+            _, client, sid, sandbox = sandbox_ctx
+            sandbox.terminate()
+            client.delete(sid)
     except Exception as e:
         print('    [DOCKER] Cleanup error: {}'.format(e))
 

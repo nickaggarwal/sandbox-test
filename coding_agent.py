@@ -82,6 +82,9 @@ def create_runner(provider):
     elif provider == 'runloop':
         from runloop_sandbox import RunloopSandboxRunner
         return RunloopSandboxRunner(api_key=os.environ.get('RUNLOOP_API_KEY', ''))
+    elif provider == 'tensorlake':
+        from tensorlake_sandbox import TensorLakeSandboxRunner
+        return TensorLakeSandboxRunner(api_key=os.environ.get('TENSORLAKE_API_KEY', ''))
     else:
         raise ValueError('Unknown provider: {}'.format(provider))
 
@@ -94,6 +97,7 @@ def get_working_dir(provider):
         'blaxel': '/blaxel/app',
         'modal': '/root/app',
         'runloop': '/home/user/app',
+        'tensorlake': '/root/app',
     }
     return dirs.get(provider, '/root/app')
 

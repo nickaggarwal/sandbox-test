@@ -1,301 +1,67 @@
 {
-  "timestamp": "2026-03-20T15:48:24.357351",
-  "wall_clock_s": 363.92,
-  "serial_sum_s": 1438.92,
-  "speedup": 3.95,
-  "sandbox_count": 4,
+  "timestamp": "2026-03-22T22:04:42.419805",
+  "wall_clock_s": 86.22,
+  "serial_sum_s": 86.22,
+  "speedup": 1.0,
+  "sandbox_count": 1,
   "providers": [
-    "runloop"
+    "tensorlake"
   ],
   "profiles": [
     {
-      "sandbox_label": "runloop-1",
-      "provider": "runloop",
-      "sandbox_id": "dbx_32lSTmS0TMTeswm4cVUCl",
+      "sandbox_label": "tensorlake-agent-1",
+      "provider": "tensorlake",
+      "sandbox_id": "",
       "config": {
-        "episodes": 30,
-        "max_steps": 15
+        "benchmark": "coding_agent",
+        "llm_backend": "gemini",
+        "llm_model": "default",
+        "max_iterations": 3,
+        "reward_threshold": 25.0,
+        "bootstrap_app": false
       },
-      "total_duration_s": 359.68,
-      "tests_passed": 29,
-      "tests_total": 29,
-      "rl_best_reward": 15.100000000000007,
-      "rl_final_avg": 10.810000000000002,
-      "rl_best_actions": [
-        "refactor_modularity",
-        "add_availability_masking",
-        "add_dst_handling",
-        "add_booking_creation",
-        "noop",
-        "refactor_modularity",
-        "refactor_modularity",
-        "add_daily_limit",
-        "improve_readability",
-        "add_booking_creation",
-        "fix_syntax",
-        "complete_implementation"
-      ],
+      "total_duration_s": 86.22,
+      "tests_passed": 0,
+      "tests_total": 0,
+      "rl_best_reward": 0.0,
+      "rl_final_avg": 0.0,
+      "rl_best_actions": [],
       "steps": [
         {
-          "name": "create_sandbox",
-          "duration_s": 1.91,
+          "name": "agent_setup",
+          "duration_s": 5.17,
           "success": true,
-          "detail": "dbx_32lSTmS0TMTeswm4cVUCl"
+          "detail": "sandbox=udy3yk2xeyvpv4ttuy4lo, provider=tensorlake, llm=gemini/gemini-2.5-flash-lite"
         },
         {
-          "name": "upload_project",
-          "duration_s": 1.88,
+          "name": "agent_upload_project",
+          "duration_s": 2.11,
           "success": true,
-          "detail": ""
+          "detail": "uploaded from ."
         },
         {
-          "name": "install_deps",
-          "duration_s": 7.27,
+          "name": "agent_iteration_1",
+          "duration_s": 15.54,
           "success": true,
-          "detail": ""
+          "detail": "tests=PASS, reward=15.6, best=15.6, llm=4.1s, upload=1.7s, test=9.7s, blocks=3"
         },
         {
-          "name": "run_tests",
-          "duration_s": 9.78,
+          "name": "agent_iteration_2",
+          "duration_s": 35.21,
           "success": true,
-          "detail": "k\n\n----------------------------------------------------------------------\nRan 29 tests in 8.522s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n"
+          "detail": "tests=FAIL, reward=10.3, best=15.6, llm=23.9s, upload=1.9s, test=9.5s, blocks=3"
         },
         {
-          "name": "rl_training",
-          "duration_s": 338.2,
+          "name": "agent_iteration_3",
+          "duration_s": 28.0,
           "success": true,
-          "detail": "s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.413s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.457s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.414s\n\nOK\n"
+          "detail": "tests=FAIL, reward=9.8, best=15.6, llm=17.8s, upload=0.7s, test=9.5s, blocks=1"
         },
         {
-          "name": "retrieve_results",
-          "duration_s": 0.11,
+          "name": "agent_final_result",
+          "duration_s": 0.0,
           "success": true,
-          "detail": ""
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.27,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "runloop-2",
-      "provider": "runloop",
-      "sandbox_id": "dbx_32lSTnPxWJGEf6jtxgFqL",
-      "config": {
-        "episodes": 30,
-        "max_steps": 15
-      },
-      "total_duration_s": 358.67,
-      "tests_passed": 29,
-      "tests_total": 29,
-      "rl_best_reward": 15.100000000000007,
-      "rl_final_avg": 10.810000000000002,
-      "rl_best_actions": [
-        "refactor_modularity",
-        "add_availability_masking",
-        "add_dst_handling",
-        "add_booking_creation",
-        "noop",
-        "refactor_modularity",
-        "refactor_modularity",
-        "add_daily_limit",
-        "improve_readability",
-        "add_booking_creation",
-        "fix_syntax",
-        "complete_implementation"
-      ],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 1.77,
-          "success": true,
-          "detail": "dbx_32lSTnPxWJGEf6jtxgFqL"
-        },
-        {
-          "name": "upload_project",
-          "duration_s": 2.1,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "install_deps",
-          "duration_s": 7.41,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "run_tests",
-          "duration_s": 9.68,
-          "success": true,
-          "detail": "k\n\n----------------------------------------------------------------------\nRan 29 tests in 8.454s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n"
-        },
-        {
-          "name": "rl_training",
-          "duration_s": 337.27,
-          "success": true,
-          "detail": "s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.437s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.412s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.419s\n\nOK\n"
-        },
-        {
-          "name": "retrieve_results",
-          "duration_s": 0.12,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.29,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "runloop-3",
-      "provider": "runloop",
-      "sandbox_id": "dbx_32lSToguvQkH0aqck4H3B",
-      "config": {
-        "episodes": 30,
-        "max_steps": 15
-      },
-      "total_duration_s": 361.91,
-      "tests_passed": 29,
-      "tests_total": 29,
-      "rl_best_reward": 15.100000000000007,
-      "rl_final_avg": 10.810000000000002,
-      "rl_best_actions": [
-        "refactor_modularity",
-        "add_availability_masking",
-        "add_dst_handling",
-        "add_booking_creation",
-        "noop",
-        "refactor_modularity",
-        "refactor_modularity",
-        "add_daily_limit",
-        "improve_readability",
-        "add_booking_creation",
-        "fix_syntax",
-        "complete_implementation"
-      ],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 1.6,
-          "success": true,
-          "detail": "dbx_32lSToguvQkH0aqck4H3B"
-        },
-        {
-          "name": "upload_project",
-          "duration_s": 2.89,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "install_deps",
-          "duration_s": 7.43,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "run_tests",
-          "duration_s": 9.65,
-          "success": true,
-          "detail": "k\n\n----------------------------------------------------------------------\nRan 29 tests in 8.464s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n"
-        },
-        {
-          "name": "rl_training",
-          "duration_s": 340.06,
-          "success": true,
-          "detail": "s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.433s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.455s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.413s\n\nOK\n"
-        },
-        {
-          "name": "retrieve_results",
-          "duration_s": 0.12,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.13,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "runloop-4",
-      "provider": "runloop",
-      "sandbox_id": "dbx_32lSTqIRRVuPmVK6JeVzE",
-      "config": {
-        "episodes": 30,
-        "max_steps": 15
-      },
-      "total_duration_s": 358.66,
-      "tests_passed": 29,
-      "tests_total": 29,
-      "rl_best_reward": 15.100000000000007,
-      "rl_final_avg": 10.810000000000002,
-      "rl_best_actions": [
-        "refactor_modularity",
-        "add_availability_masking",
-        "add_dst_handling",
-        "add_booking_creation",
-        "noop",
-        "refactor_modularity",
-        "refactor_modularity",
-        "add_daily_limit",
-        "improve_readability",
-        "add_booking_creation",
-        "fix_syntax",
-        "complete_implementation"
-      ],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 1.69,
-          "success": true,
-          "detail": "dbx_32lSTqIRRVuPmVK6JeVzE"
-        },
-        {
-          "name": "upload_project",
-          "duration_s": 1.7,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "install_deps",
-          "duration_s": 7.05,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "run_tests",
-          "duration_s": 9.87,
-          "success": true,
-          "detail": "k\n\n----------------------------------------------------------------------\nRan 29 tests in 8.533s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n"
-        },
-        {
-          "name": "rl_training",
-          "duration_s": 338.1,
-          "success": true,
-          "detail": "s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.426s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.433s\n\nOK\n----------------------------------------------------------------------\nRan 29 tests in 8.424s\n\nOK\n"
-        },
-        {
-          "name": "retrieve_results",
-          "duration_s": 0.11,
-          "success": true,
-          "detail": ""
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.13,
-          "success": true,
-          "detail": ""
+          "detail": "iterations=3, best_reward=15.6, threshold=25.0, llm=gemini/gemini-2.5-flash-lite"
         }
       ],
       "error": ""

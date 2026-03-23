@@ -122,6 +122,9 @@ def _create_runner_with_key(provider, api_key):
     elif provider == 'runloop':
         from runloop_sandbox import RunloopSandboxRunner
         return RunloopSandboxRunner(api_key=api_key)
+    elif provider == 'tensorlake':
+        from tensorlake_sandbox import TensorLakeSandboxRunner
+        return TensorLakeSandboxRunner(api_key=api_key)
     else:
         raise ValueError('Unknown provider: {}'.format(provider))
 
@@ -133,6 +136,8 @@ def _get_base_dir(provider):
     elif provider == 'blaxel':
         return '/blaxel/fanout_bench'
     elif provider == 'modal':
+        return '/root/fanout_bench'
+    elif provider == 'tensorlake':
         return '/root/fanout_bench'
     else:
         return '/home/user/fanout_bench'
