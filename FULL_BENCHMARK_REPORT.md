@@ -56,8 +56,6 @@
 
 **Why it matters**: File I/O speed determines how fast agents can iterate on code. Large file handling matters for ML models and datasets. SQLite performance affects Django and data-processing workloads. Pip install speed impacts environment setup time.
 
-### Small File I/O
-
 | Step | Daytona | E2B | Blaxel* | Modal | Runloop | TensorLake |
 |------|---------|-----|---------|-------|---------|------------|
 | Code Gen (10 files) | 6.6s | 2.0s | 1.2s | 61.7s | 55.2s | 7.8s |
@@ -65,52 +63,20 @@
 | Upload (5 files) | 48.6s | 9.9s | 0.3s | 12.3s | 3.3s | 1.4s |
 | Download (9 files) | 15.7s | 7.1s | 0.7s | 42.3s | 3.6s | 1.7s |
 | Pip Wheel I/O (1MB) | 18.0s | 46.2s | 0.2s | 21.5s | 11.2s | 7.4s |
+| Disk write (avg 10-100MB) | 392 MB/s | 739 MB/s | — | 1629 MB/s | 432 MB/s | 473 MB/s |
+| Disk read (avg 10-100MB) | 557 MB/s | 471 MB/s | — | 532 MB/s | 487 MB/s | 487 MB/s |
+| API download 100MB | 24.2s (4 MB/s) | 16.9s (6 MB/s) | — | 51.6s (2 MB/s) | 18.9s (5 MB/s) | 12.0s (8 MB/s) |
+| API upload 10MB | 47.5s | 42.3s | — | 35.7s | 24.9s | **4.1s** |
+| SQLite insert (60K rows) | 0.119s | **0.096s** | — | 0.172s | N/A† | 0.141s |
+| SQLite queries (JOIN+agg) | 0.032s | **0.027s** | — | 0.047s | N/A† | 0.041s |
+| Pip install (3 packages) | 7.9s | **3.3s** | — | 8.5s | 8.8s | 8.1s |
+| List & Verify | 1.2s | 0.2s | 0.2s | 1.1s | 1.1s | 1.0s |
+| **Total** | **174.2s** | **150.8s** | **N/A** | **288.4s** | **186.0s** | **65.1s** |
 
-\* Blaxel data from previous run (quota exceeded in latest)
-
-**Per-file throughput**: E2B/Blaxel ~0.06s per upload/download, TensorLake ~0.18s, Daytona ~0.31s, Modal ~1.0s
-
-### Large File I/O (10MB / 50MB / 100MB)
-
-In-sandbox I/O uses `os.urandom()` writes and MD5-verified reads. Native API upload tested for 10MB only (50/100MB hit timeouts or 413 errors on most providers).
-
-| Metric | Daytona | E2B | Modal | Runloop | TensorLake |
-|--------|---------|-----|-------|---------|------------|
-| Disk write (avg) | 392 MB/s | 739 MB/s | 1629 MB/s | 432 MB/s | 473 MB/s |
-| Disk read (avg) | 557 MB/s | 471 MB/s | 532 MB/s | 487 MB/s | 487 MB/s |
-| API download 100MB | 24.2s (4 MB/s) | 16.9s (6 MB/s) | 51.6s (2 MB/s) | 18.9s (5 MB/s) | 12.0s (8 MB/s) |
-| API upload 10MB | 47.5s | 42.3s | 35.7s | 24.9s | **4.1s** |
-| **Total step** | **69.1s** | **78.8s** | **125.3s** | **96.1s** | **33.4s** |
-
-### SQLite (10K events + 50K metrics, 3 indexes, 4.3MB DB)
-
-| Metric | Daytona | E2B | Modal | Runloop | TensorLake |
-|--------|---------|-----|-------|---------|------------|
-| Insert 60K rows | 0.119s | **0.096s** | 0.172s | N/A† | 0.141s |
-| Queries (JOIN + agg) | 0.032s | **0.027s** | 0.047s | N/A† | 0.041s |
-| **Total step** | **1.5s** | **0.5s** | **2.2s** | **0.7s (FAIL)** | **0.9s** |
-
+\* Blaxel data from previous run (quota exceeded in latest); large file / SQLite / pip install not tested
 † Runloop lacks `libsqlite3.so.0`; requires manual setup
 
-### Pip Install & Import (requests, pyyaml, numpy)
-
-| Provider | E2B | Daytona | TensorLake | Modal | Runloop |
-|----------|-----|---------|------------|-------|---------|
-| **Total** | **3.3s** | 7.9s | 8.1s | 8.5s | 8.8s |
-
-All imports verified OK across all providers (numpy 1000x1000 matrix op).
-
-### Overall Totals (9 steps)
-
-| Provider | Small File I/O | Large File I/O | SQLite | Pip Install | **Total** |
-|----------|---------------|----------------|--------|-------------|-----------|
-| **TensorLake** | 19.4s | 33.4s | 0.9s | 8.1s | **65.1s** |
-| **E2B** | 66.0s | 78.8s | 0.5s | 3.3s | **150.8s** |
-| **Daytona** | 90.4s | 69.1s | 1.5s | 7.9s | **174.2s** |
-| **Runloop** | 75.9s | 96.1s | 0.7s! | 8.8s | **186.0s** |
-| **Modal** | 139.4s | 125.3s | 2.2s | 8.5s | **288.4s** |
-
-! = SQLite unavailable without manual setup
+**Per-file throughput**: E2B/Blaxel ~0.06s per upload/download, TensorLake ~0.18s, Daytona ~0.31s, Modal ~1.0s. Large file API upload tested for 10MB only (50/100MB hit timeouts or 413 errors). All pip imports verified OK (numpy 1000x1000 matrix op). SQLite DB: 10K events + 50K metrics, 3 indexes, 4.3MB.
 
 **Summary**: TensorLake wins at 65.1s total -- fastest large file API throughput (8 MB/s download for 100MB, 4.1s upload for 10MB) and fastest native file I/O. E2B is second (150.8s) with best SQLite (0.096s inserts) and pip install (3.3s). Modal/Runloop have the fastest in-sandbox disk I/O (1.6+ GB/s write) but slower API transfers. API uploads are the biggest bottleneck across all providers (4s to 48s for 10MB).
 
