@@ -1,138 +1,21 @@
 {
-  "timestamp": "2026-03-24T19:53:51.820223",
-  "wall_clock_s": 291.38,
-  "serial_sum_s": 864.5,
-  "speedup": 2.97,
-  "sandbox_count": 6,
+  "timestamp": "2026-03-24T20:44:47.519113",
+  "wall_clock_s": 45.05,
+  "serial_sum_s": 45.03,
+  "speedup": 1.0,
+  "sandbox_count": 1,
   "providers": [
-    "blaxel",
-    "tensorlake",
-    "daytona",
-    "runloop",
-    "e2b",
-    "modal"
+    "e2b"
   ],
   "profiles": [
     {
-      "sandbox_label": "blaxel-fs",
-      "provider": "blaxel",
-      "sandbox_id": "",
-      "config": {
-        "benchmark": "filesystem"
-      },
-      "total_duration_s": 0.0,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.71,
-          "success": false,
-          "detail": "Unexpected status code: 429\n\nResponse content:\n{\"code\":\"QUOTA_EXCEEDED\",\"message\":\"You have reached the maximum memory (4096) for your account. Requested: 8192\",\"status_code\":429}\n"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.0,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": "Create failed: Unexpected status code: 429\n\nResponse content:\n{\"code\":\"QUOTA_EXCEEDED\",\"message\":\"You have reached the maximum memory (4096) for your account. Requested: 8192\",\"status_code\":429}\n"
-    },
-    {
-      "sandbox_label": "daytona-fs",
-      "provider": "daytona",
-      "sandbox_id": "2d8592ed-54d6-45c7-ae89-7b4ec6ca08c6",
-      "config": {
-        "benchmark": "filesystem"
-      },
-      "total_duration_s": 174.22,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.89,
-          "success": true,
-          "detail": "2d8592ed-54d6-45c7-ae89-7b4ec6ca08c6"
-        },
-        {
-          "name": "fs_code_generation",
-          "duration_s": 6.61,
-          "success": true,
-          "detail": "10 files, 78KB total"
-        },
-        {
-          "name": "fs_build_compile",
-          "duration_s": 1.54,
-          "success": true,
-          "detail": "10 .pyc files generated"
-        },
-        {
-          "name": "fs_upload_files",
-          "duration_s": 48.62,
-          "success": true,
-          "detail": "5/5 files, 32KB"
-        },
-        {
-          "name": "fs_download_files",
-          "duration_s": 15.75,
-          "success": true,
-          "detail": "9 files, 44KB"
-        },
-        {
-          "name": "fs_pip_package_io",
-          "duration_s": 18.01,
-          "success": true,
-          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
-        },
-        {
-          "name": "fs_large_file_io",
-          "duration_s": 69.11,
-          "success": true,
-          "detail": "10MB: write 0.0s (417MB/s), read 0.0s (556MB/s), api_down 5.4s (2MB/s), api_up 24.9s (0MB/s), integrity=OK; 50MB: write 0.1s (370MB/s), read 0.1s (562MB/s), api_down 10.6s (5MB/s); 100MB: write 0.3s (388MB/s), read 0.2s (552MB/s), api_down 24.2s (4MB/s)"
-        },
-        {
-          "name": "fs_sqlite_ops",
-          "duration_s": 1.54,
-          "success": true,
-          "detail": "10K events + 50K metrics: insert 0.119s, query 0.032s, copy 0.003s, verify 0.001s, db=4448KB, integrity=OK"
-        },
-        {
-          "name": "fs_pip_install_import",
-          "duration_s": 7.92,
-          "success": true,
-          "detail": "requests: install 1.5s, verify 0.99s [OK]; pyyaml: install 1.4s, verify 0.58s [OK]; numpy: install 3.0s, verify 0.52s [OK]"
-        },
-        {
-          "name": "fs_list_verify",
-          "duration_s": 1.19,
-          "success": true,
-          "detail": "38 files total, native: 20 entries"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.65,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "e2b-fs",
+      "sandbox_label": "e2b-fs-1",
       "provider": "e2b",
-      "sandbox_id": "iedu061x5augy1e4nbsj1",
+      "sandbox_id": "ira75x59y18ycnvo3zo75",
       "config": {
         "benchmark": "filesystem"
       },
-      "total_duration_s": 150.81,
+      "total_duration_s": 45.03,
       "tests_passed": 0,
       "tests_total": 0,
       "rl_best_reward": 0.0,
@@ -141,316 +24,67 @@
       "steps": [
         {
           "name": "create_sandbox",
-          "duration_s": 0.63,
+          "duration_s": 0.49,
           "success": true,
-          "detail": "iedu061x5augy1e4nbsj1"
+          "detail": "ira75x59y18ycnvo3zo75"
         },
         {
           "name": "fs_code_generation",
-          "duration_s": 2.02,
+          "duration_s": 1.76,
           "success": true,
           "detail": "10 files, 78KB total"
         },
         {
           "name": "fs_build_compile",
-          "duration_s": 0.78,
+          "duration_s": 0.23,
           "success": true,
           "detail": "10 .pyc files generated"
         },
         {
           "name": "fs_upload_files",
-          "duration_s": 9.89,
+          "duration_s": 0.62,
           "success": true,
           "detail": "5/5 files, 32KB"
         },
         {
           "name": "fs_download_files",
-          "duration_s": 7.14,
+          "duration_s": 0.83,
           "success": true,
           "detail": "9 files, 45KB"
         },
         {
           "name": "fs_pip_package_io",
-          "duration_s": 46.24,
+          "duration_s": 4.54,
           "success": true,
           "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
         },
         {
           "name": "fs_large_file_io",
-          "duration_s": 78.76,
+          "duration_s": 31.99,
           "success": true,
-          "detail": "10MB: write 0.0s (769MB/s), read 0.0s (500MB/s), api_down 1.5s (6MB/s), api_up 47.5s (0MB/s), integrity=OK; 50MB: write 0.1s (758MB/s), read 0.1s (472MB/s), api_down 8.3s (6MB/s); 100MB: write 0.1s (690MB/s), read 0.2s (442MB/s), api_down 16.9s (6MB/s)"
+          "detail": "10MB: write 0.0s (667MB/s), read 0.0s (500MB/s), api_down 1.1s (9MB/s), api_up 16.3s (1MB/s), integrity=OK; 50MB: write 0.1s (676MB/s), read 0.1s (467MB/s), api_down 4.8s (10MB/s); 100MB: write 0.1s (709MB/s), read 0.2s (465MB/s), api_down 8.1s (12MB/s)"
         },
         {
           "name": "fs_sqlite_ops",
-          "duration_s": 0.49,
+          "duration_s": 0.45,
           "success": true,
-          "detail": "10K events + 50K metrics: insert 0.141s, query 0.041s, copy 0.003s, verify 0.0s, db=4448KB, integrity=OK"
+          "detail": "10K events + 50K metrics: insert 0.144s, query 0.051s, copy 0.003s, verify 0.0s, db=4448KB, integrity=OK"
         },
         {
           "name": "fs_pip_install_import",
-          "duration_s": 3.31,
+          "duration_s": 3.29,
           "success": true,
-          "detail": "requests: install 0.9s, verify 0.43s [OK]; pyyaml: install 0.7s, verify 0.21s [OK]; numpy: install 0.8s, verify 0.23s [OK]"
+          "detail": "requests: install 1.1s, verify 0.44s [OK]; pyyaml: install 0.7s, verify 0.13s [OK]; numpy: install 0.7s, verify 0.23s [OK]"
         },
         {
           "name": "fs_list_verify",
-          "duration_s": 0.23,
+          "duration_s": 0.19,
           "success": true,
           "detail": "38 files total, native: 20 entries"
         },
         {
           "name": "destroy_sandbox",
-          "duration_s": 0.15,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "modal-fs",
-      "provider": "modal",
-      "sandbox_id": "sb-6wUTamuCgMgSIlVSHgT5uF",
-      "config": {
-        "benchmark": "filesystem"
-      },
-      "total_duration_s": 288.36,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 0.43,
-          "success": true,
-          "detail": "sb-6wUTamuCgMgSIlVSHgT5uF"
-        },
-        {
-          "name": "fs_code_generation",
-          "duration_s": 61.74,
-          "success": true,
-          "detail": "10 files, 78KB total"
-        },
-        {
-          "name": "fs_build_compile",
-          "duration_s": 2.01,
-          "success": true,
-          "detail": "10 .pyc files generated"
-        },
-        {
-          "name": "fs_upload_files",
-          "duration_s": 12.27,
-          "success": true,
-          "detail": "5/5 files, 32KB"
-        },
-        {
-          "name": "fs_download_files",
-          "duration_s": 42.27,
-          "success": true,
-          "detail": "9 files, 44KB"
-        },
-        {
-          "name": "fs_pip_package_io",
-          "duration_s": 21.45,
-          "success": true,
-          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
-        },
-        {
-          "name": "fs_large_file_io",
-          "duration_s": 125.31,
-          "success": true,
-          "detail": "10MB: write 0.0s (1111MB/s), read 0.0s (500MB/s), api_down 6.8s (2MB/s), api_up 35.7s (0MB/s), integrity=OK; 50MB: write 0.0s (1923MB/s), read 0.1s (526MB/s), api_down 26.2s (2MB/s); 100MB: write 0.1s (1852MB/s), read 0.2s (524MB/s), api_down 51.6s (2MB/s)"
-        },
-        {
-          "name": "fs_sqlite_ops",
-          "duration_s": 2.19,
-          "success": true,
-          "detail": "10K events + 50K metrics: insert 0.172s, query 0.047s, copy 0.005s, verify 0.002s, db=4448KB, integrity=OK"
-        },
-        {
-          "name": "fs_pip_install_import",
-          "duration_s": 8.49,
-          "success": true,
-          "detail": "requests: install 2.3s, verify 0.96s [OK]; pyyaml: install 1.9s, verify 0.79s [OK]; numpy: install 1.7s, verify 0.84s [OK]"
-        },
-        {
-          "name": "fs_list_verify",
-          "duration_s": 1.14,
-          "success": true,
-          "detail": "38 files total, native: 20 entries"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.13,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "runloop-fs",
-      "provider": "runloop",
-      "sandbox_id": "dbx_32nptGVgt47ZXhtOoZCCg",
-      "config": {
-        "benchmark": "filesystem"
-      },
-      "total_duration_s": 186.0,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 1.79,
-          "success": true,
-          "detail": "dbx_32nptGVgt47ZXhtOoZCCg"
-        },
-        {
-          "name": "fs_code_generation",
-          "duration_s": 55.2,
-          "success": true,
-          "detail": "10 files, 78KB total"
-        },
-        {
-          "name": "fs_build_compile",
-          "duration_s": 2.61,
-          "success": true,
-          "detail": "10 .pyc files generated"
-        },
-        {
-          "name": "fs_upload_files",
-          "duration_s": 3.26,
-          "success": true,
-          "detail": "5/5 files, 32KB"
-        },
-        {
-          "name": "fs_download_files",
-          "duration_s": 3.56,
-          "success": true,
-          "detail": "9 files, 84KB"
-        },
-        {
-          "name": "fs_pip_package_io",
-          "duration_s": 11.18,
-          "success": true,
-          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
-        },
-        {
-          "name": "fs_large_file_io",
-          "duration_s": 96.09,
-          "success": true,
-          "detail": "10MB: write 0.0s (1111MB/s), read 0.0s (556MB/s), api_down 3.9s (3MB/s), api_up 42.3s (0MB/s), integrity=OK; 50MB: write 0.5s (92MB/s), read 0.1s (521MB/s), api_down 26.9s (2MB/s); 100MB: write 1.1s (94MB/s), read 0.2s (518MB/s), api_down 18.9s (5MB/s)"
-        },
-        {
-          "name": "fs_sqlite_ops",
-          "duration_s": 0.73,
-          "success": false,
-          "detail": "Parse error: list index out of range | output: Traceback (most recent call last):\n  File \"/home/user/fs_bench/sqlite_bench.py\", line 1, in <module>\n    import sqlite3, time, json, os, shutil, sys\n  File \"/usr/local/lib/python3.12/sqlite3/__init__."
-        },
-        {
-          "name": "fs_pip_install_import",
-          "duration_s": 8.82,
-          "success": true,
-          "detail": "requests: install 2.0s, verify 0.76s [OK]; pyyaml: install 1.6s, verify 0.42s [OK]; numpy: install 3.6s, verify 0.47s [OK]"
-        },
-        {
-          "name": "fs_list_verify",
-          "duration_s": 1.11,
-          "success": true,
-          "detail": "36 files total, native: 20 entries"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.3,
-          "success": true,
-          "detail": ""
-        }
-      ],
-      "error": ""
-    },
-    {
-      "sandbox_label": "tensorlake-fs",
-      "provider": "tensorlake",
-      "sandbox_id": "y4hf8654akt4apbmoctf2",
-      "config": {
-        "benchmark": "filesystem"
-      },
-      "total_duration_s": 65.12,
-      "tests_passed": 0,
-      "tests_total": 0,
-      "rl_best_reward": 0.0,
-      "rl_final_avg": 0.0,
-      "rl_best_actions": [],
-      "steps": [
-        {
-          "name": "create_sandbox",
-          "duration_s": 1.21,
-          "success": true,
-          "detail": "y4hf8654akt4apbmoctf2"
-        },
-        {
-          "name": "fs_code_generation",
-          "duration_s": 7.77,
-          "success": false,
-          "detail": "7 files, 33KB total"
-        },
-        {
-          "name": "fs_build_compile",
-          "duration_s": 1.09,
-          "success": true,
-          "detail": "10 .pyc files generated"
-        },
-        {
-          "name": "fs_upload_files",
-          "duration_s": 1.38,
-          "success": true,
-          "detail": "5/5 files, 32KB"
-        },
-        {
-          "name": "fs_download_files",
-          "duration_s": 1.73,
-          "success": true,
-          "detail": "9 files, 92KB"
-        },
-        {
-          "name": "fs_pip_package_io",
-          "duration_s": 7.37,
-          "success": true,
-          "detail": "3 wheels: down 647KB, up 647KB, integrity=OK"
-        },
-        {
-          "name": "fs_large_file_io",
-          "duration_s": 33.44,
-          "success": true,
-          "detail": "10MB: write 0.0s (435MB/s), read 0.0s (625MB/s), api_down 3.3s (3MB/s), api_up 4.1s (0MB/s); 50MB: write 0.1s (505MB/s), read 0.1s (417MB/s), api_down 8.1s (6MB/s); 100MB: write 0.2s (478MB/s), read 0.2s (418MB/s), api_down 12.0s (8MB/s)"
-        },
-        {
-          "name": "fs_sqlite_ops",
-          "duration_s": 0.86,
-          "success": true,
-          "detail": "10K events + 50K metrics: insert 0.096s, query 0.027s, copy 0.002s, verify 0.0s, db=4448KB, integrity=OK"
-        },
-        {
-          "name": "fs_pip_install_import",
-          "duration_s": 8.1,
-          "success": true,
-          "detail": "requests: install 1.3s, verify 0.79s [OK]; pyyaml: install 1.8s, verify 0.83s [OK]; numpy: install 2.6s, verify 0.79s [OK]"
-        },
-        {
-          "name": "fs_list_verify",
-          "duration_s": 1.0,
-          "success": true,
-          "detail": "37 files total, native: 20 entries"
-        },
-        {
-          "name": "destroy_sandbox",
-          "duration_s": 0.11,
+          "duration_s": 0.16,
           "success": true,
           "detail": ""
         }

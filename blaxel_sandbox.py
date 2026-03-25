@@ -49,7 +49,7 @@ class BlaxelSandboxRunner:
         self.sandbox = self._run(self._SandboxInstance.create({
             'name': name,
             'image': 'blaxel/py-app:latest',
-            'memory': 8192,
+            'memory': 4096,
             'vcpu': 4,
         }))
         self.sandbox_id = name
@@ -182,10 +182,15 @@ class BlaxelSandboxRunner:
 
     def download_file_native(self, remote_path):
         """Download a single file using Blaxel native FS API. Returns bytes."""
-        content = self._run(self.sandbox.fs.read(remote_path))
-        if isinstance(content, str):
-            return content.encode('utf-8')
-        return content
+        try:
+            content = self._run(self.sandbox.fs.read_binary(remote_path))
+            return content
+        except Exception:
+            # Fallback to text read for non-binary files
+            content = self._run(self.sandbox.fs.read(remote_path))
+            if isinstance(content, str):
+                return content.encode('utf-8')
+            return content
 
     def list_files_native(self, remote_path):
         """List files in a directory using Blaxel native FS API."""
