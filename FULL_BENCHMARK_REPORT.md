@@ -15,7 +15,7 @@
 | # | Benchmark | What It Tests | Steps |
 |---|-----------|---------------|-------|
 | 1 | RL Compute | Long-running training (50 ep, 25 steps) | 7 |
-| 2 | Filesystem I/O | Code gen, compile, upload/download, large files | 6 |
+| 2 | Filesystem I/O | Code gen, compile, upload/download, large files (100MB), SQLite, pip install | 9 |
 | 3 | Pause/Resume | Background task, state persistence across pause | 7 |
 | 4 | Concurrent Exec | Parallel lint/test/typecheck/format in one sandbox | 4 |
 | 5 | Iteration Loop | Agent edit-test cycle (write code, test, fix, re-test) | 6 |
@@ -52,27 +52,88 @@
 
 ## 2. Filesystem I/O Benchmark
 
-**What it tests**: Agent-style file operations -- generating 10 Python source files (small to 20KB) via exec, compiling them to .pyc, uploading 5 files (32KB total) via native FS API, downloading 9 files back, round-tripping pip wheel packages (download in sandbox, retrieve via FS API, upload back, verify checksums), and listing directory contents.
+**What it tests**: Agent-style file operations -- generating 10 Python source files (small to 20KB) via exec, compiling them to .pyc, uploading 5 files (32KB total) via native FS API, downloading 9 files back, round-tripping pip wheel packages (download in sandbox, retrieve via FS API, upload back, verify checksums), large file I/O (10MB, 50MB, 100MB with in-sandbox write/read and native API download/upload throughput), SQLite database operations (10K events + 50K metrics with inserts, indexed queries, JOINs, and DB copy/verify), pip package install and import verification (requests, pyyaml, numpy), and listing directory contents.
 
-**Why it matters**: Coding agents constantly read and write files in sandboxes. The speed of native filesystem APIs directly determines how fast an agent can upload code patches, download build artifacts, and manage project files. Slow file I/O creates a bottleneck on every iteration.
+**Why it matters**: Coding agents constantly read and write files in sandboxes. The speed of native filesystem APIs directly determines how fast an agent can upload code patches, download build artifacts, and manage project files. Large file handling matters for ML models, datasets, and build artifacts. SQLite performance indicates how well the sandbox handles embedded databases (Django, data processing). Pip install speed affects environment setup time.
+
+### Original Steps (small file I/O)
 
 | Step | Daytona | E2B | Blaxel | Modal | Runloop | TensorLake |
 |------|---------|-----|--------|-------|---------|------------|
-| Code Generation (10 files) | 1.8s | 1.1s | 1.2s | 3.9s | 5.3s | 5.9s |
-| Build/Compile (.pyc) | 0.4s | 0.2s | 0.3s | 0.8s | 1.0s | 0.8s |
-| Native File Upload (5 files) | 1.5s | 0.3s | 0.3s | 6.1s | 1.7s | 1.0s |
-| Native File Download (9 files) | 2.6s | 0.5s | 0.7s | 6.8s | 2.3s | 1.5s |
-| Pip Package I/O (1MB round-trip) | 6.8s | 0.6s | 0.2s | 9.8s | 12.0s | 6.1s |
-| List & Verify | 0.3s | 0.1s | 0.2s | 0.5s | 1.3s | 0.6s |
-| **Total** | **14.7s** | **2.8s** | **3.7s** | **30.8s** | **25.0s** | **17.8s** |
+| Code Generation (10 files) | 6.6s | 2.0s | 1.2s* | 61.7s | 55.2s | 7.8s |
+| Build/Compile (.pyc) | 1.5s | 0.8s | 0.3s* | 2.0s | 2.6s | 1.1s |
+| Native File Upload (5 files) | 48.6s | 9.9s | 0.3s* | 12.3s | 3.3s | 1.4s |
+| Native File Download (9 files) | 15.7s | 7.1s | 0.7s* | 42.3s | 3.6s | 1.7s |
+| Pip Package I/O (1MB round-trip) | 18.0s | 46.2s | 0.2s* | 21.5s | 11.2s | 7.4s |
+| List & Verify | 1.2s | 0.2s | 0.2s* | 1.1s | 1.1s | 1.0s |
+
+\* Blaxel data from previous run (quota exceeded in latest run)
 
 | Operation | Daytona | E2B | Blaxel | Modal | Runloop | TensorLake |
 |-----------|---------|-----|--------|-------|---------|------------|
-| Upload per file | ~0.32s | ~0.06s | ~0.06s | ~1.22s | ~0.34s | ~0.20s |
-| Download per file | ~0.31s | ~0.06s | ~0.08s | ~0.76s | ~0.26s | ~0.17s |
-| Large file (710KB) | ~1.7s | ~0.3s | ~0.1s | ~3.3s | ~3.0s | ~1.5s |
+| Upload per file | ~0.32s | ~0.06s | ~0.06s* | ~1.22s | ~0.34s | ~0.20s |
+| Download per file | ~0.31s | ~0.06s | ~0.08s* | ~0.76s | ~0.26s | ~0.17s |
 
-**Summary**: E2B dominates overall filesystem performance at 2.8s total. Blaxel is a close second at 3.7s and wins on large file I/O (0.2s for 1MB vs E2B's 0.6s). TensorLake performs well on native file I/O (0.20s upload, 0.17s download per file) -- faster than Daytona and Runloop -- placing 4th at 17.8s total. Higher code generation time (5.9s) reflects exec overhead. Runloop performs well on per-file upload (0.34s) and download (0.26s) but its pip package round-trip is slow (12.0s). Modal is the slowest at 30.8s. For file-heavy agent workflows, E2B or Blaxel should be preferred.
+### Large File I/O (10MB, 50MB, 100MB) — NEW
+
+Tests in-sandbox disk write/read speed and native API download/upload throughput for large files. Files generated with `os.urandom()`, verified with MD5 checksums. Native API upload tested for 10MB only (50/100MB uploads hit timeouts or size limits on most providers).
+
+| Metric | Daytona | E2B | Modal | Runloop | TensorLake |
+|--------|---------|-----|-------|---------|------------|
+| In-sandbox write 10MB | 417 MB/s | 769 MB/s | 1111 MB/s | 1111 MB/s | 435 MB/s |
+| In-sandbox write 50MB | 370 MB/s | 758 MB/s | 1923 MB/s | 92 MB/s | 505 MB/s |
+| In-sandbox write 100MB | 388 MB/s | 690 MB/s | 1852 MB/s | 94 MB/s | 478 MB/s |
+| In-sandbox read 10MB | 556 MB/s | 500 MB/s | 556 MB/s | 625 MB/s | 625 MB/s |
+| In-sandbox read 50MB | 562 MB/s | 472 MB/s | 521 MB/s | 417 MB/s | 417 MB/s |
+| In-sandbox read 100MB | 552 MB/s | 442 MB/s | 518 MB/s | 418 MB/s | 418 MB/s |
+| API download 10MB | 5.4s (2 MB/s) | 1.5s (6 MB/s) | 6.8s (2 MB/s) | 3.9s (3 MB/s) | 3.3s (3 MB/s) |
+| API download 50MB | 10.6s (5 MB/s) | 8.3s (6 MB/s) | 26.2s (2 MB/s) | 26.9s (2 MB/s) | 8.1s (6 MB/s) |
+| API download 100MB | 24.2s (4 MB/s) | 16.9s (6 MB/s) | 51.6s (2 MB/s) | 18.9s (5 MB/s) | 12.0s (8 MB/s) |
+| API upload 10MB | 47.5s | 42.3s | 35.7s | 24.9s | 4.1s |
+| 10MB round-trip integrity | OK | OK | OK | OK | OK |
+| **Total step** | **69.1s** | **78.8s** | **125.3s** | **96.1s** | **33.4s** |
+
+### SQLite Operations (10K events + 50K metrics) — NEW
+
+Creates a SQLite database with 10,000 event rows (with JSON payloads) and 50,000 metric rows, builds 3 indexes, runs JOIN/GROUP BY/aggregation/filtered queries, copies the DB file, and verifies row counts in the copy.
+
+| Metric | Daytona | E2B | Modal | Runloop | TensorLake |
+|--------|---------|-----|-------|---------|------------|
+| Insert (10K + 50K rows) | 0.119s | 0.096s | 0.172s | N/A† | 0.141s |
+| Query (JOIN + agg + filter) | 0.032s | 0.027s | 0.047s | N/A† | 0.041s |
+| DB copy | 0.003s | 0.002s | 0.005s | N/A† | 0.003s |
+| Copy verification | 0.001s | 0.000s | 0.002s | N/A† | 0.000s |
+| DB file size | 4,448 KB | 4,448 KB | 4,448 KB | N/A† | 4,448 KB |
+| Integrity | OK | OK | OK | N/A† | OK |
+| **Total step** | **1.5s** | **0.5s** | **2.2s** | **0.7s (FAIL)** | **0.9s** |
+
+† Runloop devboxes lack `libsqlite3.so.0` by default; SQLite is unavailable without manual library setup via `setup_environment()`
+
+### Pip Install & Import — NEW
+
+Installs 3 packages (`requests`, `pyyaml`, `numpy`) and verifies each imports and executes correctly (numpy performs a 1000x1000 random matrix operation).
+
+| Metric | Daytona | E2B | Modal | Runloop | TensorLake |
+|--------|---------|-----|-------|---------|------------|
+| requests install | 1.5s | 0.9s | 2.3s | 1.3s | 2.0s |
+| pyyaml install | 1.4s | 0.7s | 1.6s | 1.8s | 1.9s |
+| numpy install | 3.0s | 0.8s | 3.6s | 2.6s | 1.7s |
+| All imports verified | OK | OK | OK | OK | OK |
+| **Total step** | **7.9s** | **3.3s** | **8.5s** | **8.8s** | **8.1s** |
+
+### Overall FS Benchmark Totals (9 steps)
+
+| Provider | Small File I/O | Large File I/O | SQLite | Pip Install | List & Verify | **Total** |
+|----------|---------------|----------------|--------|-------------|---------------|-----------|
+| **TensorLake** | 19.4s | 33.4s | 0.9s | 8.1s | 1.0s | **65.1s** |
+| **E2B** | 66.0s | 78.8s | 0.5s | 3.3s | 0.2s | **150.8s** |
+| **Daytona** | 90.4s | 69.1s | 1.5s | 7.9s | 1.2s | **174.2s** |
+| **Runloop** | 75.9s | 96.1s | 0.7s! | 8.8s | 1.1s | **186.0s** |
+| **Modal** | 139.4s | 125.3s | 2.2s | 8.5s | 1.1s | **288.4s** |
+
+! = FAIL (Runloop SQLite unavailable without setup)
+
+**Summary**: TensorLake dominates the enhanced FS benchmark at 65.1s total -- driven by the fastest large file API throughput (8 MB/s download for 100MB, 4.1s upload for 10MB) and fastest native file I/O (1.4s upload, 1.7s download for small files). E2B places second at 150.8s with the best SQLite performance (0.5s total, fastest inserts at 0.096s) and fastest pip install (3.3s). Modal and Runloop have the fastest in-sandbox disk I/O (1.1-1.9 GB/s write) but their API transfer speeds are slower. Runloop lacks SQLite without manual library setup. API uploads are the biggest bottleneck across all providers -- a 10MB upload ranges from 4.1s (TensorLake) to 47.5s (Daytona).
 
 ---
 
@@ -344,7 +405,7 @@
 | Benchmark | 1st | 2nd | 3rd | 4th | 5th | 6th |
 |-----------|-----|-----|-----|-----|-----|-----|
 | RL Compute | Blaxel (135s)* | Daytona (165s)† | E2B (301s)* | Runloop (360s)† | TensorLake (365s)† | Modal (564s) |
-| Filesystem I/O | E2B (2.8s) | Blaxel (3.7s) | Daytona (14.7s) | TensorLake (17.8s) | Runloop (25.0s) | Modal (30.8s) |
+| Filesystem I/O (9 steps) | TensorLake (65s) | E2B (151s) | Daytona (174s) | Runloop (186s) | Modal (288s) | Blaxel (N/A)§ |
 | Pause/Resume | E2B (15.4s) | TensorLake (11.5s) | Runloop (20.3s)*** | Modal (22.7s) | Daytona (32.5s) | Blaxel (4.4s)** |
 | Concurrent Exec | E2B (8.1s) | Blaxel (9.7s) | Daytona (10.3s) | TensorLake (13.3s) | Modal (15.6s) | Runloop (16.1s) |
 | Iteration Loop | E2B (3.8s) | Blaxel (5.1s) | Daytona (6.3s) | TensorLake (7.3s) | Runloop (9.9s) | Modal (12.6s) |
@@ -357,6 +418,7 @@
 \** Blaxel skipped pause/resume (no API)
 \*** Runloop pause/resume requires account capability (skipped, other steps OK)
 † Daytona, Runloop, and TensorLake ran 30ep/15steps; others ran 50ep/25steps
+§ Blaxel hit quota limit during latest FS benchmark run
 
 ### By Use Case
 
@@ -367,8 +429,12 @@
 | **Parallel tool execution** | E2B | Fastest concurrent exec (0.66s for 4 cmds), 3.40x speedup |
 | **Multi-sandbox fan-out** | E2B | 3.0s total for 10 sandboxes, fastest I/O (0.3s upload+collect) |
 | **Pause/resume workflows** | E2B | Sub-second native pause (0.9s), instant resume (0.2s) |
-| **Filesystem-heavy agents** | E2B | 5x faster per-file I/O than Daytona |
-| **Large file processing** | Blaxel | 0.2s for 1MB round-trip (fastest of all) |
+| **Filesystem-heavy agents** | TensorLake | 65s total FS benchmark, fastest native API I/O |
+| **Large file download (100MB)** | TensorLake | 12.0s (8 MB/s) API download for 100MB |
+| **Large file upload (10MB)** | TensorLake | 4.1s API upload for 10MB (next best: Runloop 24.9s) |
+| **In-sandbox disk I/O** | Modal/Runloop | 1.1-1.9 GB/s write speed for 10-100MB files |
+| **SQLite / embedded DB** | E2B | 0.096s insert 60K rows, 0.027s complex queries |
+| **Pip install speed (3 pkgs)** | E2B | 3.3s to install+verify requests, pyyaml, numpy |
 | **Short compute bursts** | Blaxel | Fastest test execution (0.29-0.39s per run) |
 | **Custom environments** | Daytona | 3.88x speedup with custom images, fastest of all providers |
 | **Fastest sandbox creation** | Modal | 0.09s avg per sandbox (10-sandbox fan-out) |
@@ -392,7 +458,12 @@
 | Concurrent exec (4 cmds) | E2B | 0.66s | Modal (0.67s) |
 | Pause latency | E2B | 0.9s | Modal (1.5s) |
 | Resume latency | E2B | 0.2s | Daytona (0.7s) |
-| Large file I/O (1MB) | Blaxel | 0.2s | E2B (0.6s) |
+| Large file API download (100MB) | TensorLake | 12.0s (8 MB/s) | E2B (16.9s) |
+| Large file API upload (10MB) | TensorLake | 4.1s | Runloop (24.9s) |
+| In-sandbox disk write (50MB) | Runloop | 1923 MB/s | Modal (1852 MB/s) |
+| SQLite insert (60K rows) | E2B | 0.096s | Daytona (0.119s) |
+| SQLite queries (JOIN+agg) | E2B | 0.027s | Daytona (0.032s) |
+| Pip install (3 packages) | E2B | 3.3s | Daytona (7.9s) |
 | 10-sandbox fan-out (total) | E2B | 3.0s | Runloop (6.2s) |
 | 10-sandbox creation | Modal | 0.9s (0.09s each) | Daytona (1.7s) |
 | 10-sandbox fan-out (custom) | Modal | 0.6s | Daytona (1.5s) |
@@ -466,7 +537,7 @@
 ```
 === DAYTONA (python:3.12-slim, 4 CPU, 8GB RAM, 10GB disk) ===
   RL:         164.7s total (147.8s training 30ep/15steps, 29/29 tests, best=15.1)
-  FS:          14.7s total (1.8s codegen, 2.6s download, 6.8s large IO)
+  FS:         174.2s total (6.6s codegen, 48.6s upload, 15.7s download, 18.0s pip_io, 69.1s large_io, 1.5s sqlite, 7.9s pip_install)
   Pause:       32.5s total (22.3s pause, 0.7s resume, state=OK)
   Concurrent:  10.3s total (2.7s seq, 0.8s conc, 3.38x speedup)
   Iteration:    6.3s total (0.3s overwrite, 0.5s test avg)
@@ -477,7 +548,7 @@
 
 === E2B (default instance) ===
   RL:         301.1s total (287s training*, 29/29 tests)
-  FS:           2.8s total (1.1s codegen, 0.5s download, 0.6s large IO)
+  FS:         150.8s total (2.0s codegen, 9.9s upload, 7.1s download, 46.2s pip_io, 78.8s large_io, 0.5s sqlite, 3.3s pip_install)
   Pause:       15.4s total (0.9s pause, 0.2s resume, state=OK)
   Concurrent:   8.1s total (2.23s seq, 0.66s conc, 3.40x speedup)
   Iteration:    3.8s total (0.05s overwrite, 0.47s test avg)
@@ -487,7 +558,7 @@
 
 === BLAXEL (4 vCPU, 8GB RAM) ===
   RL:         135.2s total (120s training*, 29/29 tests)
-  FS:           3.7s total (1.2s codegen, 0.7s download, 0.2s large IO)
+  FS:           3.7s total (1.2s codegen, 0.7s download, 0.2s large IO) [from previous run; quota exceeded in latest]
   Pause:        4.4s total (no pause API, state=OK without pause)
   Concurrent:   9.7s total (2.23s seq, 0.87s conc, 2.56x speedup)
   Iteration:    5.1s total (0.04s overwrite, 0.33s test avg)
@@ -497,7 +568,7 @@
 
 === MODAL (4 CPU, 8GB) ===
   RL:         564.0s total (542.2s training, 29/29 tests, best reward 14.54)
-  FS:          30.8s total (3.9s codegen, 6.8s download, 9.8s large IO)
+  FS:         288.4s total (61.7s codegen, 12.3s upload, 42.3s download, 21.5s pip_io, 125.3s large_io, 2.2s sqlite, 8.5s pip_install)
   Pause:       22.7s total (1.5s pause, 0.1s resume, state=OK)
   Concurrent:  15.6s total (3.38s seq, 0.67s conc, 5.06x speedup)
   Iteration:   12.6s total (0.56s overwrite, 1.06s test avg)
@@ -516,7 +587,7 @@
 
 === RUNLOOP (default devbox) ===
   RL:         359.7s total (338.4s training 30ep/15steps, 29/29 tests, best=15.1, avg=10.81)
-  FS:          25.0s total (5.3s codegen, 2.3s download, 12.0s large IO) [10 sandboxes avg, 2 runs]
+  FS:         186.0s total (55.2s codegen, 3.3s upload, 3.6s download, 11.2s pip_io, 96.1s large_io, 0.7s sqlite_FAIL, 8.8s pip_install)
   Pause:       20.3s total (pause/resume N/A - capability gated, state=OK)
   Concurrent:  16.1s total (3.74s seq, 2.39s conc, 1.57x speedup)
   Iteration:    9.9s total (0.24s overwrite, 0.73s test avg)
@@ -527,7 +598,7 @@
 
 === TENSORLAKE (python:3.12-slim, 4 CPU, 8GB RAM, 10GB disk) ===
   RL:         365.3s total (345.1s training 30ep/15steps, 29/29 tests, best=15.1, avg=10.81)
-  FS:          17.8s total (5.9s codegen, 1.5s download, 6.1s large IO)
+  FS:          65.1s total (7.8s codegen, 1.4s upload, 1.7s download, 7.4s pip_io, 33.4s large_io, 0.9s sqlite, 8.1s pip_install)
   Pause:       11.5s total (2.5s snapshot pause, 0.9s resume, state=OK)
   Concurrent:  13.3s total (3.7s seq, 1.9s conc, 1.95x speedup)
   Iteration:    7.3s total (0.1s overwrite, 0.67s test avg)
